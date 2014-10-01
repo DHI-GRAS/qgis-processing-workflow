@@ -6,14 +6,33 @@
 # This file should be included when you package your plugin.
 
 [general]
-name=WOIS Workflows
-email=rmgu@dhi-gras.dk
-author= Radoslaw Guzinski
+name= Processing Workflows
 description=A plugin that adds workflow functionality to Processing.
-version=0.2
+
+about= This plugin is part of the Water Observation Information System (WOIS) developed under the TIGER-NET project funded by the European Space Agency as part of the long-term TIGER initiative aiming at promoting the use of Earth Observation (EO) for improved Integrated Water Resources Management (IWRM) in Africa. Copyright (C) 2014 TIGER-NET (www.tiger-net.org)
+
+version=1.0
 qgisMinimumVersion=2.0
 
-icon=images/icon.png
-class_name=ProcessingWorkflowPlugin
+# Optional items:
+
+# changelog=
+
+# tags are comma separated with spaces allowed
+tags=processing, workflow, instructions
+
 homepage=www.tiger-net.org
+tracker=https://github.com/TIGER-NET/Processing-Workflow/issues
+repository=https://github.com/TIGER-NET/Processing-Workflow/tree/clean
+icon=images/icon.png
+experimental=False
+
+# deprecated flag (applies to the whole plugin, not just a single version
+deprecated=False
+
+# Author contact information
+author=Radoslaw Guzinski
+email=rmgu@dhi-gras.com
+
+
 
