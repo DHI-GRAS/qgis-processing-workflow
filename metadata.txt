@@ -16,12 +16,12 @@ qgisMinimumVersion=2.0
 
 # Optional items:
 
-# changelog=
+# changelog= 
 
 # tags are comma separated with spaces allowed
 tags=processing, workflow, instructions
 
-homepage=www.tiger-net.org
+homepage=http://www.tiger-net.org
 tracker=https://github.com/TIGER-NET/Processing-Workflow/issues
 repository=https://github.com/TIGER-NET/Processing-Workflow/tree/clean
 icon=images/icon.png
