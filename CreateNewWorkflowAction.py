@@ -39,7 +39,7 @@ class CreateNewWorkflowAction(ToolboxAction):
         self.group="Tools"
 
     def getIcon(self):
-        return QtGui.QIcon(os.path.dirname(__file__) + "/images/tigerNET.png")
+        return QtGui.QIcon(os.path.dirname(__file__) + "/images/icon.png")
 
     def execute(self):
         dlg = WorkflowCreatorDialog(None)

@@ -92,7 +92,7 @@ class WorkflowProvider(AlgorithmProvider):
         return "workflow"
 
     def getIcon(self):
-        return QIcon(os.path.dirname(__file__) + "/images/tigerNET.png")
+        return QIcon(os.path.dirname(__file__) + "/images/icon.png")
 
     def loadAlgorithms(self):
         AlgorithmProvider.loadAlgorithms(self)

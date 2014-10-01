@@ -13,7 +13,7 @@ description=A plugin that adds workflow functionality to Processing.
 version=0.2
 qgisMinimumVersion=2.0
 
-icon=images/tigerNET.png
+icon=images/icon.png
 class_name=ProcessingWorkflowPlugin
 homepage=www.tiger-net.org
 

@@ -84,7 +84,7 @@ class Workflow(GeoAlgorithm):
         return self._steps[index]['instructions']    
     
     def getIcon(self):
-        return  QtGui.QIcon(os.path.dirname(__file__) + "/images/tigerNET.png")
+        return  QtGui.QIcon(os.path.dirname(__file__) + "/images/icon.png")
     
     def getCopy(self):
         newone = Workflow()
