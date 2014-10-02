@@ -15,7 +15,7 @@ Select and define the path for output.
 (e.g. 03_01_[NAME].xml)
 !INSTRUCTIONS
 .ALGORITHM:otb:trainimagesclassifiersvm
-.PARAMETERS:{"-classifier.svm.m": 0, "-sample.edg": true, "-classifier": 0, "-classifier.svm.coef0": 0, "-sample.mv": 1000, "-classifier.svm.degree": 1, "-sample.mt": 1000, "-classifier.svm.c": 1, "-classifier.svm.opt": true, "-classifier.svm.gamma": 1, "-classifier.svm.nu": 0, "-classifier.svm.k": 1, "-sample.vtr": 1.5, "-elev.default": 0, "-sample.vfn": "value", "-rand": 0}
+.PARAMETERS:{"-classifier.svm.m": 0, "-sample.edg": true, "-classifier": 0, "-classifier.svm.coef0": 0, "-sample.mv": 1000, "-classifier.svm.degree": 1, "-sample.mt": 1000, "-classifier.svm.c": 1, "-classifier.svm.opt": true, "-classifier.svm.gamma": 1, "-classifier.svm.nu": 0, "-classifier.svm.k": 0, "-sample.vtr": 0.5, "-elev.default": 0, "-sample.vfn": "value", "-rand": 0}
 .MODE:Normal
 .INSTRUCTIONS:In this step, SVM classifier training is being derived from an input image and associated training polygon vector data. Training pixel values in each band are scaled using the XML statistics file produced in the previous step.
 
