@@ -1,9 +1,9 @@
 .NAME:07 - Water demand evaluation
 .GROUP:PG #05: High resolution basin characterization
 .ALGORITHM:modeler:hrl_water_demand
-.PARAMETERS:{"STRING_FIELDNAMEAREA": "ha_6_05", "STRING_FORMULACALCULATEAREA": "\"_count\"  *  ( 20 * 20 )  * 0.0001", "STRING_FORMULA": "if(A == 6, 1, 0)", "STRING_WATERDEMANDFIELDNAMEEGWATERDEMANDLANDCOVERTIME": "wd_05_6_a", "STRING_FORMULACALCULATEWATERDEMAND": "\"ha_6_05\"  *  6950"}
+.PARAMETERS:{"STRING_FIELDNAMEAREA": "ha_6_05", "STRING_FORMULACALCULATEAREA": "\"_sum\"  *  ( 20 * 20 )  * 0.0001", "STRING_FORMULA": "if(A == 6, 1, 0)", "STRING_WATERDEMANDFIELDNAMEEGWATERDEMANDLANDCOVERTIME": "wd_05_6_a", "STRING_FORMULACALCULATEWATERDEMAND": "\"ha_6_05\"  *  6950"}
 .MODE:Normal
-.INSTRUCTIONS: Within this step, water demand for defined area of interest (e.g. catchments) is quantified while relating it to land cover classes of the previously derived land cover classification.
+.INSTRUCTIONS:Within this step, water demand for defined area of interest (e.g. catchments) is quantified while relating it to land cover classes of the previously derived land cover classification.
 
 SETTINGS
 
@@ -22,7 +22,7 @@ Area field name - e.g. area_unit_landcover_year:
 This will be the name of the fieldname/column, within which the area of interest land cover class while be calculated. Try to choose a short and self-explaing name as character are limited to 10. As example here is stated "ha_6_05", meaning area in hectares (ha), for land cover class "irrigated cultivated" (6) out of the year 2005 (05).
 
 Formula - calculate area:
-Here the values have to be adjusted according to your resolution (INPUT: HR classification) and the units, on which basis water demand statistics are available. Do not change "_count". As example here is stated ""_count" * (20 * 20) * 0.0001", where 20 represents the resolution (cell size) of you image classification and 0.0001 the factor in order to convert from square meter to hectares.
+Here the values have to be adjusted according to your resolution (INPUT: HR classification) and the units, on which basis water demand statistics are available. Do not change "_sum". As example here is stated ""_sum" * (20 * 20) * 0.0001", where 20 represents the resolution (cell size) of you image classification and 0.0001 the factor in order to convert from square meter to hectares.
 
 Water demand field name - e.g. waterdemand_year_landcover_time:
 Define here the name of the fieldname/column, within which the water demand values will be calculated. Also here, try to choose a short and self-explaing name as character are limited to 10. As example here is stated "wd_05_6_a", meaning water demand (wd) for the year 2005 (05), relating the land cover class "irrigated cultivated" (6) to yearly demand (a).
