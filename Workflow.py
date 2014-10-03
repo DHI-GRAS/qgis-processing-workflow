@@ -31,10 +31,22 @@ import fileinput
 import json
 from PyQt4 import QtGui, QtCore
 from processing.modeler.ModelerUtils import ModelerUtils
-from processing.parameters.ParameterString import ParameterString
-from processing.parameters.ParameterBoolean import ParameterBoolean
-from processing.parameters.ParameterSelection import ParameterSelection
-from processing.parameters.ParameterNumber import ParameterNumber
+try:
+    from processing.parameters.ParameterString import ParameterString
+except:
+    from processing.core.parameters import ParameterString
+try:
+    from processing.parameters.ParameterBoolean import ParameterBoolean
+except:
+    from processing.core.parameters import ParameterBoolean
+try:
+    from processing.parameters.ParameterSelection import ParameterSelection
+except:
+    from processing.core.parameters import ParameterSelection
+try:
+    from processing.parameters.ParameterNumber import ParameterNumber
+except:
+    from processing.core.parameters import ParameterNumber
 from processing.core.GeoAlgorithm import GeoAlgorithm
 from processing.algs.grass.GrassAlgorithm import GrassAlgorithm
 from processing.algs.grass.GrassUtils import GrassUtils
@@ -53,6 +65,7 @@ class Workflow(GeoAlgorithm):
         self.group = ''
         self.descriptionFile = None
         self.parameters = [ParameterString("Info", "Workflow can not be run as a batch process. Please close this dialog and execute as a normal process.", "", False)]
+        self.showInModeler = False
         
     def addStep(self, algorithm, mode, instructions, algParameters = {}):
         step = {'algorithm' : algorithm, 'mode' : mode, 'instructions' : instructions, 'parameters' : algParameters}

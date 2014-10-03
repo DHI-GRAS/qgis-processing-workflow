@@ -30,9 +30,15 @@
 
 from PyQt4 import QtCore, QtGui
 from processing_workflow.WorkflowUtils import WorkflowUtils
-from processing.modeler.Providers import Providers
+try:
+    from processing.modeler.Providers import Providers
+except:
+    from processing.modeler.ModelerUtils import ModelerUtils
 from processing.modeler.ModelerUtils import ModelerUtils
-
+try:
+    ModelerUtils.allAlgs = ModelerUtils.getAlgorithms()
+except:
+    pass
 from qgis.utils import iface
 from processing.core.Processing import Processing
 from processing.gui.ParametersDialog import ParametersDialog
@@ -198,15 +204,18 @@ class WorkflowListDialog(QtGui.QDialog):
     def fillAlgorithmTree(self):
         self.algorithmTree.clear()
         text = unicode(self.searchBox.text())
-        allAlgs = ModelerUtils.getAlgorithms()
+        allAlgs = ModelerUtils.allAlgs
+        # Account for old (pre 2.4) and new (2.4 and up) Processing API
+        try:
+            providers = Providers.providers
+        except:
+            providers = ModelerUtils.providers
         for providerName in [self.workflowProvider.getName()]:
             groups = {}
             provider = allAlgs[providerName]
             algs = provider.values()
             #add algorithms
             for alg in algs:
-                if not alg.showInModeler:
-                    continue
                 if text == "" or text.lower() in alg.name.lower():
                     if alg.group in groups:
                         groupItem = groups[alg.group]
@@ -219,8 +228,8 @@ class WorkflowListDialog(QtGui.QDialog):
 
             if len(groups) > 0:
                 providerItem = QtGui.QTreeWidgetItem()
-                providerItem.setText(0, Providers.providers[providerName].getDescription())
-                providerItem.setIcon(0, Providers.providers[providerName].getIcon())
+                providerItem.setText(0, providers[providerName].getDescription())
+                providerItem.setIcon(0, providers[providerName].getIcon())
                 for groupItem in groups.values():
                     providerItem.addChild(groupItem)
                 self.algorithmTree.addTopLevelItem(providerItem)

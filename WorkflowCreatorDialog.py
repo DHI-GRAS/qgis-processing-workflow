@@ -29,17 +29,36 @@
 from PyQt4 import QtCore, QtGui
 import codecs
 from processing.modeler.ModelerUtils import ModelerUtils
-from processing.modeler.Providers import Providers
+try:
+    ModelerUtils.allAlgs = ModelerUtils.getAlgorithms()
+except:
+    pass
+try:
+    from processing.modeler.Providers import Providers
+except:
+    from processing.modeler.ModelerUtils import ModelerUtils
+try:
+    from processing.parameters.ParameterString import ParameterString
+except:
+    from processing.core.parameters import ParameterString
+try:
+    from processing.parameters.ParameterBoolean import ParameterBoolean
+except:
+    from processing.core.parameters import ParameterBoolean
+try:
+    from processing.parameters.ParameterSelection import ParameterSelection
+except:
+    from processing.core.parameters import ParameterSelection
+try:
+    from processing.parameters.ParameterNumber import ParameterNumber
+except:
+    from processing.core.parameters import ParameterNumber
 from processing.gui.ParametersDialog import ParametersDialog
 from processing_workflow.Workflow import Workflow
 from processing_workflow.StepDialog import StepDialog, NORMAL_MODE, BATCH_MODE
 from processing_workflow.WorkflowUtils import WorkflowUtils
 from processing.gui.AlgorithmExecutionDialog import AlgorithmExecutionDialog
 from processing_workflow.WrongWorkflowException import WrongWorkflowException
-from processing.parameters.ParameterString import ParameterString
-from processing.parameters.ParameterBoolean import ParameterBoolean
-from processing.parameters.ParameterSelection import ParameterSelection
-from processing.parameters.ParameterNumber import ParameterNumber
 
 # Dialog for creating new workflows from all the available SEXTANTE algorithms
 class WorkflowCreatorDialog(ParametersDialog):
@@ -272,7 +291,12 @@ class WorkflowCreatorDialog(ParametersDialog):
     def fillAlgorithmTree(self):
         self.algorithmTree.clear()
         text = unicode(self.searchBox.text())
-        allAlgs = ModelerUtils.getAlgorithms()
+        allAlgs = ModelerUtils.allAlgs
+        # Account for old (pre 2.4) and new (2.4 and up) Processing API
+        try:
+            providers = Providers.providers
+        except:
+            providers = ModelerUtils.providers
         for providerName in allAlgs.keys():
             # don't show workflows in available algorithms
             if providerName == "workflow":
@@ -296,8 +320,8 @@ class WorkflowCreatorDialog(ParametersDialog):
 
             if len(groups) > 0:
                 providerItem = QtGui.QTreeWidgetItem()
-                providerItem.setText(0, Providers.providers[providerName].getDescription())
-                providerItem.setIcon(0, Providers.providers[providerName].getIcon())
+                providerItem.setText(0, providers[providerName].getDescription())
+                providerItem.setIcon(0, providers[providerName].getIcon())
                 for groupItem in groups.values():
                     providerItem.addChild(groupItem)
                 self.algorithmTree.addTopLevelItem(providerItem)
