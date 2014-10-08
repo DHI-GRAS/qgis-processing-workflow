@@ -69,3 +69,26 @@ For each zone the following values are calculated:
 
 All results are stored as attributes in a new output vector layer.
 !INSTRUCTIONS
+.ALGORITHM:script:buildvirtualrasterdirectory
+.PARAMETERS:{"proj_difference": false, "resolution": 0, "separate": true}
+.MODE:Normal
+.INSTRUCTIONS:Build virtual raster file from a time-series of rainfall images.
+
+SETTINGS
+
+Image located in input directory:
+Select an image from a directory containing the time-series of images (e.g. C:\Data\RFE\rain_20140101.tif). The virtual raster will be created from all images located in the same directory and with same file extension as the selected image.
+
+Layer stack:
+Set to "Yes" to add each image as a separate band of the output virtual raster.
+
+Output file:
+The name of the output virtual raster file (e.g. C:\Data\RFE\rain_2014.vrt). If the file extension is different from .vrt then it will be automatically changed to .vrt.
+
+Other settings:
+Leave the default values.
+
+FURTHER INFORMATION
+
+The virtual raster can be used with Temporal/Spectral Profile Tool to display time-series graphs of rainfall at individual pixels.
+!INSTRUCTIONS
