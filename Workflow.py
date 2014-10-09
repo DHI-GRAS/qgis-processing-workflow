@@ -30,7 +30,7 @@ import os
 import fileinput
 import json
 from PyQt4 import QtGui, QtCore
-from processing.modeler.ModelerUtils import ModelerUtils
+from processing.core.Processing import Processing
 try:
     from processing.parameters.ParameterString import ParameterString
 except:
@@ -206,7 +206,7 @@ class Workflow(GeoAlgorithm):
                     self.group = line[len(".GROUP:"):]
                     
                 elif line.startswith(".ALGORITHM:"):
-                    alg = ModelerUtils.getAlgorithm(line[len(".ALGORITHM:"):])
+                    alg = Processing.getAlgorithm(line[len(".ALGORITHM:"):])
                     if alg:
                         alg = alg.getCopy()
                         self.addStep(alg, NORMAL_MODE, '')

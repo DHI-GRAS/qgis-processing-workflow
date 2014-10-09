@@ -34,7 +34,6 @@ import inspect
 from processing.core.Processing import Processing  
 from processing_workflow.WorkflowProvider import WorkflowProvider 
 
-
 cmd_folder = os.path.split(inspect.getfile( inspect.currentframe() ))[0]
 if cmd_folder not in sys.path:
     sys.path.insert(0, cmd_folder)
@@ -47,7 +46,22 @@ class ProcessingWorkflowPlugin:
         self.iface = iface
         
     def initGui(self):
-        Processing.addProvider(self.provider, True)
 
+        self.algListener = WorkflowAlgListListner(self.provider)
+        Processing.addAlgListListener(self.algListener)
+        Processing.addProvider(self.provider, True)
+            
     def unload(self):
+        #Processing.removeAlgListListener(self.algListener)
         Processing.removeProvider(self.provider)
+		
+class WorkflowAlgListListner():
+    def __init__(self, workflowProvider):
+        self.workflowProvider = workflowProvider
+			
+    def algsListHasChanged(self):
+        self.workflowProvider.createAlgsList()
+        algs = {}
+        for alg in self.workflowProvider.preloadedAlgs:
+            algs[alg.commandLineName()] = alg
+        Processing.algs[self.workflowProvider.getName()] = algs

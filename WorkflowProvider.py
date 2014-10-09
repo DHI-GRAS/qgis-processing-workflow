@@ -76,6 +76,7 @@ class WorkflowProvider(AlgorithmProvider):
                     fullpath = os.path.join(folder,descriptionFile)
                     workflow.openWorkflow(fullpath)
                     if workflow.name.strip() != "":
+                        workflow.provider = self
                         self.preloadedAlgs.append(workflow)
                     else:
                         ProcessingLog.addToLog(ProcessingLog.LOG_ERROR, "Could not open Workflow algorithm: " + descriptionFile)
