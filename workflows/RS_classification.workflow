@@ -1,5 +1,29 @@
 .NAME:02 - Threshold classification
 .GROUP:PG #07: Flood mapping system
+.ALGORITHM:script:backscatternormalization
+.PARAMETERS:{"sigma0_nodata ": 0.0, "lia_nodata ": 0.0}
+.MODE:Normal
+.INSTRUCTIONS:This algorithm will use the slope parameter to normalize the backscatter to a reference incidence angle.
+
+SETTINGS
+
+sigma0:
+sigma0 nodata:
+The backscatter image and its nodata value.
+
+local incidence angle:
+lia nodata:
+The local incidence angle image and its nodata value.
+
+reference incidence angle:
+The reference incidence angle.
+
+parameter database:
+It is a tile based parameter database provided by TUWien.
+
+output raster:
+Specify the output file name.
+!INSTRUCTIONS
 .ALGORITHM:r:automaticsplitbasedotsuthreshold
 .PARAMETERS:{"Tile_size ": 200, "Nodata_value ": 0, "Lower_than ": true}
 .MODE:Normal
