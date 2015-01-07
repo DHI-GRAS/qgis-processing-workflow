@@ -41,7 +41,7 @@ except:
     pass
 from qgis.utils import iface
 from processing.core.Processing import Processing
-from processing.gui.ParametersDialog import ParametersDialog
+from processing.gui.AlgorithmDialog import AlgorithmDialog
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -188,7 +188,7 @@ class WorkflowListDialog(QtGui.QDialog):
             alg = alg.getCopy()
             dlg = alg.getCustomParametersDialog()
             if not dlg:
-                dlg = ParametersDialog(alg)
+                dlg = AlgorithmDialog(alg)
             canvas = iface.mapCanvas()
             prevMapTool = canvas.mapTool()
             dlg.show()

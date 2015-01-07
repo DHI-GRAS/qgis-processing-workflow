@@ -27,8 +27,8 @@
 """
 
 from PyQt4 import QtCore, QtGui
-from processing.gui.ParametersDialog import ParametersDialog
-from processing.gui.BatchProcessingDialog import BatchProcessingDialog
+from processing.gui.AlgorithmDialog import AlgorithmDialog
+from processing.gui.BatchAlgorithmDialog import BatchAlgorithmDialog
 from processing.gui.InputLayerSelectorPanel import InputLayerSelectorPanel
 
 NORMAL_MODE = "Normal"
@@ -62,16 +62,16 @@ class StepDialog(QtGui.QDialog):
         
         self.normalModeDialog = alg.getCustomParametersDialog()
         if not self.normalModeDialog:
-            self.normalModeDialog = ParametersDialog(alg)
-        self.batchModeDialog = BatchProcessingDialog(alg)
+            self.normalModeDialog = AlgorithmDialog(alg)
+        self.batchModeDialog = BatchAlgorithmDialog(alg)
         self.batchModeDialog.setHidden(True)
         self.normalModeDialog.buttonBox.button(QtGui.QDialogButtonBox.Close).hide() # forwardButton does this job
         self.batchModeDialog.buttonBox.button(QtGui.QDialogButtonBox.Close).hide() # forwardButton does this job
         if canEdit:
-            self.normalModeDialog.progress.hide()
+            self.normalModeDialog.progressBar.hide()
             self.normalModeDialog.buttonBox.hide()
             self.batchModeDialog.buttonBox.hide()
-            self.batchModeDialog.progress.hide()
+            self.batchModeDialog.progressBar.hide()
         self.normalModeDialog.connect(self.normalModeDialog, QtCore.SIGNAL("finished(int)"), self.forward)
         self.batchModeDialog.connect(self.batchModeDialog, QtCore.SIGNAL("finished(int)"), self.forward)    
             

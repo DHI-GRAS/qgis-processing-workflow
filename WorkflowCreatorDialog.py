@@ -53,15 +53,15 @@ try:
     from processing.parameters.ParameterNumber import ParameterNumber
 except:
     from processing.core.parameters import ParameterNumber
-from processing.gui.ParametersDialog import ParametersDialog
+from processing.gui.AlgorithmDialogBase import AlgorithmDialogBase
 from processing_workflow.Workflow import Workflow
 from processing_workflow.StepDialog import StepDialog, NORMAL_MODE, BATCH_MODE
 from processing_workflow.WorkflowUtils import WorkflowUtils
-from processing.gui.AlgorithmExecutionDialog import AlgorithmExecutionDialog
+from processing.gui.AlgorithmDialog import AlgorithmDialog
 from processing_workflow.WrongWorkflowException import WrongWorkflowException
 
 # Dialog for creating new workflows from all the available SEXTANTE algorithms
-class WorkflowCreatorDialog(ParametersDialog):
+class WorkflowCreatorDialog(AlgorithmDialogBase):
     def __init__(self, workflow):
         QtGui.QDialog.__init__(self)
         self.setupUi()
@@ -141,11 +141,6 @@ class WorkflowCreatorDialog(ParametersDialog):
         #And the whole layout
         #==========================
 
-        self.progress = QtGui.QProgressBar()
-        self.progress.setMinimum(0)
-        self.progress.setMaximum(100)
-        self.progress.setValue(0)
-
         self.buttonBox = QtGui.QDialogButtonBox()
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
         self.runButton = QtGui.QPushButton()
@@ -173,7 +168,6 @@ class WorkflowCreatorDialog(ParametersDialog):
         self.globalLayout.setSpacing(2)
         self.globalLayout.setMargin(0)
         self.globalLayout.addLayout(self.horizontalLayout)
-        self.globalLayout.addWidget(self.progress)
         self.globalLayout.addWidget(self.buttonBox)
         self.setLayout(self.globalLayout)
         QtCore.QMetaObject.connectSlotsByName(self)
@@ -196,7 +190,7 @@ class WorkflowCreatorDialog(ParametersDialog):
         stepDialog = self.canvasTabWidget.widget(stepNumber)
         # get customised default values for some parameter types
         if stepDialog.getMode() == NORMAL_MODE:
-            if isinstance(stepDialog.normalModeDialog, AlgorithmExecutionDialog):
+            if isinstance(stepDialog.normalModeDialog, AlgorithmDialog):
                 for param in stepDialog.alg.parameters:
                     if isinstance(param, ParameterBoolean) or isinstance(param, ParameterNumber) or isinstance(param, ParameterString) or isinstance(param, ParameterSelection):
                         # this is not very nice going so deep into step dialog but there seems to be no other way right now
