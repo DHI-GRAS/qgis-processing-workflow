@@ -65,18 +65,17 @@ class StepDialog(QtGui.QDialog):
             self.normalModeDialog = AlgorithmDialog(alg)
         self.batchModeDialog = BatchAlgorithmDialog(alg)
         self.batchModeDialog.setHidden(True)
-        # Not all dialogs might have buttonBox
+        # forwardButton does the job of cancel/close button
         try:
             if self.alg.name == "Field calculator":
-                self.normalModeDialog.mButtonBox.button(QtGui.QDialogButtonBox.Cancel).hide() # forwardButton does this job
-                self.batchModeDialog.mButtonBox.button(QtGui.QDialogButtonBox.Cancel).hide() # forwardButton does this job
+                self.normalModeDialog.mButtonBox.removeButton(self.normalModeDialog.mButtonBox.button(QtGui.QDialogButtonBox.Cancel)) 
             else:    
-                self.normalModeDialog.buttonBox.button(QtGui.QDialogButtonBox.Close).hide() # forwardButton does this job
-                self.batchModeDialog.buttonBox.button(QtGui.QDialogButtonBox.Close).hide() # forwardButton does this job
+                self.normalModeDialog.buttonBox.removeButton(self.normalModeDialog.buttonBox.button(QtGui.QDialogButtonBox.Close))
+            self.batchModeDialog.buttonBox.removeButton(self.batchModeDialog.buttonBox.button(QtGui.QDialogButtonBox.Close)) # forwardButton does this job
         except:
+            # Not all dialogs might have buttonBox
             pass
         if canEdit:
-            # Not all dialogs might have buttonBox
             try:
                 self.normalModeDialog.progressBar.hide()
                 self.batchModeDialog.progressBar.hide()
@@ -84,9 +83,9 @@ class StepDialog(QtGui.QDialog):
                     self.normalModeDialog.mButtonBox.hide()
                 else:
                     self.normalModeDialog.buttonBox.hide()
-                self.batchModeDialog.buttonBox.hide()
-                
+                self.batchModeDialog.buttonBox.hide() 
             except:
+                # Not all dialogs might have buttonBox
                 pass
         self.normalModeDialog.connect(self.normalModeDialog, QtCore.SIGNAL("finished(int)"), self.forward)
         self.batchModeDialog.connect(self.batchModeDialog, QtCore.SIGNAL("finished(int)"), self.forward)    
