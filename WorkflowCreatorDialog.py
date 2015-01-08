@@ -194,7 +194,7 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
                 for param in stepDialog.alg.parameters:
                     if isinstance(param, ParameterBoolean) or isinstance(param, ParameterNumber) or isinstance(param, ParameterString) or isinstance(param, ParameterSelection):
                         # this is not very nice going so deep into step dialog but there seems to be no other way right now
-                        stepDialog.normalModeDialog.setParamValue(param, stepDialog.normalModeDialog.paramTable.valueItems[param.name])
+                        stepDialog.normalModeDialog.setParamValue(param, stepDialog.normalModeDialog.mainWidget.valueItems[param.name])
         elif stepDialog.getMode() == BATCH_MODE:
             col = 0
             for param in stepDialog.alg.parameters:

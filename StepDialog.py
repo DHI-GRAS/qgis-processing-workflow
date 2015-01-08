@@ -150,9 +150,9 @@ class StepDialog(QtGui.QDialog):
     # not used for now    
     def addRasterInputs(self, inputs):
         if self.getMode() == NORMAL_MODE:
-            panelList = self.normalModeDialog.ui.paramTable.findChildren(InputLayerSelectorPanel)
+            panelList = self.normalModeDialog.mainWidget.findChildren(InputLayerSelectorPanel)
         else:
-            panelList = self.normalBatchDialog.ui.paramTable.findChildren(InputLayerSelectorPanel)
+            panelList = self.normalBatchDialog.mainWidget.findChildren(InputLayerSelectorPanel)
         
         for panel in panelList:
             comboBox = panel.text
