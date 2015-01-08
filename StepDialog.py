@@ -65,13 +65,29 @@ class StepDialog(QtGui.QDialog):
             self.normalModeDialog = AlgorithmDialog(alg)
         self.batchModeDialog = BatchAlgorithmDialog(alg)
         self.batchModeDialog.setHidden(True)
-        self.normalModeDialog.buttonBox.button(QtGui.QDialogButtonBox.Close).hide() # forwardButton does this job
-        self.batchModeDialog.buttonBox.button(QtGui.QDialogButtonBox.Close).hide() # forwardButton does this job
+        # Not all dialogs might have buttonBox
+        try:
+            if self.alg.name == "Field calculator":
+                self.normalModeDialog.mButtonBox.button(QtGui.QDialogButtonBox.Cancel).hide() # forwardButton does this job
+                self.batchModeDialog.mButtonBox.button(QtGui.QDialogButtonBox.Cancel).hide() # forwardButton does this job
+            else:    
+                self.normalModeDialog.buttonBox.button(QtGui.QDialogButtonBox.Close).hide() # forwardButton does this job
+                self.batchModeDialog.buttonBox.button(QtGui.QDialogButtonBox.Close).hide() # forwardButton does this job
+        except:
+            pass
         if canEdit:
-            self.normalModeDialog.progressBar.hide()
-            self.normalModeDialog.buttonBox.hide()
-            self.batchModeDialog.buttonBox.hide()
-            self.batchModeDialog.progressBar.hide()
+            # Not all dialogs might have buttonBox
+            try:
+                self.normalModeDialog.progressBar.hide()
+                self.batchModeDialog.progressBar.hide()
+                if self.alg.name == "Field calculator":
+                    self.normalModeDialog.mButtonBox.hide()
+                else:
+                    self.normalModeDialog.buttonBox.hide()
+                self.batchModeDialog.buttonBox.hide()
+                
+            except:
+                pass
         self.normalModeDialog.connect(self.normalModeDialog, QtCore.SIGNAL("finished(int)"), self.forward)
         self.batchModeDialog.connect(self.batchModeDialog, QtCore.SIGNAL("finished(int)"), self.forward)    
             
