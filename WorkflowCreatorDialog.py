@@ -199,7 +199,7 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
             col = 0
             for param in stepDialog.alg.parameters:
                     if isinstance(param, ParameterBoolean) or isinstance(param, ParameterNumber) or isinstance(param, ParameterString) or isinstance(param, ParameterSelection):
-                        stepDialog.batchModeDialog.setParameterValueFromWidget(param, stepDialog.batchModeDialog.table.cellWidget(0, col))
+                        stepDialog.batchModeDialog.setParamValue(param, stepDialog.batchModeDialog.mainWidget.tblParameters.cellWidget(0, col))
                     col += 1
         
         # update the step in the workflow            
