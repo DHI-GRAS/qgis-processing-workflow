@@ -34,6 +34,8 @@ file containing reclass rules:
 1 = 1
 2 3 4 5 6 7 8 9 = 0
 with this content you use the class 1 for your analysis. you can change these rules, based on the classes you like to analyze
+For detailed reclass rules check:
+http://grass.osgeo.org/grass65/manuals/r.reclass.html
 
 Make sure "Load in QGIS" is set to YES
 
@@ -93,7 +95,7 @@ Leave the rest on default
 .ALGORITHM:modeler:zonal_sm4tiger
 .PARAMETERS:{}
 .MODE:Normal
-.INSTRUCTIONS:This tool derives information about how many people are affected by a delay in start of season in a specific zone. Further it provides information about the duration of the delay per zone (min, max, mean)
+.INSTRUCTIONS:This tool derives information about the number of people affected of a delay in  start of season in a specific zone. Further it provides information about the duration of the delay per zone (min, max, mean)
 
 SETTINGS:
 
