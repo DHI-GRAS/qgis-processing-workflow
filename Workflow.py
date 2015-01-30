@@ -31,22 +31,10 @@ import fileinput
 import json
 from PyQt4 import QtGui, QtCore
 from processing.core.Processing import Processing
-try:
-    from processing.parameters.ParameterString import ParameterString
-except:
-    from processing.core.parameters import ParameterString
-try:
-    from processing.parameters.ParameterBoolean import ParameterBoolean
-except:
-    from processing.core.parameters import ParameterBoolean
-try:
-    from processing.parameters.ParameterSelection import ParameterSelection
-except:
-    from processing.core.parameters import ParameterSelection
-try:
-    from processing.parameters.ParameterNumber import ParameterNumber
-except:
-    from processing.core.parameters import ParameterNumber
+from processing.core.parameters import ParameterString
+from processing.core.parameters import ParameterBoolean
+from processing.core.parameters import ParameterSelection
+from processing.core.parameters import ParameterNumber
 from processing.core.GeoAlgorithm import GeoAlgorithm
 from processing.algs.grass.GrassAlgorithm import GrassAlgorithm
 from processing.algs.grass.GrassUtils import GrassUtils

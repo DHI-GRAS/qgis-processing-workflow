@@ -30,15 +30,6 @@
 
 from PyQt4 import QtCore, QtGui
 from processing_workflow.WorkflowUtils import WorkflowUtils
-try:
-    from processing.modeler.Providers import Providers
-except:
-    from processing.modeler.ModelerUtils import ModelerUtils
-from processing.modeler.ModelerUtils import ModelerUtils
-try:
-    ModelerUtils.allAlgs = ModelerUtils.getAlgorithms()
-except:
-    pass
 from qgis.utils import iface
 from processing.core.Processing import Processing
 from processing.gui.AlgorithmDialog import AlgorithmDialog
@@ -204,12 +195,10 @@ class WorkflowListDialog(QtGui.QDialog):
     def fillAlgorithmTree(self):
         self.algorithmTree.clear()
         text = unicode(self.searchBox.text())
-        allAlgs = ModelerUtils.allAlgs
-        # Account for old (pre 2.4) and new (2.4 and up) Processing API
-        try:
-            providers = Providers.providers
-        except:
-            providers = ModelerUtils.providers
+        allAlgs = Processing.algs
+        providers = {}
+        for provider in Processing.providers:
+            providers[provider.getName()] = provider
         for providerName in [self.workflowProvider.getName()]:
             groups = {}
             provider = allAlgs[providerName]
