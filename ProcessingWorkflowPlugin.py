@@ -52,7 +52,7 @@ class ProcessingWorkflowPlugin:
         Processing.addProvider(self.provider, True)
             
     def unload(self):
-        #Processing.removeAlgListListener(self.algListener)
+        Processing.removeAlgListListener(self.algListener)
         Processing.removeProvider(self.provider)
 		
 class WorkflowAlgListListner():
