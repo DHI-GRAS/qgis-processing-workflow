@@ -1,6 +1,6 @@
 .NAME:Pre-processing ASAR WS (multiple images)
 .GROUP:PG #07: Flood mapping system
-.ALGORITHM:nest:applyorbitfile
+.ALGORITHM:s1tbx:applyorbitfile
 .PARAMETERS:{"orbitType": 0}
 .MODE:Batch
 .INSTRUCTIONS:The first step for ASAR WS processing consist of retrieving precise DORIS orbit information on the exact position of the ENVISAT satellite during the acquisition of the image.
@@ -20,7 +20,7 @@ FURTHER INFORMATION
 
 IMPORTANT: make sure that the correct path to the downloaded DORIS files is set in the NEST GUI under Edit -> Settings -> Orbit Files -> dorisVorOrbitPath.
 !INSTRUCTIONS
-.ALGORITHM:nest:subset
+.ALGORITHM:s1tbx:subset
 .PARAMETERS:{"tiePointGridNames": "", "subSamplingY": 1, "bandNames": "Amplitude", "subSamplingX": 1, "copyMetadata": false, "fullSwath": false}
 .MODE:Batch
 .INSTRUCTIONS:Since the ASAR files are rather large it is important to subset them to the area of interest. This is done in this step. 
@@ -41,7 +41,7 @@ FURTHER INFORMATION
 
 Important: the zooming has to be done on a georeferenced layer since QGIS cannot read directly the geolocation from the N1 file.
 !INSTRUCTIONS
-.ALGORITHM:nest:calibration
+.ALGORITHM:s1tbx:calibration
 .PARAMETERS:{"!sourceBands>band": "Amplitude", "createBetaBand": false, "outputImageScaleInDb": true, "createGammaBand": false, "auxFile": 0}
 .MODE:Batch
 .INSTRUCTIONS:ASAR Level 1 data have to be calibrated to obtain Sigma nought values.
@@ -66,7 +66,7 @@ If you want to produce the Beta or Gamma band information, please enter the outp
 Other setting:
 Leave the default values.
 !INSTRUCTIONS
-.ALGORITHM:nest:terraincorrection
+.ALGORITHM:s1tbx:terraincorrection
 .PARAMETERS:{"nodataValueAtSea": true, "saveDEM": false, "pixelSpacingInDegree": 0.00067373646309, "demName": 0, "saveSigmaNought": false, "applyRadiometricNormalization": false, "saveProjectedLocalIncidenceAngle": false, "demResamplingMethod": 0, "incidenceAngleForGamma0": 0, "saveLocalIncidenceAngle": false, "saveGammaNought": false, "incidenceAngleForSigma0": 0, "externalDEMNoDataValue": -32768, "saveBetaNought": false, "!sourceBands>band": "", "imgResamplingMethod": 0, "auxFile": 0, "pixelSpacingInMeter": 75, "saveSelectedSourceBand": true}
 .MODE:Batch
 .INSTRUCTIONS:Terrain Correction will transform the image to ground geometry 

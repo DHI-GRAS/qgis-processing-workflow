@@ -1,6 +1,6 @@
 .NAME:01b - RADARSAT pre-processing - , no multilooking
 .GROUP:PG #07: Flood mapping system
-.ALGORITHM:nest:calibration
+.ALGORITHM:s1tbx:calibration
 .PARAMETERS:{"!sourceBands>band": "", "createBetaBand": false, "outputImageScaleInDb": true, "createGammaBand": false, "auxFile": 0}
 .MODE:Normal
 .INSTRUCTIONS:RADARSAT Level 1 data must be calibrated in order to obtain backscatter values.
@@ -24,7 +24,7 @@ Create Gamma band(Advanced):
 If you want to produce the Beta or Gamma band, please enter the output file path here.
 
 !INSTRUCTIONS
-.ALGORITHM:nest:terraincorrection
+.ALGORITHM:s1tbx:terraincorrection
 .PARAMETERS:{"nodataValueAtSea": true, "saveDEM": false, "pixelSpacingInDegree": 0.000112289410515, "demName": 2, "saveSigmaNought": false, "applyRadiometricNormalization": false, "saveProjectedLocalIncidenceAngle": true, "demResamplingMethod": 1, "incidenceAngleForGamma0": 1, "saveLocalIncidenceAngle": false, "saveGammaNought": false, "incidenceAngleForSigma0": 1, "externalDEMNoDataValue": -32768, "saveBetaNought": false, "!sourceBands>band": "", "imgResamplingMethod": 1, "auxFile": 0, "pixelSpacingInMeter": 12.5, "saveSelectedSourceBand": true}
 .MODE:Normal
 .INSTRUCTIONS:Terrain Correction will transform the image to ground geometry 
@@ -54,7 +54,7 @@ Other settings:
 Leave the default values.
 
 !INSTRUCTIONS
-.ALGORITHM:nest:specklefilter
+.ALGORITHM:s1tbx:specklefilter
 .PARAMETERS:{"estimateENL": true, "enl": 1, "filter": 3, "filterSizeX": 3, "edgeThreshold": 5000, "dampingFactor": 2, "!sourceBands>band": "", "filterSizeY": 3}
 .MODE:Normal
 .INSTRUCTIONS:RADARSAT imagery contains a high amount of speckle, so speckle filtering should be performed.

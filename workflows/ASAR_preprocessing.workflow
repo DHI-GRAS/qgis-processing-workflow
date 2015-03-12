@@ -1,6 +1,6 @@
 .NAME:01a - Pre-processing - ASAR WS
 .GROUP:PG #07: Flood mapping system
-.ALGORITHM:nest:applyorbitfile
+.ALGORITHM:s1tbx:applyorbitfile
 .PARAMETERS:{"orbitType": 1}
 .MODE:Normal
 .INSTRUCTIONS:The first step for ASAR WS processing consist of retrieving precise DORIS orbit information on the exact position of the ENVISAT satellite during the acquisition of the image.
@@ -20,7 +20,7 @@ FURTHER INFORMATION
 
 IMPORTANT: make sure that the correct path to the downloaded DORIS files is set in the NEST GUI under Edit -> Settings -> Orbit Files -> dorisVorOrbitPath.
 !INSTRUCTIONS
-.ALGORITHM:nest:subset
+.ALGORITHM:s1tbx:subset
 .PARAMETERS:{"tiePointGridNames": "", "subSamplingY": 1, "bandNames": "", "subSamplingX": 1, "copyMetadata": false, "fullSwath": false}
 .MODE:Normal
 .INSTRUCTIONS:Since the ASAR files are rather large it is important to subset them to the area of interest. This is done in this step. 
@@ -41,7 +41,7 @@ FURTHER INFORMATION
 
 Important: the zooming has to be done on a georeferenced layer since QGIS cannot read directly the geolocation from the N1 file.
 !INSTRUCTIONS
-.ALGORITHM:nest:calibration
+.ALGORITHM:s1tbx:calibration
 .PARAMETERS:{"!sourceBands>band": "", "createBetaBand": false, "outputImageScaleInDb": true, "createGammaBand": false, "auxFile": 1}
 .MODE:Normal
 .INSTRUCTIONS:ASAR Level 1 data have to be calibrated to obtain Sigma nought values.
@@ -67,7 +67,7 @@ Other setting:
 Leave the default values.
 
 !INSTRUCTIONS
-.ALGORITHM:nest:terraincorrection
+.ALGORITHM:s1tbx:terraincorrection
 .PARAMETERS:{"nodataValueAtSea": true, "saveDEM": false, "pixelSpacingInDegree": 0.00067373646309, "demName": 2, "saveSigmaNought": false, "applyRadiometricNormalization": false, "saveProjectedLocalIncidenceAngle": false, "demResamplingMethod": 1, "incidenceAngleForGamma0": 1, "saveLocalIncidenceAngle": false, "saveGammaNought": false, "incidenceAngleForSigma0": 1, "externalDEMNoDataValue": -32768, "saveBetaNought": false, "!sourceBands>band": "", "imgResamplingMethod": 1, "auxFile": 1, "pixelSpacingInMeter": 75, "saveSelectedSourceBand": true}
 .MODE:Normal
 .INSTRUCTIONS:Terrain Correction will transform the image to ground geometry 
