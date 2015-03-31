@@ -1,59 +1,35 @@
-.NAME:Pre-processing ASAR WS (multiple images)
+.NAME:Pre-processing Sentinel-1 (multiple images)
 .GROUP:PG #07: Flood mapping system
 .ALGORITHM:s1tbx:applyorbitfile
 .PARAMETERS:{"orbitType": 0}
 .MODE:Batch
-.INSTRUCTIONS:The first step for ASAR WS processing consist of retrieving precise DORIS orbit information on the exact position of the ENVISAT satellite during the acquisition of the image.
+.INSTRUCTIONS:The first step for Sentinel-1 processing consist of retrieving precise orbit information on the exact position of the Sentinel-1 satellite during the acquisition of the image.
 
 SETTINGS
 
 Input image:
-Select an ASAR image to process
+Select a Sentinel-1 image to process
 
 Orbit type:
-Select DORIS Verified(ENVISAT)
+Select Sentinel Precise (Auto Download)
 
 Output Image:
 The output file must be in *.dim format. Uncheck the "Open output file" option as QGIS cannot read DIM files.
 
-FURTHER INFORMATION
-
-IMPORTANT: make sure that the correct path to the downloaded DORIS files is set in the NEST GUI under Edit -> Settings -> Orbit Files -> dorisVorOrbitPath.
-!INSTRUCTIONS
-.ALGORITHM:s1tbx:subset
-.PARAMETERS:{"tiePointGridNames": "", "subSamplingY": 1, "bandNames": "Amplitude", "subSamplingX": 1, "copyMetadata": false, "fullSwath": false}
-.MODE:Batch
-.INSTRUCTIONS:Since the ASAR files are rather large it is important to subset them to the area of interest. This is done in this step. 
-
-SETTINGS
-
-The product which will be subseted:
-Spatial extent:
-Select the ASAR scene with the applied orbit file produced in step 1. Simply zoom in to the AOI in QGIS and click on the "..." Button next to Spatial Extent and choose "Use canvas extent".
-
-Output Image:
-The output file has to be in *.dim format. Switch "Open output file" off as QGIS cannot read DIM files.
-
-Other settings:
-Leave the default values.
-
-FURTHER INFORMATION
-
-Important: the zooming has to be done on a georeferenced layer since QGIS cannot read directly the geolocation from the N1 file.
 !INSTRUCTIONS
 .ALGORITHM:s1tbx:calibration
 .PARAMETERS:{"!sourceBands>band": "Amplitude", "createBetaBand": false, "outputImageScaleInDb": true, "createGammaBand": false, "auxFile": 0}
 .MODE:Batch
-.INSTRUCTIONS:ASAR Level 1 data have to be calibrated to obtain Sigma nought values.
+.INSTRUCTIONS:Sentinel-1 Level 1 data have to be calibrated to obtain Sigma nought values.
 
 SETTINGS
 
 Input image: 
 This list of source bands:
-Select an ASAR subset image as "Input image" (Figure 1) and choose the "Amplitude_XX" band for processing.
+Select an Sentinel-1 image as "Input image" (Figure 1) and choose the "Amplitude_XX" band for processing.
 
 The auxiliary file:
-When calibrating ASAR WS data, set the auxiliary file to "product auxiliary file".
+This is only useful for ASAR.
 
 Output image scale in Db:
 Output Image:
@@ -84,7 +60,7 @@ DEM resampling method:
 Image resampling method:
 The pixel spacing in degrees:
 The pixle spacing in meters:
-For DEM you can either choose one of the options (like SRTM) in which case the DEM will be downloaded. If you want to use another DEM (e.g. ASTER GDEM) you have to specify it as an external DEM. For ASAR-WS: Pixel spacing in degrees: 0.00067373646309; Pixel spacing in meters: 75.
+For DEM you can either choose one of the options (like SRTM) in which case the DEM will be downloaded. If you want to use another DEM (e.g. ASTER GDEM) you have to specify it as an external DEM. For Sentinel-1: Pixel spacing in degrees: 8.983152841195215E-5 for high resolution and 3.594159451762205E-4 for medium resolution; Pixel spacing in meters: 10 for high resolution and 40 for medium resolution.
 
 Output Image:
 As output, you can now specify *.tif.
@@ -103,7 +79,7 @@ If you want to save the projected local incidence angle for normalizing the back
 .ALGORITHM:gdalogr:translate
 .PARAMETERS:{"EXTRA": "-co COMPRESS=LZW", "OUTSIZE": 100, "OUTSIZE_PERC": true, "SDS": false, "NO_DATA": "none", "EXPAND": 0}
 .MODE:Batch
-.INSTRUCTIONS:In order for QGIS to be able to use the NEST GeoTIFF output, the file has to be converted by GDAL.
+.INSTRUCTIONS:In order for QGIS to be able to use the S1TBX GeoTIFF output, the file has to be converted by GDAL.
 
 SETTINGS
 

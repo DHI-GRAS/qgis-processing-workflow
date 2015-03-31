@@ -53,6 +53,10 @@ It is only tested for WGS84 (EPSG:4326). Set "Save selected Source Band" to Yes.
 Other settings:
 Leave the default values.
 
+FURTHER INFORMATION
+
+If you want to save the projected local incidence angle for normalizing the backscatter later, please activate the "Save projected incidence angle" in the advanced parameters.
+
 !INSTRUCTIONS
 .ALGORITHM:s1tbx:specklefilter
 .PARAMETERS:{"estimateENL": true, "enl": 1, "filter": 0, "filterSizeX": 3, "edgeThreshold": 5000, "dampingFactor": 2, "!sourceBands>band": "", "filterSizeY": 3}
