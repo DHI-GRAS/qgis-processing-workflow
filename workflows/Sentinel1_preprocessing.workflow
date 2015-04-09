@@ -18,7 +18,7 @@ The output file must be in *.dim format. Uncheck the "Open output file" option a
 
 !INSTRUCTIONS
 .ALGORITHM:s1tbx:calibration
-.PARAMETERS:{"!sourceBands>band": "", "createBetaBand": false, "outputImageScaleInDb": true, "createGammaBand": false, "auxFile": 1}
+.PARAMETERS:{"!sourceBands>band": "", "createBetaBand": false, "outputImageScaleInDb": false, "createGammaBand": false, "auxFile": 1}
 .MODE:Normal
 .INSTRUCTIONS:Sentinel-1 Level 1 data have to be calibrated to obtain Sigma nought values.
 
@@ -26,14 +26,10 @@ SETTINGS
 
 Input image: 
 This list of source bands:
-Select an Sentinel-1 image as "Input image" (Figure 1) and choose the "Amplitude_XX" band for processing.
+Select an Sentinel-1 image as "Input image" and choose the "Amplitude_XX" band for processing.
 
-The auxiliary file:
-This is only useful for ASAR.
-
-Output image scale in Db:
 Output Image:
-Make sure that "Output image scale in dB" is set to "Yes" to get values in logarithmic dB scale. The output file has to be in *.dim format. Switch "Open output file" off as QGIS cannot read DIM files.
+The output file has to be in *.dim format. Switch "Open output file" off as QGIS cannot read DIM files.
 
 Create Beta band(Advanced):
 Create Gamma band(Advanced):
@@ -41,6 +37,26 @@ If you want to produce the Beta or Gamma band information, please enter the outp
 
 Other setting:
 Leave the default values.
+
+FURTHER INFORMATION
+
+The "Output image scale in dB" in the advanced parameters is not working for Sentinel-1 data Calibration due to the S1TBX problem.
+
+!INSTRUCTIONS
+.ALGORITHM:s1tbx:lineartodb
+.PARAMETERS:{}
+.MODE:Normal
+.INSTRUCTIONS:This step is to scale the backscatter intto the dB domain.
+
+SETTINGS
+
+Input image: 
+This list of source bands:
+Select an Sentinel-1 image as "Input image" and choose the "Sigma0_XX" band for processing.
+
+
+Output Image:
+The output file must be in *.dim format. Uncheck the "Open output file" option as QGIS cannot read DIM files.
 
 !INSTRUCTIONS
 .ALGORITHM:s1tbx:terraincorrection
