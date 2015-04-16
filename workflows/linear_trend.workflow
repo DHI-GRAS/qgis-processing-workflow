@@ -186,7 +186,7 @@ An image file located in the data directory:
 Select one of the normalized NDVI files in the folder with data of the growth season (see comments above).
 
 Input images filename:
-Retype the input image filename incl. file extension and by replacing the date string with Y,M,D (e.g., Norm_NDVI_201101.tif becomes Norm_NDVI_YMD.tif).
+Retype the input image filename incl. file extension and by replacing the date string with Y,M,D (e.g., Norm_NDVI_201101.tif becomes Norm_NDVI_YYYYMM.tif).
 
 Output directory:
 Define the path and folder where you want to save the processed data, e.g., C:\WOIS\PG03\
@@ -218,7 +218,7 @@ An image file located in the data directory:
 Select one of the normalized NDVI files in the folder with data of the growth season (see comments above).
 
 Input images filename:
-Retype the input image filename incl. file extension and by replacing the date string with Y,M,D (e.g., for Norm_NDVI_201101.tif type Norm_NDVI_YMD.tif).
+Retype the input image filename incl. file extension and by replacing the date string with Y,M,D (e.g., for Norm_NDVI_201101.tif type Norm_NDVI_YYYYMM.tif).
 
 Output directory:
 Define the path and folder where you want to save the processed data, e.g., C:\WOIS\PG03\

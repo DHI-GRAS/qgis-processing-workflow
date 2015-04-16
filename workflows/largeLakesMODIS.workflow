@@ -1,7 +1,7 @@
 .NAME:Water quality and temperature (MODIS)
 .GROUP:PG #01: Large lakes water quality and temperature
 .ALGORITHM:script:downloadfromftp
-.PARAMETERS:{"username": "", "timestamp": "20130701000000", "host": "", "remoteDir": "", "password": "", "overwrite": false}
+.PARAMETERS:{"username": "", "timestamp": "20150401000000", "host": "", "remoteDir": "", "password": "", "overwrite": false}
 .MODE:Normal
 .INSTRUCTIONS:Downloads daily water information and temperature data via FTP.
 
@@ -16,7 +16,7 @@ Remote Directory: Define
 
 Local Directory:
 Specify a local directory where the data will be downloaded to, e.g.:
-C:\Data\Temperature
+C:\Data\MODIS_WQ
 
 Download files modified since:
 Only files which have been last modified on or downloaded after the specified date will be downloaded.
@@ -33,4 +33,6 @@ Leave the default values.
 FURTHER INFORMATION
 
 Data provided are from the MODIS AQUA sensor, and processed in-house by the TIGER-NET consortium before being made available to users via ftp. If interested in this product please contact the TIGER-NET consortium.
+
+Alternatively a direct download of MODIS Oceal Color data can be facilited through a subscription with NASA (cf. http://oceancolor.gsfc.nasa.gov/sdpscgi/public/subscriptions_home.cgi).
 !INSTRUCTIONS

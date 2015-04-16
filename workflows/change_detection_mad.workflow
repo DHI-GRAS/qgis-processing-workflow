@@ -78,7 +78,7 @@ The mask is computed by image thresholding, where pixel values larger than the s
 
 !INSTRUCTIONS
 .ALGORITHM:grass:r.neighbors
-.PARAMETERS:{"GRASS_REGION_CELLSIZE_PARAMETER": 0, "-a": false, "method": 0, "-c": false, "size": 3}
+.PARAMETERS:{"GRASS_REGION_CELLSIZE_PARAMETER": 0, "-a": false, "method": 2, "-c": false, "size": 3}
 .MODE:Normal
 .INSTRUCTIONS:In this step a modal filter  will be applied to smooth out the spectral variability in the binary change mask (i.e. remove isolated pixels).
 
