@@ -1,25 +1,7 @@
 .NAME:Seasonal monitoring of landscape dynamics
 .GROUP:PG #04: Medium resolution full basin characterization
-.ALGORITHM:script:rfillnullsfordirectory
-.PARAMETERS:{"tension": 40, "smooth": 0.1, "method": 0, "cellSize": 0}
-.MODE:Normal
-.INSTRUCTIONS:This step performs spatial interpolation of missing data in a data timeseries (for instance owing to cloud coverage).
-
-SETTINGS
-
-An image in the input directory:
-Select a file from the directory where the time series of 10-day biophysical images are saved to spatially interpolate over any missing data.
-
-Output directory:
-Select the output directory 
-(note: If there are no missing data in an image it will not be processed. Therefore, it is best to overwrite the input files i.e. set the output directory to be the same as the input directory) 
-
-Other settings: 
-Leave the default values.
-
-!INSTRUCTIONS
 .ALGORITHM:script:grassrseriesforwholedirectory
-.PARAMETERS:{"cellSize": 0, "range": "-10000000000,10000000000", "propagateNulls": true, "filenameFormat": "", "operation": 0, "outputFileFormat": "", "groupBy": 0}
+.PARAMETERS:{"cellSize": 0, "range": "0.0000000001,10000000000", "propagateNulls": false, "filenameFormat": "", "operation": 0, "outputFileFormat": "", "groupBy": 2}
 .MODE:Normal
 .INSTRUCTIONS:This step computes the per-pixel mean values for an image time series - in this case the long-term mean biophysical value (e.g., FAPAR, LAI, FCover) for each 10-day period.
 
@@ -30,7 +12,7 @@ Select the directory with the 10-day biophysical time series. Retype the image f
 
 Specify the iputput directory and give an output image filename format using "YMD" to inlcude a date string and avoid overwriting (e.g., 010 stands then for January first decade, 122 is December third decade).
 
-Set "Aggregation condition" to "decadal", "Propagate NULLs" to "No" and "Aggregate operation" to "mean" to compute the mean value.
+Set "Aggregation condition" to "day", "Propagate NULLs" to "No" and "Aggregate operation" to "average" to compute the mean value.
 
 FURTHER INFORMATION
 

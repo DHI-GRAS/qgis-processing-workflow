@@ -87,6 +87,8 @@ Output images filename:
 Define the output image filename, with the date string replaced by "YMD" (e.g. ET_totalMonthly_YMD.tif).
 
 Pair images by:
+year-month
+
 Band math expression:
 With the pre-set options the algorithm will group all images with the same year and month and multiply each image by 30 to calculate total monthly ET. In this case each group will only have one image, since in the previous step the mean daily ET per month was calculated.
 

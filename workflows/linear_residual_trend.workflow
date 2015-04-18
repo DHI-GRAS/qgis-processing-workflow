@@ -35,7 +35,7 @@ Other settings:
 Leave the default values.
 !INSTRUCTIONS
 .ALGORITHM:script:grassrseriesforwholedirectory
-.PARAMETERS:{"cellSize": 0, "range": "-10000000000,10000000000", "propagateNulls": false, "filenameFormat": "", "operation": 0, "outputFileFormat": "", "groupBy": 3}
+.PARAMETERS:{"cellSize": 0, "range": "-10000000000,10000000000", "propagateNulls": false, "filenameFormat": "", "operation": 0, "outputFileFormat": "", "groupBy": 4}
 .MODE:Normal
 .INSTRUCTIONS:Calculation of long-term mean rainfall for each month.
 
@@ -70,7 +70,7 @@ Other settings:
 Leave the default values.
 !INSTRUCTIONS
 .ALGORITHM:script:grassrseriesforwholedirectory
-.PARAMETERS:{"cellSize": 0, "range": "-10000000000,10000000000", "propagateNulls": false, "filenameFormat": "", "operation": 8, "outputFileFormat": "", "groupBy": 3}
+.PARAMETERS:{"cellSize": 0, "range": "-10000000000,10000000000", "propagateNulls": false, "filenameFormat": "", "operation": 8, "outputFileFormat": "", "groupBy": 4}
 .MODE:Normal
 .INSTRUCTIONS:Calculation of long-term standard deviation of RFE for each month.
 
@@ -105,7 +105,7 @@ Other settings:
 Leave the default values.
 !INSTRUCTIONS
 .ALGORITHM:script:otbbandmathfortemporaldata
-.PARAMETERS:{"filenameFormat1": "", "expression": "(im1b1-im2b1)/im3b1", "ram": 128, "outputFileFormat": "", "groupBy": 3, "filenameFormat3": "", "filenameFormat2": ""}
+.PARAMETERS:{"filenameFormat1": "", "expression": "(im1b1-im2b1)/im3b1", "ram": 128, "outputFileFormat": "", "groupBy": 4, "filenameFormat3": "", "filenameFormat2": ""}
 .MODE:Normal
 .INSTRUCTIONS:Calculation of standardized RFE anomalies for each month of the time series.
 
@@ -173,7 +173,7 @@ Output images filename:
 Define an output filename, e.g., Residual_NDVI_YYYYMM.tif
 !INSTRUCTIONS
 .ALGORITHM:script:grassrseriesforwholedirectory
-.PARAMETERS:{"cellSize": 0, "range": "-10000000000,10000000000", "propagateNulls": false, "filenameFormat": "", "operation": 13, "outputFileFormat": "", "groupBy": 6}
+.PARAMETERS:{"cellSize": 0, "range": "-10000000000,10000000000", "propagateNulls": false, "filenameFormat": "", "operation": 13, "outputFileFormat": "", "groupBy": 7}
 .MODE:Normal
 .INSTRUCTIONS:Calculation of linear slopes by regressing residual NDVI anomalies (dependent variable) on time (independent variable).
 
@@ -205,7 +205,7 @@ Other settings:
 Leave the default values.
 !INSTRUCTIONS
 .ALGORITHM:script:grassrseriesforwholedirectory
-.PARAMETERS:{"cellSize": 0, "range": "-10000000000,10000000000", "propagateNulls": false, "filenameFormat": "", "operation": 15, "outputFileFormat": "", "groupBy": 6}
+.PARAMETERS:{"cellSize": 0, "range": "-10000000000,10000000000", "propagateNulls": false, "filenameFormat": "", "operation": 15, "outputFileFormat": "", "groupBy": 7}
 .MODE:Normal
 .INSTRUCTIONS:Calculation of pixelwise coefficient of determination (R2) between the residual NDVI anomalies and time to assess statistical significance of the slopes calculated in the previous step.
 

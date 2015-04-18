@@ -19,10 +19,10 @@ Specify the directory where the aggregated evapotranspiration images are to be s
 Output image filename:
 Define the output image filename, with the date string replaced by "YMD" (e.g. RFE_meanMonthly_YMD.tif).
 
-Aggregation condition:
-Propagate NULLs:
 Aggregate operation:
-With the pre-set options the algorithm will group all the images that come from the same year and month and calculate the sum of values for each pixel. Pixels with missing values will be ignored.
+With the pre-set options the algorithm will group all the images that come from the same year and month and calculate the sum of values for each pixel. 
+
+Propagate NULLs: when checked  pixels with missing values will be ignored.
 
 Regional extent:
 Region cellsize:
