@@ -1,1 +1,0 @@
-Those txt files refer to applied filetr within the SWB mapping workflow

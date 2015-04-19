@@ -1,7 +1,7 @@
 .NAME:01 - Data pre-processing
 .GROUP:PG #12: Medium resolution erosion potential indicator
 .ALGORITHM:gdalogr:merge
-.PARAMETERS:{"PCT": false, "SEPARATE": true}
+.PARAMETERS:{"RTYPE": 5, "PCT": false, "SEPARATE": true}
 .MODE:Normal
 .INSTRUCTIONS:In this step you will stack the rainfall data for calculation of mean annual rainfall in the following step.
 
@@ -40,7 +40,7 @@ FURTHER INFORMATION
 This step has to be done as the USLE model needs the mean annual rainfall as input values to calculate the R factor.
 !INSTRUCTIONS
 .ALGORITHM:gdalogr:merge
-.PARAMETERS:{"PCT": false, "SEPARATE": false}
+.PARAMETERS:{"RTYPE": 5, "PCT": false, "SEPARATE": false}
 .MODE:Normal
 .INSTRUCTIONS:In this step you will mosaic the single DEM tiles to create a continuous DEM for the area of interest.
 
@@ -58,7 +58,7 @@ Select and define the path for output.
 
 !INSTRUCTIONS
 .ALGORITHM:gdalogr:translate
-.PARAMETERS:{"EXTRA": "", "OUTSIZE": 100, "OUTSIZE_PERC": true, "SDS": false, "NO_DATA": "none", "EXPAND": 0}
+.PARAMETERS:{"ZLEVEL": 6, "SDS": false, "OUTSIZE": 100, "OUTSIZE_PERC": true, "RTYPE": 0, "COMPRESS": 0, "NO_DATA": "none", "BIGTIFF": 0, "TILED": false, "JPEGCOMPRESSION": 75, "TFW": false, "PREDICTOR": 1, "EXPAND": 0, "EXTRA": ""}
 .MODE:Batch
 .INSTRUCTIONS:This step is used to reduce the data to the area of interest. All data will be cliped to the aoi extent.
 
@@ -74,6 +74,11 @@ Input Layers:
 Parameters:
 "Subset based on georeferenced coordinates" -> use layer/canvas extent: select the AOI shapefile
 
+Define “Float32” as “output raster type” for: 
+1. 01_04_01_rainfall_[NAME].tif
+3. 01_04_03_DEM_[NAME].tif
+5. 01_04_05_degradation_[NAME].tif
+
 Output Layers:
 Select and define the path for output.
 1. 01_04_01_rainfall_[NAME].tif
@@ -84,7 +89,7 @@ Select and define the path for output.
 
 !INSTRUCTIONS
 .ALGORITHM:gdalogr:warpreproject
-.PARAMETERS:{"TR": 0, "METHOD": 0, "EXTRA": ""}
+.PARAMETERS:{"ZLEVEL": 6, "RTYPE": 0, "BIGTIFF": 0, "TR": 0, "EXTRA": "", "COMPRESS": 0, "NO_DATA": "-9999", "TILED": false, "JPEGCOMPRESSION": 75, "TFW": false, "METHOD": 0, "PREDICTOR": 1}
 .MODE:Batch
 .INSTRUCTIONS:In this step all data (raster only) will be projected to UTM zone 36 (EPSG: 32636) This step is necessary because in a later step metric values are needed for calculation.
 
@@ -99,6 +104,11 @@ Input Layers:
 
 Parameter:
 Set "Destination SRS (EPSG Code)" to EPSG: 32636
+
+Define “Float32” as “output raster type” for: 
+1. 01_04_01_rainfall_[NAME].tif
+3. 01_04_03_DEM_[NAME].tif
+5. 01_04_05_degradation_[NAME].tif
 
 Output Layers:
 Select and define the path for output.
