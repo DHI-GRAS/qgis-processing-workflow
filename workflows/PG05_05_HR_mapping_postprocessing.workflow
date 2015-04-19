@@ -42,7 +42,7 @@ Select and define the input classification image.
 (05_01_[NAME].tif)
 
 Raster layer containing reference classes:
-Select and define the raster layer containing the reference image information.
+Select and define the raster layer containing the reference image information. (Note that this raster layer must reflect the same class codes as your input classification image) 
 
 Title for error matrix and kappa:
 Choose a title for the error Matrix (default is "ACCURACY ASSESSMENT")
@@ -55,7 +55,7 @@ Choose "yes" to generate a "Wide report".
 
 Output file containing error matrix and kappa:
 Finally, specify the location and name of the error matrix and kappa file.
-(e.g. 05_02_[NAME].txt)
+(e.g. 05_02_Accuracy_[NAME].txt)
 
 FURTHER INFORMATION
 
