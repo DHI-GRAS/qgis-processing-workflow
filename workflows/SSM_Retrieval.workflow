@@ -19,7 +19,7 @@ lia nodata:
 The local incidence angle image and its nodata value.
 
 parameter database:
-It is a tile based parameter database provided by TUWien.
+It is a tile based parameter database provided by TUWien. The area of standing water, oversaturated soil, dense vegetation(rainiforest), complex topography  or  desert will be masked out from the soil moisture.
 
 output raster:
 Specify the output file name.
