@@ -4,7 +4,7 @@
 .PARAMETERS:{}
 .MODE:Normal
 .INSTRUCTIONS:
-This module launches the MWSWAT interface. In MWSWAT, you can perform DEM hydro-processing, HRU delineation and SWAT model parameterization
+This module launches the MWSWAT interface. In MWSWAT, you can perform DEM hydro-processing, HRU delineation and SWAT model parameterization. Reproject all required input grids in the relevant UTM projection in MapWindow prior to moving on with the model development. 
 
 SETTINGS
 
@@ -13,7 +13,7 @@ Press 'Run' to launch MapWindow.
 
 FURTHER INFORMATION
 
-In MapWindow, create a new MWSWAT project and complete the steps (1) Delineate watershed, (2) Create HRUs. 
+In MapWindow, create a new MWSWAT project and complete the steps (1) Delineate watershed, (2) Create HRUs. Save between each step and before closing MWSWAT.
 
 For support regarding SWAT model development under MapWindow, please see the TIGER-NET training material and the WaterBase project, http://www.waterbase.org/docs/MWSWAT%20Setup.pdf.
 
@@ -74,10 +74,10 @@ FURTHER INFORMATION
 
 The model description file is a text file that contains all the necessary information to handle and manage the model in the WOIS.
 In order to create the model description file, you need a shapefile with the model subcatchments in lat-lon pseudo-projection.
-Use MapWindow to reproject from UTM to lat-lon. Indicate, which column of the attribute table holds the sub-basin IDs.
-You also need a point shapefile with the subcatchment centroids (use MapWindow). The attribute table of the centroid file
+Use QGIS to reproject from UTM to lat-lon. Indicate, which column of the attribute table holds the sub-basin IDs.
+You also need a point shapefile with the subcatchment centroids (use QGIS). The attribute table of the centroid file
 should contain columns with latitude, longitude and elevation. To compute average elevation of the subcatchments,
-use MapWindow's Grid Analysis Tools plugin ("Make statistics of grid by shapfile")
+use QGIS's Zonal Statistics algorithm (Raster -> Zonal Statistics -> Zonal Statistics).
 !INSTRUCTIONS
 .ALGORITHM:wg9hm:3generatemodelclimatedatamdwf
 .PARAMETERS:{}
