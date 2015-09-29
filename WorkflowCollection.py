@@ -3,14 +3,7 @@ import os
 import glob
 from PyQt4.QtGui import QIcon, QAction
 from PyQt4.QtCore import QObject, SIGNAL
-from processing.core.ProcessingConfig import ProcessingConfig
-from processing.core.AlgorithmProvider import AlgorithmProvider
-from processing.core.ProcessingLog import ProcessingLog
-from processing_workflow.Workflow import Workflow
 from processing_workflow.WorkflowProviderBase import WorkflowProviderBase
-from processing_workflow.WorkflowUtils import WorkflowUtils
-from processing_workflow.WorkflowListDialog import WorkflowListDialog
-from processing_workflow.WrongWorkflowException import WrongWorkflowException
 
 class WorkflowCollection(WorkflowProviderBase):
     
@@ -22,7 +15,7 @@ class WorkflowCollection(WorkflowProviderBase):
         
         self.algs = []
         
-        AlgorithmProvider.__init__(self)
+        WorkflowProviderBase.__init__(self)
         self.activate = True
         
         self.iface = iface
@@ -32,7 +25,7 @@ class WorkflowCollection(WorkflowProviderBase):
         QObject.connect(self.action, SIGNAL("triggered()"), self.displayWorkflowListDialog)
     
     def unload(self):
-        AlgorithmProvider.unload(self)    
+        WorkflowProviderBase.unload(self)    
     
     # Read the JSON description file    
     def processDescriptionFile(self):

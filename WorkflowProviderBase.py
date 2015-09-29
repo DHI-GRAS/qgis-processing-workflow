@@ -26,13 +26,11 @@
 ***************************************************************************
 """
 
-import os
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from processing.core.ProcessingConfig import ProcessingConfig, Setting
 from processing.core.AlgorithmProvider import AlgorithmProvider
 from processing.core.ProcessingLog import ProcessingLog
-from processing.core.Processing import Processing
 from processing_workflow.WorkflowUtils import WorkflowUtils
 from processing_workflow.CreateNewWorkflowAction import CreateNewWorkflowAction
 from processing_workflow.EditWorkflowAction import EditWorkflowAction
@@ -40,38 +38,18 @@ from processing_workflow.DeleteWorkflowAction import DeleteWorkflowAction
 from processing_workflow.Workflow import Workflow
 from processing_workflow.WorkflowListDialog import WorkflowListDialog
 from processing_workflow.WrongWorkflowException import WrongWorkflowException
-from processing_workflow.WorkflowAlgListListener import WorkflowAlgListListener
 
 class WorkflowProviderBase(AlgorithmProvider):
 
-    def __init__(self, iface):
+    def __init__(self):
         AlgorithmProvider.__init__(self)
-        self.activate = False
-        self.actions.append(CreateNewWorkflowAction())
-        self.contextMenuActions = [EditWorkflowAction(), DeleteWorkflowAction()]
-        self.iface = iface
         
-        # Set constant properties
-        self.description = "Processing Workflows (Step by step guidance)"
-        self.icon = os.path.join(os.path.dirname(__file__), "images", "workflow.png")
-        self.name = "workflow"
-        
-        # Create action that will display workflow list dialog when toolbar button is clicked
-        self.action = QAction(self.getIcon(), \
-                                  "WOIS Workflows", self.iface.mainWindow())
-        QObject.connect(self.action, SIGNAL("triggered()"), self.displayWorkflowListDialog)
-        
-
-
     def initializeSettings(self):
         AlgorithmProvider.initializeSettings(self)
         ProcessingConfig.addSetting(Setting(self.getDescription(), WorkflowUtils.WORKFLOW_FOLDER, "Workflow algorithms folder", WorkflowUtils.workflowPath()))
 
     def unload(self):
         AlgorithmProvider.unload(self)
-    #    ProcessingConfig.removeSetting(WorkflowUtils.WORKFLOW_FOLDER)
-        # Remove toolbar button
-        self.iface.removeToolBarIcon(self.action)
     
     # Load all the workflows saved in the workflow folder    
     def createAlgsList(self):
