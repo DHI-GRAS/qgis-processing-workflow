@@ -3,11 +3,12 @@ import os
 import glob
 from PyQt4.QtGui import QIcon, QAction
 from PyQt4.QtCore import QObject, SIGNAL
+from processing.core.ProcessingConfig import ProcessingConfig, Setting
 from processing_workflow.WorkflowProviderBase import WorkflowProviderBase
 
 class WorkflowCollection(WorkflowProviderBase):
     
-    def __init__(self, iface, descriptionFile):
+    def __init__(self, iface, descriptionFile, workflowProvider):
         
         self.descriptionFile = descriptionFile
         self.baseDir = os.path.dirname(descriptionFile)
@@ -15,17 +16,21 @@ class WorkflowCollection(WorkflowProviderBase):
         
         self.algs = []
         
-        WorkflowProviderBase.__init__(self)
-        self.activate = True
+        WorkflowProviderBase.__init__(self, iface)
+        self.activate = False
         
-        self.iface = iface
+        self.workflowProvider = workflowProvider
         
-        # Create action that will display workflow list dialog when toolbar button is clicked
-        self.action = QAction(QIcon(self.getIcon()), self.getDescription(), self.iface.mainWindow())
-        QObject.connect(self.action, SIGNAL("triggered()"), self.displayWorkflowListDialog)
     
     def unload(self):
-        WorkflowProviderBase.unload(self)    
+        WorkflowProviderBase.unload(self)
+        self.iface.removeToolBarIcon(self.action)    
+    
+    def initializeSettings(self):
+        # The activate collection setting is in the Workflow provider settings group
+        name = 'ACTIVATE_' + self.getName().upper().replace(' ', '_')
+        ProcessingConfig.settingIcons[name] = self.getIcon()
+        ProcessingConfig.addSetting(Setting(self.workflowProvider.getDescription(), name, self.tr('Activate '+self.getName()), self.activate))
     
     # Read the JSON description file    
     def processDescriptionFile(self):
@@ -42,7 +47,3 @@ class WorkflowCollection(WorkflowProviderBase):
         self.preloadedAlgs = []
         for descriptionFile in glob.glob(os.path.join(self.baseDir, "*.workflow")):
             self.loadWorkflow(descriptionFile)
-    
-    def loadAlgorithms(self):
-        WorkflowProviderBase.loadAlgorithms(self)
-        self.iface.addToolBarIcon(self.action)        

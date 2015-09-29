@@ -41,13 +41,15 @@ from processing_workflow.WrongWorkflowException import WrongWorkflowException
 
 class WorkflowProviderBase(AlgorithmProvider):
 
-    def __init__(self):
+    def __init__(self, iface):
         AlgorithmProvider.__init__(self)
         
-    def initializeSettings(self):
-        AlgorithmProvider.initializeSettings(self)
-        ProcessingConfig.addSetting(Setting(self.getDescription(), WorkflowUtils.WORKFLOW_FOLDER, "Workflow algorithms folder", WorkflowUtils.workflowPath()))
-
+        self.iface = iface
+        
+        # Create action that will display workflow list dialog when toolbar button is clicked
+        self.action = QAction(self.getIcon(), self.getDescription(), self.iface.mainWindow())
+        QObject.connect(self.action, SIGNAL("triggered()"), self.displayWorkflowListDialog)
+        
     def unload(self):
         AlgorithmProvider.unload(self)
     

@@ -43,20 +43,15 @@ from processing_workflow.WorkflowAlgListListener import WorkflowAlgListListener
 class WorkflowProvider(WorkflowProviderBase):
 
     def __init__(self, iface):
-        WorkflowProviderBase.__init__(self)
-        self.activate = False
-        self.actions.append(CreateNewWorkflowAction())
-        self.contextMenuActions = [EditWorkflowAction(), DeleteWorkflowAction()]
-        self.iface = iface
-        
         # Set constant properties
         self.description = "Processing Workflows (Step by step guidance)"
         self.icon = os.path.join(os.path.dirname(__file__), "images", "workflow.png")
         self.name = "workflow"
         
-        # Create action that will display workflow list dialog when toolbar button is clicked
-        self.action = QAction(self.getIcon(), self.getDescription(), self.iface.mainWindow())
-        QObject.connect(self.action, SIGNAL("triggered()"), self.displayWorkflowListDialog)
+        WorkflowProviderBase.__init__(self, iface)
+        self.activate = False
+        self.actions.append(CreateNewWorkflowAction())
+        self.contextMenuActions = [EditWorkflowAction(), DeleteWorkflowAction()]
         
         self.collections = []
         self.collectionListeners = []
@@ -85,7 +80,7 @@ class WorkflowProvider(WorkflowProviderBase):
             # Load collections if they are not already loaded
             if os.path.isfile(os.path.join(root, "collection.conf")):
                 #try:
-                workflowCollection = WorkflowCollection(self.iface, os.path.join(root, "collection.conf"))
+                workflowCollection = WorkflowCollection(self.iface, os.path.join(root, "collection.conf"), self)
                 collectionAlreadyExists = False
                 for collection in self.collections:
                     if collection.getName() == workflowCollection.getName():
@@ -95,7 +90,7 @@ class WorkflowProvider(WorkflowProviderBase):
                         self.collections.append(workflowCollection)
                         self.collectionListeners.append(WorkflowAlgListListener(workflowCollection))
                         Processing.addAlgListListener(self.collectionListeners[-1])
-                        Processing.addProvider(workflowCollection)
+                        Processing.addProvider(workflowCollection, True)
                 #except:
                 #    pass
             else:
