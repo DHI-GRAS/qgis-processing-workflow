@@ -7,11 +7,12 @@ from processing.core.ProcessingConfig import ProcessingConfig
 from processing.core.AlgorithmProvider import AlgorithmProvider
 from processing.core.ProcessingLog import ProcessingLog
 from processing_workflow.Workflow import Workflow
+from processing_workflow.WorkflowProviderBase import WorkflowProviderBase
 from processing_workflow.WorkflowUtils import WorkflowUtils
 from processing_workflow.WorkflowListDialog import WorkflowListDialog
 from processing_workflow.WrongWorkflowException import WrongWorkflowException
 
-class WorkflowCollection(AlgorithmProvider):
+class WorkflowCollection(WorkflowProviderBase):
     
     def __init__(self, iface, descriptionFile):
         
@@ -25,6 +26,11 @@ class WorkflowCollection(AlgorithmProvider):
         self.activate = True
         
         self.iface = iface
+        
+        # Create action that will display workflow list dialog when toolbar button is clicked
+        self.action = QAction(QIcon(self.getIcon()), self.getName(), self.iface.mainWindow())
+        QObject.connect(self.action, SIGNAL("triggered()"), self.displayWorkflowListDialog)
+        
     
     # Read the JSON description file    
     def processDescriptionFile(self):
@@ -32,41 +38,16 @@ class WorkflowCollection(AlgorithmProvider):
             settings = json.load(f)
             self.description = settings["description"]
             self.name = settings["name"]
-            self.icon = settings["icon"]
+            self.icon = os.path.join(self.baseDir, settings["icon"])
             self.aboutHTML = (' ').join(settings["aboutHTML"])
-            
-    def getDescription(self):
-        return self.description
-
-    def getName(self):
-        return self.name
-
-    def getIcon(self):
-        return QIcon(os.path.join(self.baseDir, self.icon))
-    
-    def loadAlgorithms(self):
-        AlgorithmProvider.loadAlgorithms(self)
+                
        
     # Load all the workflows saved in the workflow folder    
     def createAlgsList(self):
         self.preloadedAlgs = []
         for descriptionFile in glob.glob(os.path.join(self.baseDir, "*.workflow")):
-            try:
-                workflow = Workflow()
-                fullpath = os.path.join(self.baseDir,descriptionFile)
-                workflow.openWorkflow(fullpath)
-                if workflow.name.strip() != "":
-                    workflow.provider = self
-                    self.preloadedAlgs.append(workflow)
-                else:
-                    ProcessingLog.addToLog(ProcessingLog.LOG_ERROR, "Could not open Workflow algorithm: " + descriptionFile)
-            except WrongWorkflowException,e:
-                ProcessingLog.addToLog(ProcessingLog.LOG_ERROR, "Could not open Workflow algorithm " + descriptionFile + ". "+e.msg)
-            except Exception,e:
-                ProcessingLog.addToLog(ProcessingLog.LOG_ERROR, "Could not open Workflow algorithm: " + descriptionFile + ". Unknown exception: "+unicode(e)+"\n")
-
-    def _loadAlgorithms(self):
-        self.createAlgsList()
-        self.algs = self.preloadedAlgs
-        
-            
+            self.loadWorkflow(descriptionFile)
+    
+    def loadAlgorithms(self):
+        WorkflowProviderBase.loadAlgorithms(self)
+        self.iface.addToolBarIcon(self.action)        

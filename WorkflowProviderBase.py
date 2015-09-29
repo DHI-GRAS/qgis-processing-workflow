@@ -33,8 +33,6 @@ from processing.core.ProcessingConfig import ProcessingConfig, Setting
 from processing.core.AlgorithmProvider import AlgorithmProvider
 from processing.core.ProcessingLog import ProcessingLog
 from processing.core.Processing import Processing
-from processing_workflow.WorkflowProviderBase import WorkflowProviderBase
-from processing_workflow.WorkflowCollection import WorkflowCollection
 from processing_workflow.WorkflowUtils import WorkflowUtils
 from processing_workflow.CreateNewWorkflowAction import CreateNewWorkflowAction
 from processing_workflow.EditWorkflowAction import EditWorkflowAction
@@ -44,7 +42,7 @@ from processing_workflow.WorkflowListDialog import WorkflowListDialog
 from processing_workflow.WrongWorkflowException import WrongWorkflowException
 from processing_workflow.WorkflowAlgListListener import WorkflowAlgListListener
 
-class WorkflowProvider(WorkflowProviderBase):
+class WorkflowProviderBase(AlgorithmProvider):
 
     def __init__(self, iface):
         AlgorithmProvider.__init__(self)
@@ -63,7 +61,6 @@ class WorkflowProvider(WorkflowProviderBase):
                                   "WOIS Workflows", self.iface.mainWindow())
         QObject.connect(self.action, SIGNAL("triggered()"), self.displayWorkflowListDialog)
         
-        self.collections = []
 
 
     def initializeSettings(self):
@@ -71,36 +68,55 @@ class WorkflowProvider(WorkflowProviderBase):
         ProcessingConfig.addSetting(Setting(self.getDescription(), WorkflowUtils.WORKFLOW_FOLDER, "Workflow algorithms folder", WorkflowUtils.workflowPath()))
 
     def unload(self):
-        for collection in self.collections:
-            collection.unload()
-        self.collection = []    
         AlgorithmProvider.unload(self)
-        ProcessingConfig.removeSetting(WorkflowUtils.WORKFLOW_FOLDER)
+    #    ProcessingConfig.removeSetting(WorkflowUtils.WORKFLOW_FOLDER)
         # Remove toolbar button
         self.iface.removeToolBarIcon(self.action)
     
     # Load all the workflows saved in the workflow folder    
     def createAlgsList(self):
-        self.preloadedAlgs = []
-        folder = WorkflowUtils.workflowPath()
-        for root, _, files in os.walk(folder):
-            if os.path.isfile(os.path.join(root, "collection.conf")):
-                #try:
-                workflowCollection = WorkflowCollection(self.iface, os.path.join(root, "collection.conf"))
-                collectionAlreadyExists = False
-                for collection in self.collections:
-                    if collection.getName() == workflowCollection.getName():
-                        collectionAlreadyExists = True
-                        break
-                if not collectionAlreadyExists:
-                        self.collections.append(workflowCollection)
-                        self.algListener = WorkflowAlgListListener(workflowCollection)
-                        Processing.addAlgListListener(self.algListener)
-                        Processing.addProvider(workflowCollection)
-                #except:
-                #    pass
-            else:
-                for descriptionFile in files:
-                    if descriptionFile.endswith(".workflow"):
-                        self.loadWorkflow(os.path.join(root,descriptionFile))
+        pass
                         
+    def loadWorkflow(self, workflowFilePath):
+        try:
+            workflow = Workflow()
+            workflow.openWorkflow(workflowFilePath)
+            if workflow.name.strip() != "":
+                workflow.provider = self
+                self.preloadedAlgs.append(workflow)
+            else:
+                ProcessingLog.addToLog(ProcessingLog.LOG_ERROR, "Could not open Workflow algorithm: " + workflowFilePath)
+        except WrongWorkflowException,e:
+            ProcessingLog.addToLog(ProcessingLog.LOG_ERROR, "Could not open Workflow algorithm " + workflowFilePath + ". "+e.msg)
+        except Exception,e:
+            ProcessingLog.addToLog(ProcessingLog.LOG_ERROR, "Could not open Workflow algorithm: " + workflowFilePath + ". Unknown exception: "+unicode(e)+"\n")
+
+                    
+    def getDescription(self):
+        return self.description
+
+    def getName(self):
+        return self.name
+
+    def getIcon(self):
+        return QIcon(self.icon)
+
+    def loadAlgorithms(self):
+        AlgorithmProvider.loadAlgorithms(self)
+        name = 'ACTIVATE_' + self.getName().upper().replace(' ', '_')
+        if not ProcessingConfig.getSetting(name):
+            # Remove toolbar button
+            self.iface.removeToolBarIcon(self.action)
+        else:
+            # Add toolbar button
+            self.iface.addToolBarIcon(self.action)  
+
+    def _loadAlgorithms(self):
+        self.createAlgsList()
+        self.algs = self.preloadedAlgs
+        
+    # display a dialog listing all the workflows
+    def displayWorkflowListDialog(self):
+        dlg = WorkflowListDialog(self)
+        dlg.show()
+        dlg.exec_()
