@@ -32,6 +32,8 @@ from PyQt4.QtGui import *
 from processing.core.ProcessingConfig import ProcessingConfig, Setting
 from processing.core.AlgorithmProvider import AlgorithmProvider
 from processing.core.ProcessingLog import ProcessingLog
+from processing.core.Processing import Processing
+from processing_workflow.WorkflowCollection import WorkflowCollection
 from processing_workflow.WorkflowUtils import WorkflowUtils
 from processing_workflow.CreateNewWorkflowAction import CreateNewWorkflowAction
 from processing_workflow.EditWorkflowAction import EditWorkflowAction
@@ -39,6 +41,7 @@ from processing_workflow.DeleteWorkflowAction import DeleteWorkflowAction
 from processing_workflow.Workflow import Workflow
 from processing_workflow.WorkflowListDialog import WorkflowListDialog
 from processing_workflow.WrongWorkflowException import WrongWorkflowException
+from processing_workflow.WorkflowAlgListListener import WorkflowAlgListListener
 
 class WorkflowProvider(AlgorithmProvider):
 
@@ -53,6 +56,8 @@ class WorkflowProvider(AlgorithmProvider):
         self.action = QAction(QIcon(self.getIcon()), \
                                   "WOIS Workflows", self.iface.mainWindow())
         QObject.connect(self.action, SIGNAL("triggered()"), self.displayWorkflowListDialog)
+        
+        self.collections = []
 
 
     def initializeSettings(self):
@@ -69,31 +74,48 @@ class WorkflowProvider(AlgorithmProvider):
     def createAlgsList(self):
         self.preloadedAlgs = []
         folder = WorkflowUtils.workflowPath()
-        for descriptionFile in os.listdir(folder):
-            if descriptionFile.endswith(".workflow"):
-                try:
-                    workflow = Workflow()
-                    fullpath = os.path.join(folder,descriptionFile)
-                    workflow.openWorkflow(fullpath)
-                    if workflow.name.strip() != "":
-                        workflow.provider = self
-                        self.preloadedAlgs.append(workflow)
-                    else:
-                        ProcessingLog.addToLog(ProcessingLog.LOG_ERROR, "Could not open Workflow algorithm: " + descriptionFile)
-                except WrongWorkflowException,e:
-                    ProcessingLog.addToLog(ProcessingLog.LOG_ERROR, "Could not open Workflow algorithm " + descriptionFile + ". "+e.msg)
-                except Exception,e:
-                    ProcessingLog.addToLog(ProcessingLog.LOG_ERROR, "Could not open Workflow algorithm: " + descriptionFile + ". Unknown exception: "+unicode(e)+"\n")
+        for root, _, files in os.walk(folder):
+            if os.path.isfile(os.path.join(root, "collection.conf")):
+                #try:
+                workflowCollection = WorkflowCollection(self.iface, os.path.join(root, "collection.conf"))
+                collectionAlreadyExists = False
+                for collection in self.collections:
+                    if collection.getName() == workflowCollection.getName():
+                        collectionAlreadyExists = True
+                        break
+                if not collectionAlreadyExists:
+                        self.collections.append(workflowCollection)
+                        self.algListener = WorkflowAlgListListener(workflowCollection)
+                        Processing.addAlgListListener(self.algListener)
+                        Processing.addProvider(workflowCollection)
+                #except:
+                #    pass
+            else:
+                for descriptionFile in files:
+                    if descriptionFile.endswith(".workflow"):
+                        try:
+                            workflow = Workflow()
+                            fullpath = os.path.join(root,descriptionFile)
+                            workflow.openWorkflow(fullpath)
+                            if workflow.name.strip() != "":
+                                workflow.provider = self
+                                self.preloadedAlgs.append(workflow)
+                            else:
+                                ProcessingLog.addToLog(ProcessingLog.LOG_ERROR, "Could not open Workflow algorithm: " + descriptionFile)
+                        except WrongWorkflowException,e:
+                            ProcessingLog.addToLog(ProcessingLog.LOG_ERROR, "Could not open Workflow algorithm " + descriptionFile + ". "+e.msg)
+                        except Exception,e:
+                            ProcessingLog.addToLog(ProcessingLog.LOG_ERROR, "Could not open Workflow algorithm: " + descriptionFile + ". Unknown exception: "+unicode(e)+"\n")
 
                     
     def getDescription(self):
-        return "WOIS Workflows (Step by step guidance)"
+        return "Processing Workflows (Step by step guidance)"
 
     def getName(self):
         return "workflow"
 
     def getIcon(self):
-        return QIcon(os.path.dirname(__file__) + "/images/icon.png")
+        return QIcon(os.path.dirname(__file__) + "/images/workflow.png")
 
     def loadAlgorithms(self):
         AlgorithmProvider.loadAlgorithms(self)

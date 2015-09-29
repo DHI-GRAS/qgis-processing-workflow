@@ -32,7 +32,8 @@ from qgis.core import *
 import os, sys
 import inspect
 from processing.core.Processing import Processing  
-from processing_workflow.WorkflowProvider import WorkflowProvider 
+from processing_workflow.WorkflowProvider import WorkflowProvider
+from processing_workflow.WorkflowAlgListListener import WorkflowAlgListListener 
 
 cmd_folder = os.path.split(inspect.getfile( inspect.currentframe() ))[0]
 if cmd_folder not in sys.path:
@@ -47,30 +48,11 @@ class ProcessingWorkflowPlugin:
         
     def initGui(self):
 
-        self.algListener = WorkflowAlgListListner(self.provider)
+        self.algListener = WorkflowAlgListListener(self.provider)
         Processing.addAlgListListener(self.algListener)
         Processing.addProvider(self.provider, True)
             
     def unload(self):
         Processing.removeAlgListListener(self.algListener)
         Processing.removeProvider(self.provider)
-		
-class WorkflowAlgListListner():
-    def __init__(self, workflowProvider):
-        self.workflowProvider = workflowProvider
-        self.recursiveCall = False
-			
-    def algsListHasChanged(self):
-        if self.recursiveCall:
-            return
-        self.workflowProvider.createAlgsList()
-        algs = {}
-        for alg in self.workflowProvider.preloadedAlgs:
-            algs[alg.commandLineName()] = alg
-        Processing.algs[self.workflowProvider.getName()] = algs
-        
-        # fireAlgsListHasChanged to update the Toolbox GUI but make sure that the 
-        # call doesn't lead to infinite loop
-        self.recursiveCall = True
-        Processing.fireAlgsListHasChanged()
-        self.recursiveCall = False
+
