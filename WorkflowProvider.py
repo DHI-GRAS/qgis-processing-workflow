@@ -37,10 +37,14 @@ from processing_workflow.WorkflowCollection import WorkflowCollection
 from processing_workflow.WorkflowUtils import WorkflowUtils
 from processing_workflow.CreateNewWorkflowAction import CreateNewWorkflowAction
 from processing_workflow.WorkflowAlgListListener import WorkflowAlgListListener
+from processing_workflow.WrongWorkflowException import WrongWorkflowException
 
 class WorkflowProvider(WorkflowProviderBase):
 
     def __init__(self, iface):
+        
+        self.iface = iface
+        
         # Set constant properties
         self.description = "Processing Workflows (Step by step guidance)"
         self.icon = os.path.join(os.path.dirname(__file__), "images", "icon.png")
@@ -75,20 +79,21 @@ class WorkflowProvider(WorkflowProviderBase):
         for root, _, files in os.walk(folder):
             # Load collections if they are not already loaded
             if os.path.isfile(os.path.join(root, "collection.conf")):
-                #try:
-                workflowCollection = WorkflowCollection(self.iface, os.path.join(root, "collection.conf"), self)
-                collectionAlreadyExists = False
-                for collection in self.collections:
-                    if collection.getName() == workflowCollection.getName():
-                        collectionAlreadyExists = True
-                        break
-                if not collectionAlreadyExists:
-                        self.collections.append(workflowCollection)
-                        self.collectionListeners.append(WorkflowAlgListListener(workflowCollection))
-                        Processing.addAlgListListener(self.collectionListeners[-1])
-                        Processing.addProvider(workflowCollection, True)
-                #except:
-                #    pass
+                try:
+                    workflowCollection = WorkflowCollection(self.iface, os.path.join(root, "collection.conf"), self)
+                    collectionAlreadyExists = False
+                    for collection in self.collections:
+                        if collection.getName() == workflowCollection.getName():
+                            collectionAlreadyExists = True
+                            break
+                    if not collectionAlreadyExists:
+                            self.collections.append(workflowCollection)
+                            self.collectionListeners.append(WorkflowAlgListListener(workflowCollection))
+                            Processing.addAlgListListener(self.collectionListeners[-1])
+                            Processing.addProvider(workflowCollection, True)
+                except WrongWorkflowException:
+                    # A warning message was already printed in WorkflowCollection constructor so nothing to do here 
+                    pass
             else:
                 # Load workflows which do not belong to any collection
                 for descriptionFile in files:

@@ -42,7 +42,6 @@ class WorkflowProviderBase(AlgorithmProvider):
     def __init__(self, iface):
         AlgorithmProvider.__init__(self)
         
-        self.iface = iface
         self.activate = False
         self.algs = []
         
