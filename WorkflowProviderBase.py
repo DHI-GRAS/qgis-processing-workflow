@@ -85,11 +85,15 @@ class WorkflowProviderBase(AlgorithmProvider):
 
     def getActivateSetting(self):
         return 'ACTIVATE_' + self.getName().upper().replace(' ', '_')
+    
+    def getTaskbarButtonSetting(self):
+        return 'TASKBAR_BUTTON_' + self.getName().upper().replace(' ', '_')
 
     def loadAlgorithms(self):
         AlgorithmProvider.loadAlgorithms(self)
         name = self.getActivateSetting()
-        if not ProcessingConfig.getSetting(name):
+        taskbar = self.getTaskbarButtonSetting()
+        if not (ProcessingConfig.getSetting(name) and ProcessingConfig.getSetting(taskbar)):
             # Remove toolbar button
             self.iface.removeToolBarIcon(self.action)
         else:

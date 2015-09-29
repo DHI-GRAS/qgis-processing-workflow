@@ -60,6 +60,7 @@ class WorkflowProvider(WorkflowProviderBase):
     def initializeSettings(self):
         AlgorithmProvider.initializeSettings(self)
         ProcessingConfig.addSetting(Setting(self.getDescription(), WorkflowUtils.WORKFLOW_FOLDER, "Workflow algorithms folder", WorkflowUtils.workflowPath()))
+        ProcessingConfig.addSetting(Setting(self.getDescription(), self.getTaskbarButtonSetting(), "Show on workflow button taskbar", True))
 
     def unload(self):
         for i, collection in enumerate(self.collections):
@@ -69,6 +70,7 @@ class WorkflowProvider(WorkflowProviderBase):
         self.collectionListeners = []   
         WorkflowProviderBase.unload(self)
         ProcessingConfig.removeSetting(WorkflowUtils.WORKFLOW_FOLDER)
+        ProcessingConfig.removeSetting(self.getTaskbarButtonSetting())
         # Remove toolbar button
         self.iface.removeToolBarIcon(self.action)
     

@@ -26,12 +26,14 @@ class WorkflowCollection(WorkflowProviderBase):
         
     def unload(self):
         WorkflowProviderBase.unload(self)
+        ProcessingConfig.removeSetting(self.getTaskbarButtonSetting())
         self.iface.removeToolBarIcon(self.action)    
     
     def initializeSettings(self):
         # The activate collection setting is in the Workflow provider settings group
         name = self.getActivateSetting()
         ProcessingConfig.addSetting(Setting(self.workflowProvider.getDescription(), name, self.tr('Activate '+self.getName()), self.activate))
+        ProcessingConfig.addSetting(Setting(self.workflowProvider.getDescription(), self.getTaskbarButtonSetting(), "Show on "+self.getName()+" icon on taskbar", True))
     
     # Read the JSON description file    
     def processDescriptionFile(self):
