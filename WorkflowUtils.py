@@ -46,6 +46,5 @@ class WorkflowUtils:
     
     @staticmethod
     def workflowIcon():
-        return  QtGui.QIcon(os.path.dirname(__file__) + "/images/icon.png")
-
+        return  QtGui.QIcon(os.path.join(os.path.dirname(__file__), "images","icon.png"))
 

@@ -30,8 +30,7 @@ class WorkflowCollection(WorkflowProviderBase):
     
     def initializeSettings(self):
         # The activate collection setting is in the Workflow provider settings group
-        name = 'ACTIVATE_' + self.getName().upper().replace(' ', '_')
-        ProcessingConfig.settingIcons[name] = self.getIcon()
+        name = self.getActivateSetting()
         ProcessingConfig.addSetting(Setting(self.workflowProvider.getDescription(), name, self.tr('Activate '+self.getName()), self.activate))
     
     # Read the JSON description file    

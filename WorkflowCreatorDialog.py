@@ -59,10 +59,11 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
         
         if workflow:
             self.openWorkflow(workflow.descriptionFile)
+            self.setWindowIcon = workflow.getIcon()
 
     def setupUi(self):
         self.resize(1200, 600)
-        self.setWindowTitle("WOIS Workflow Creator")
+        self.setWindowTitle("Processing Workflow Creator")
         self.setWindowIcon(WorkflowUtils.workflowIcon())
         self.tabWidget = QtGui.QTabWidget()
         self.tabWidget.setMaximumSize(QtCore.QSize(350, 10000))

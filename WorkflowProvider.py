@@ -47,7 +47,7 @@ class WorkflowProvider(WorkflowProviderBase):
         
         # Set constant properties
         self.description = "Processing Workflows (Step by step guidance)"
-        self.icon = os.path.join(os.path.dirname(__file__), "images", "icon.png")
+        self.icon = WorkflowUtils.workflowIcon()
         self.name = "workflow"
         
         WorkflowProviderBase.__init__(self, iface)

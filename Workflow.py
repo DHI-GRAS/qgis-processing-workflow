@@ -40,6 +40,7 @@ from processing.algs.grass.GrassAlgorithm import GrassAlgorithm
 from processing.algs.grass.GrassUtils import GrassUtils
 from processing_workflow.StepDialog import StepDialog, NORMAL_MODE, BATCH_MODE
 from processing_workflow.WrongWorkflowException import WrongWorkflowException
+from processing_workflow.WorkflowUtils import WorkflowUtils
 
 # Class containing the list of steps (algorithms) in the workflow together with the mode 
 # and instructions for each step 
@@ -89,7 +90,7 @@ class Workflow(GeoAlgorithm):
         try:
             return self.provider.getIcon()
         except:
-            return  QtGui.QIcon(os.path.join(os.path.dirname(__file__), "images", "icon.png"))
+            return  WorkflowUtils.workflowIcon()
     
     def getCopy(self):
         newone = Workflow(self.provider)

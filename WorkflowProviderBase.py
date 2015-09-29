@@ -83,9 +83,12 @@ class WorkflowProviderBase(AlgorithmProvider):
     def getIcon(self):
         return QIcon(self.icon)
 
+    def getActivateSetting(self):
+        return 'ACTIVATE_' + self.getName().upper().replace(' ', '_')
+
     def loadAlgorithms(self):
         AlgorithmProvider.loadAlgorithms(self)
-        name = 'ACTIVATE_' + self.getName().upper().replace(' ', '_')
+        name = self.getActivateSetting()
         if not ProcessingConfig.getSetting(name):
             # Remove toolbar button
             self.iface.removeToolBarIcon(self.action)
