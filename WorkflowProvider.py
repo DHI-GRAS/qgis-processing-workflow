@@ -36,8 +36,6 @@ from processing_workflow.WorkflowProviderBase import WorkflowProviderBase
 from processing_workflow.WorkflowCollection import WorkflowCollection
 from processing_workflow.WorkflowUtils import WorkflowUtils
 from processing_workflow.CreateNewWorkflowAction import CreateNewWorkflowAction
-from processing_workflow.EditWorkflowAction import EditWorkflowAction
-from processing_workflow.DeleteWorkflowAction import DeleteWorkflowAction
 from processing_workflow.WorkflowAlgListListener import WorkflowAlgListListener
 
 class WorkflowProvider(WorkflowProviderBase):
@@ -50,7 +48,6 @@ class WorkflowProvider(WorkflowProviderBase):
         
         WorkflowProviderBase.__init__(self, iface)
         self.actions.append(CreateNewWorkflowAction())
-        self.contextMenuActions = [EditWorkflowAction(), DeleteWorkflowAction()]
         
         self.collections = []
         self.collectionListeners = []

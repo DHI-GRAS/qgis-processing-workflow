@@ -33,11 +33,12 @@ from PyQt4 import QtGui
 
 class DeleteWorkflowAction(ContextAction):
 
-    def __init__(self):
+    def __init__(self, provider):
         self.name="Delete workflow"
+        self.provider = provider
 
     def isEnabled(self):
-        return isinstance(self.alg, Workflow)
+        return isinstance(self.alg, Workflow) and self.alg.provider == self.provider
 
     def execute(self, alg):
         reply = QtGui.QMessageBox.question(None, 'Confirmation',

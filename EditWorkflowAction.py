@@ -32,11 +32,12 @@ from processing_workflow.WorkflowCreatorDialog import WorkflowCreatorDialog
 
 class EditWorkflowAction(ContextAction):
 
-    def __init__(self):
+    def __init__(self, provider):
         self.name="Edit workflow"
+        self.provider = provider
 
     def isEnabled(self):
-        return isinstance(self.alg, Workflow)
+        return isinstance(self.alg, Workflow) and self.alg.provider == self.provider
 
     def execute(self):
         dlg = WorkflowCreatorDialog(self.alg)

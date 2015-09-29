@@ -28,11 +28,9 @@
 
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-from processing.core.ProcessingConfig import ProcessingConfig, Setting
+from processing.core.ProcessingConfig import ProcessingConfig
 from processing.core.AlgorithmProvider import AlgorithmProvider
 from processing.core.ProcessingLog import ProcessingLog
-from processing_workflow.WorkflowUtils import WorkflowUtils
-from processing_workflow.CreateNewWorkflowAction import CreateNewWorkflowAction
 from processing_workflow.EditWorkflowAction import EditWorkflowAction
 from processing_workflow.DeleteWorkflowAction import DeleteWorkflowAction
 from processing_workflow.Workflow import Workflow
@@ -52,6 +50,8 @@ class WorkflowProviderBase(AlgorithmProvider):
         self.action = QAction(self.getIcon(), self.getDescription(), self.iface.mainWindow())
         QObject.connect(self.action, SIGNAL("triggered()"), self.displayWorkflowListDialog)
         
+        # Right click button actions
+        self.contextMenuActions = [EditWorkflowAction(self), DeleteWorkflowAction(self)]
         
     def unload(self):
         AlgorithmProvider.unload(self)
