@@ -59,8 +59,7 @@ class WorkflowProvider(WorkflowProviderBase):
         self.name = "workflow"
         
         # Create action that will display workflow list dialog when toolbar button is clicked
-        self.action = QAction(self.getIcon(), \
-                                  "WOIS Workflows", self.iface.mainWindow())
+        self.action = QAction(self.getIcon(), self.getDescription(), self.iface.mainWindow())
         QObject.connect(self.action, SIGNAL("triggered()"), self.displayWorkflowListDialog)
         
         self.collections = []
@@ -84,6 +83,7 @@ class WorkflowProvider(WorkflowProviderBase):
         self.preloadedAlgs = []
         folder = WorkflowUtils.workflowPath()
         for root, _, files in os.walk(folder):
+            # Load collections if they are not already loaded
             if os.path.isfile(os.path.join(root, "collection.conf")):
                 #try:
                 workflowCollection = WorkflowCollection(self.iface, os.path.join(root, "collection.conf"))
@@ -94,12 +94,12 @@ class WorkflowProvider(WorkflowProviderBase):
                         break
                 if not collectionAlreadyExists:
                         self.collections.append(workflowCollection)
-                        self.algListener = WorkflowAlgListListener(workflowCollection)
-                        Processing.addAlgListListener(self.algListener)
+                        Processing.addAlgListListener(WorkflowAlgListListener(workflowCollection))
                         Processing.addProvider(workflowCollection)
                 #except:
                 #    pass
             else:
+                # Load workflows which do not belong to any collection
                 for descriptionFile in files:
                     if descriptionFile.endswith(".workflow"):
                         self.loadWorkflow(os.path.join(root,descriptionFile))

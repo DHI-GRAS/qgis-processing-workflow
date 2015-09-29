@@ -28,9 +28,11 @@ class WorkflowCollection(WorkflowProviderBase):
         self.iface = iface
         
         # Create action that will display workflow list dialog when toolbar button is clicked
-        self.action = QAction(QIcon(self.getIcon()), self.getName(), self.iface.mainWindow())
+        self.action = QAction(QIcon(self.getIcon()), self.getDescription(), self.iface.mainWindow())
         QObject.connect(self.action, SIGNAL("triggered()"), self.displayWorkflowListDialog)
-        
+    
+    def unload(self):
+        AlgorithmProvider.unload(self)    
     
     # Read the JSON description file    
     def processDescriptionFile(self):
