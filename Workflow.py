@@ -45,9 +45,10 @@ from processing_workflow.WrongWorkflowException import WrongWorkflowException
 # and instructions for each step 
 class Workflow(GeoAlgorithm):
 
-    def __init__(self):
+    def __init__(self, provider):
         GeoAlgorithm.__init__(self)
         # holds the algorithm object, the mode (normal or batch) and instructions
+        self.provider = provider
         self._steps = list()
         self.name = ''
         self.group = ''
@@ -85,12 +86,14 @@ class Workflow(GeoAlgorithm):
         return self._steps[index]['instructions']    
     
     def getIcon(self):
-        return  QtGui.QIcon(os.path.dirname(__file__) + "/images/icon.png")
+        try:
+            return self.provider.getIcon()
+        except:
+            return  QtGui.QIcon(os.path.join(os.path.dirname(__file__), "images", "icon.png"))
     
     def getCopy(self):
-        newone = Workflow()
+        newone = Workflow(self.provider)
         newone.openWorkflow(self.descriptionFile)
-        newone.provider = self.provider
         return newone
     
     def getCustomParametersDialog(self):

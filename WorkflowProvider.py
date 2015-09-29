@@ -45,17 +45,16 @@ class WorkflowProvider(WorkflowProviderBase):
     def __init__(self, iface):
         # Set constant properties
         self.description = "Processing Workflows (Step by step guidance)"
-        self.icon = os.path.join(os.path.dirname(__file__), "images", "workflow.png")
+        self.icon = os.path.join(os.path.dirname(__file__), "images", "icon.png")
         self.name = "workflow"
         
         WorkflowProviderBase.__init__(self, iface)
-        self.activate = False
         self.actions.append(CreateNewWorkflowAction())
         self.contextMenuActions = [EditWorkflowAction(), DeleteWorkflowAction()]
         
         self.collections = []
         self.collectionListeners = []
-
+        
 
     def initializeSettings(self):
         AlgorithmProvider.initializeSettings(self)

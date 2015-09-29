@@ -14,14 +14,10 @@ class WorkflowCollection(WorkflowProviderBase):
         self.baseDir = os.path.dirname(descriptionFile)
         self.processDescriptionFile()
         
-        self.algs = []
-        
         WorkflowProviderBase.__init__(self, iface)
-        self.activate = False
         
         self.workflowProvider = workflowProvider
         
-    
     def unload(self):
         WorkflowProviderBase.unload(self)
         self.iface.removeToolBarIcon(self.action)    

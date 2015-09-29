@@ -51,7 +51,7 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
         # set as window modal
         self.setWindowModality(1)
         
-        self.workflow = Workflow()
+        self.workflow = Workflow(None)
 
         self.help = None
         self.update = True #indicates whether to update or not the toolbox after closing this dialog
@@ -220,7 +220,7 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
             filename = QtGui.QFileDialog.getOpenFileName(self, "Open Workflow",  WorkflowUtils.workflowPath(), "SEXTANTE workflows (*.workflow)")
         if filename:
             try:
-                workflow = Workflow()
+                workflow = Workflow(None)
                 workflow.openWorkflow(filename)
                 self.workflow = workflow
                 

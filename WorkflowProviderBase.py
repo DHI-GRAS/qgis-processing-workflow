@@ -45,10 +45,13 @@ class WorkflowProviderBase(AlgorithmProvider):
         AlgorithmProvider.__init__(self)
         
         self.iface = iface
+        self.activate = False
+        self.algs = []
         
         # Create action that will display workflow list dialog when toolbar button is clicked
         self.action = QAction(self.getIcon(), self.getDescription(), self.iface.mainWindow())
         QObject.connect(self.action, SIGNAL("triggered()"), self.displayWorkflowListDialog)
+        
         
     def unload(self):
         AlgorithmProvider.unload(self)
@@ -59,7 +62,7 @@ class WorkflowProviderBase(AlgorithmProvider):
                         
     def loadWorkflow(self, workflowFilePath):
         try:
-            workflow = Workflow()
+            workflow = Workflow(self)
             workflow.openWorkflow(workflowFilePath)
             if workflow.name.strip() != "":
                 workflow.provider = self
