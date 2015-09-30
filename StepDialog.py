@@ -26,10 +26,12 @@
 ***************************************************************************
 """
 
+import os
 from PyQt4 import QtCore, QtGui
 from processing.gui.AlgorithmDialog import AlgorithmDialog
 from processing.gui.BatchAlgorithmDialog import BatchAlgorithmDialog
 from processing.gui.InputLayerSelectorPanel import InputLayerSelectorPanel
+from processing_workflow import WorkflowUtils
 
 NORMAL_MODE = "Normal"
 BATCH_MODE = "Batch"
@@ -52,13 +54,75 @@ class StepDialog(QtGui.QDialog):
         
         # create a tab for this algorithm
         self.tabLayout = QtGui.QGridLayout()
-            
-        self.algInstructions = QtGui.QTextEdit()
-        self.algInstructions.setMinimumWidth(250)
-        self.algInstructions.setMaximumWidth(250)
-        self.algInstructions.setFontPointSize(10)
+        
+        # Create widget holding instructions text and instructions' editing
+        # toolbar if in edit mode
+        self.algInstructionsWidget = QtGui.QWidget()
+        self.algInstructionsLayout = QtGui.QGridLayout()
+        self.algInstructionsText = QtGui.QTextEdit()
+        self.algInstructionsText.setMinimumWidth(250)
+        self.algInstructionsText.setMaximumWidth(250)
+        self.algInstructionsText.setFontPointSize(10)
+         
+        # Tool bar to hold font-editing tools
+        self.algInstructionsEditBar = QtGui.QToolBar()
+        self.algInstructionsEditBar.setIconSize(QtCore.QSize(16, 16))
+        iconDir = os.path.join(os.path.dirname(__file__), "images")
+        
+        # Bold
+        self.actionTextBold = QtGui.QAction(QtGui.QIcon.fromTheme("format-text-bold", QtGui.QIcon(os.path.join(iconDir, "boldA.png"))), "&Bold", self)
+        self.actionTextBold.setShortcut("Ctrl+B")
+        QtCore.QObject.connect(self.actionTextBold, QtCore.SIGNAL("triggered()"), self.textBold)
+        self.algInstructionsEditBar.addAction(self.actionTextBold)
+        self.actionTextBold.setCheckable(True)
+        
+        # Italic
+        self.actionTextItalic = QtGui.QAction(QtGui.QIcon.fromTheme("format-text-italic", QtGui.QIcon(os.path.join(iconDir, "italicA.png"))), "&Italic", self)
+        self.actionTextItalic.setShortcut("Ctrl+I")
+        QtCore.QObject.connect(self.actionTextItalic, QtCore.SIGNAL("triggered()"), self.textItalic)
+        self.algInstructionsEditBar.addAction(self.actionTextItalic)
+        self.actionTextItalic.setCheckable(True)
+        
+        # Underline
+        self.actionTextUnderline = QtGui.QAction(QtGui.QIcon.fromTheme("format-text-underline", QtGui.QIcon(os.path.join(iconDir, "underlineA.png"))), "&Underline", self)
+        self.actionTextUnderline.setShortcut("Ctrl+U")
+        QtCore.QObject.connect(self.actionTextUnderline, QtCore.SIGNAL("triggered()"), self.textUnderline)
+        self.algInstructionsEditBar.addAction(self.actionTextUnderline)
+        self.actionTextUnderline.setCheckable(True)
+        
+        # Colour
+        pix = QtGui.QPixmap(16, 16)
+        pix.fill(QtGui.QColor("black"))
+        self.actionTextColor = QtGui.QAction(QtGui.QIcon(pix), "&Color...", self)
+        QtCore.QObject.connect(self.actionTextColor, QtCore.SIGNAL("triggered()"), self.textColor)
+        self.algInstructionsEditBar.addAction(self.actionTextColor)
+        
+        # Font
+        self.comboFont = QtGui.QFontComboBox(self.algInstructionsEditBar)
+        self.comboFont.setMaximumWidth(95)
+        self.algInstructionsEditBar.addWidget(self.comboFont)
+        QtCore.QObject.connect(self.comboFont, QtCore.SIGNAL("activated(QString)"), self.textFamily)
+        
+        # Size
+        self.comboSize = QtGui.QComboBox(self.algInstructionsEditBar)
+        self.comboSize.setMaximumWidth(35)
+        self.algInstructionsEditBar.addWidget(self.comboSize)
+        self.comboSize.setEditable(True)
+        db = QtGui.QFontDatabase()
+        for size in db.standardSizes():
+            self.comboSize.addItem(str(size))
+        QtCore.QObject.connect(self.comboSize, QtCore.SIGNAL("activated(QString)"), self.textSize)
+        self.comboSize.setCurrentIndex(self.comboSize.findText(str(self.algInstructionsText.font().pointSize())))
+        
+        # Only show the editing tool bar when in edit mode
         if not canEdit:
-            self.algInstructions.setReadOnly(True)
+            self.algInstructionsText.setReadOnly(True)
+            self.algInstructionsLayout.addWidget(self.algInstructionsText, 0, 0)
+        else:
+            self.algInstructionsLayout.addWidget(self.algInstructionsEditBar, 0, 0)
+            self.algInstructionsLayout.addWidget(self.algInstructionsText, 1, 0)
+        self.algInstructionsWidget.setLayout(self.algInstructionsLayout)
+        
         
         self.normalModeDialog = alg.getCustomParametersDialog()
         if not self.normalModeDialog:
@@ -90,7 +154,7 @@ class StepDialog(QtGui.QDialog):
         self.normalModeDialog.connect(self.normalModeDialog, QtCore.SIGNAL("finished(int)"), self.forward)
         self.batchModeDialog.connect(self.batchModeDialog, QtCore.SIGNAL("finished(int)"), self.forward)    
             
-        self.tabLayout.addWidget(self.algInstructions,0,0)
+        self.tabLayout.addWidget(self.algInstructionsWidget,0,0)
         self.tabLayout.addWidget(self.normalModeDialog, 0, 1)
         self.tabLayout.addWidget(self.batchModeDialog, 0, 1)
         
@@ -120,6 +184,49 @@ class StepDialog(QtGui.QDialog):
         
         self.executed = self.normalModeDialog.executed
     
+    def textBold(self):
+        fmt = QtGui.QTextCharFormat()
+        fmt.setFontWeight(QtGui.QFont.Bold if self.actionTextBold.isChecked() else QtGui.QFont.Normal)
+        self.mergeFormatOnWordOrSelection(fmt)
+        
+    def textItalic(self):
+        fmt = QtGui.QTextCharFormat()
+        fmt.setFontItalic(self.actionTextItalic.isChecked())
+        self.mergeFormatOnWordOrSelection(fmt)
+        
+    def textUnderline(self):
+        fmt = QtGui.QTextCharFormat()
+        fmt.setFontUnderline(self.actionTextUnderline.isChecked())
+        self.mergeFormatOnWordOrSelection(fmt)
+        
+    def textColor(self):
+        col = QtGui.QColorDialog.getColor(self.algInstructionsText.textColor(), self);
+        if not col.isValid():
+            return
+        fmt = QtGui.QTextCharFormat()
+        fmt.setForeground(col);
+        self.mergeFormatOnWordOrSelection(fmt)
+        pix = QtGui.QPixmap(16, 16)
+        pix.fill(col)
+        self.actionTextColor.setIcon(QtGui.QIcon(pix))
+        
+    def textFamily(self, f):
+        fmt = QtGui.QTextCharFormat()
+        fmt.setFontFamily(f)
+        self.mergeFormatOnWordOrSelection(fmt)
+    
+    def textSize(self, p):
+        pointSize = float(p)
+        if pointSize > 0:
+            fmt = QtGui.QTextCharFormat()
+            fmt.setFontPointSize(pointSize)
+            self.mergeFormatOnWordOrSelection(fmt)
+
+    def mergeFormatOnWordOrSelection(self, fontFormat):
+        cursor = self.algInstructionsText.textCursor()
+        cursor.mergeCharFormat(fontFormat)
+        self.algInstructionsText.mergeCurrentCharFormat(fontFormat)
+
     def forward(self):
         self.goForward = True
         self.close()
@@ -141,10 +248,10 @@ class StepDialog(QtGui.QDialog):
             self.resize(1050, 500)
     
     def getInstructions(self):
-        return self.algInstructions.toPlainText()
+        return self.algInstructionsText.toHtml()
     
     def setInstructions(self, instructions):
-        self.algInstructions.setText(instructions)
+        self.algInstructionsText.setText(instructions)
     
     # not used for now    
     def addRasterInputs(self, inputs):
