@@ -272,15 +272,13 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
             providers[provider.getName()] = provider
         for providerName in allAlgs.keys():
             # don't show workflows in available algorithms
-            if providerName == "workflow":
+            if providerName == "workflow" or providerName == "modelertools":
                 continue
             groups = {}
             provider = allAlgs[providerName]
             algs = provider.values()
             #add algorithms
             for alg in algs:
-                if not alg.showInModeler:
-                    continue
                 if text == "" or text.lower() in alg.name.lower():
                     if alg.group in groups:
                         groupItem = groups[alg.group]

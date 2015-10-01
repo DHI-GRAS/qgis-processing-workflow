@@ -60,8 +60,6 @@ class StepDialog(QtGui.QDialog):
         self.algInstructionsWidget = QtGui.QWidget()
         self.algInstructionsLayout = QtGui.QGridLayout()
         self.algInstructionsText = QtGui.QTextEdit()
-        self.algInstructionsText.setMinimumWidth(250)
-        self.algInstructionsText.setMaximumWidth(250)
         self.algInstructionsText.setFontPointSize(10)
          
         # Tool bar to hold font-editing tools
@@ -153,16 +151,22 @@ class StepDialog(QtGui.QDialog):
                 pass
         self.normalModeDialog.connect(self.normalModeDialog, QtCore.SIGNAL("finished(int)"), self.forward)
         self.batchModeDialog.connect(self.batchModeDialog, QtCore.SIGNAL("finished(int)"), self.forward)    
-            
+        
+        if self.alg.provider.getName() == "workflowtools" and self.alg.name == "Workflow instructions":
+            self.resize(1120, 790)
+            cols = 0
+        else:
+            cols = 1
+        self.algInstructionsText.setMinimumWidth(250)
         self.tabLayout.addWidget(self.algInstructionsWidget,0,0)
         self.tabLayout.addWidget(self.normalModeDialog, 0, 1)
         self.tabLayout.addWidget(self.batchModeDialog, 0, 1)
-        
+            
         self.algMode = QtGui.QComboBox()  
         self.algMode.addItems([NORMAL_MODE, BATCH_MODE])
         if canEdit:
             self.algMode.connect(self.algMode, QtCore.SIGNAL("currentIndexChanged(QString)"),  self.mainDialog.changeAlgMode)
-            self.tabLayout.addWidget(self.algMode, 1, 1)
+            self.tabLayout.addWidget(self.algMode, 1, cols)
         else:
             self.buttonBox = QtGui.QDialogButtonBox()
             self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
@@ -178,11 +182,11 @@ class StepDialog(QtGui.QDialog):
             self.closeButton.setText("Finish Workflow")
             self.buttonBox.addButton(self.closeButton, QtGui.QDialogButtonBox.ActionRole)
             QtCore.QObject.connect(self.closeButton, QtCore.SIGNAL("clicked()"), self.close)
-            self.tabLayout.addWidget(self.buttonBox, 1, 1)
-            
+            self.tabLayout.addWidget(self.buttonBox, 1, cols)
         self.setLayout(self.tabLayout)
         
         self.executed = self.normalModeDialog.executed
+        
     
     def textBold(self):
         fmt = QtGui.QTextCharFormat()
@@ -239,13 +243,17 @@ class StepDialog(QtGui.QDialog):
         return self.algMode.currentText()
     
     def setMode(self, mode):
-        if mode == NORMAL_MODE and not self.normalModeDialog.isVisible(): 
+        if not (self.alg.provider.getName() == "workflowtools" and self.alg.name == "Workflow instructions"):
+            if mode == NORMAL_MODE and not self.normalModeDialog.isVisible(): 
+                self.batchModeDialog.setHidden(True)
+                self.normalModeDialog.setVisible(True)
+            elif mode == BATCH_MODE and not self.batchModeDialog.isVisible():
+                self.normalModeDialog.setHidden(True)
+                self.batchModeDialog.setVisible(True)
+                self.resize(1050, 500)
+        else:
             self.batchModeDialog.setHidden(True)
-            self.normalModeDialog.setVisible(True)
-        elif mode == BATCH_MODE and not self.batchModeDialog.isVisible():
             self.normalModeDialog.setHidden(True)
-            self.batchModeDialog.setVisible(True)
-            self.resize(1050, 500)
     
     def getInstructions(self):
         return self.algInstructionsText.toHtml()

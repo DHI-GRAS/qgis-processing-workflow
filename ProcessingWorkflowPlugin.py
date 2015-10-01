@@ -33,7 +33,8 @@ import os, sys
 import inspect
 from processing.core.Processing import Processing  
 from processing_workflow.WorkflowProvider import WorkflowProvider
-from processing_workflow.WorkflowAlgListListener import WorkflowAlgListListener 
+from processing_workflow.WorkflowAlgListListener import WorkflowAlgListListener
+from processing_workflow.WorkflowOnlyAlgorithmProvider import WorkflowOnlyAlgorithmProvider 
 
 cmd_folder = os.path.split(inspect.getfile( inspect.currentframe() ))[0]
 if cmd_folder not in sys.path:
@@ -43,6 +44,7 @@ class ProcessingWorkflowPlugin:
 
     def __init__(self, iface):
         self.provider = WorkflowProvider(iface)
+        self.workflowOnlyAlgorithmProvider = WorkflowOnlyAlgorithmProvider()
         # Save reference to the QGIS interface
         self.iface = iface
         
@@ -50,9 +52,11 @@ class ProcessingWorkflowPlugin:
 
         self.algListener = WorkflowAlgListListener(self.provider)
         Processing.addAlgListListener(self.algListener)
-        Processing.addProvider(self.provider, True)
+        Processing.addProvider(self.provider, updateList = True)
+        Processing.addProvider(self.workflowOnlyAlgorithmProvider, updateList = True)
             
     def unload(self):
         Processing.removeAlgListListener(self.algListener)
         Processing.removeProvider(self.provider)
+        Processing.removeProvider(self.workflowOnlyAlgorithmProvider)
 
