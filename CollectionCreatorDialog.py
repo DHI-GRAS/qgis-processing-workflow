@@ -1,22 +1,19 @@
 import json
-#from PyQt4 import uic
+from PyQt4 import uic
 from PyQt4.QtGui import QFileDialog
 from qgis.utils import iface
 import os, shutil
 from processing_workflow.WorkflowCollection import WorkflowCollection
 from processing_workflow.WorkflowUtils import WorkflowUtils
-import sys
-#sys.path.append(r'C:\Users\rfn\.qgis2\python\plugins\processing_workflow\ui')
-from processing_workflow.ui.CollectionDialog5 import Ui_Dialog
-#pluginPath = os.path.dirname(__file__)
-#WIDGET, BASE = uic.loadUiType(os.path.join(pluginPath, 'ui', 'just_dialog.ui'))
 
-class CollectionCreatorDialog(Ui_Dialog):
+pluginPath = os.path.dirname(__file__)
+WIDGET, BASE = uic.loadUiType(os.path.join(pluginPath, 'ui', 'CollectionDialog5.ui'))
+
+class CollectionCreatorDialog(WIDGET, BASE):
     def __init__(self, alg):
         self.update = False
         self.basedir = WorkflowUtils.workflowPath()
-        #super(CollectionCreatorDialog, self).__init__(iface.mainWindow())
-        Ui_Dialog.__init__(self, None)
+        super(CollectionCreatorDialog, self).__init__(iface.mainWindow())
         self.setupUi(self)
         self.folderSelected = 0
         self.iconSelected = 0
@@ -76,7 +73,7 @@ class CollectionCreatorDialog(Ui_Dialog):
     
     def copyIcon(self):
         iconFile = self.lineEdit_icon.text()
-        head,tail = os.path.split(iconFile)
+        _,tail = os.path.split(iconFile)
         iconFileCopy = os.path.join(self.lineEdit_folder.text(),tail)
         if os.path.isfile(iconFileCopy) == False:
             shutil.copyfile(iconFile, iconFileCopy)

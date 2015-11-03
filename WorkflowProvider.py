@@ -53,7 +53,7 @@ class WorkflowProvider(WorkflowProviderBase):
         self.name = "workflow"
         
         WorkflowProviderBase.__init__(self, iface)
-        self.actions.append([CreateNewWorkflowAction(),CreateNewCollectionAction()])
+        self.actions += [CreateNewWorkflowAction(), CreateNewCollectionAction()]
         self.collections = []
         self.collectionListeners = []
         
