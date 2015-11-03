@@ -27,6 +27,7 @@
 """
 
 import os
+import json
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from processing.core.ProcessingConfig import ProcessingConfig, Setting
@@ -38,6 +39,8 @@ from processing_workflow.WorkflowUtils import WorkflowUtils
 from processing_workflow.CreateNewWorkflowAction import CreateNewWorkflowAction
 from processing_workflow.WorkflowAlgListListener import WorkflowAlgListListener
 from processing_workflow.WrongWorkflowException import WrongWorkflowException
+
+import traceback
 
 class WorkflowProvider(WorkflowProviderBase):
 
@@ -82,20 +85,29 @@ class WorkflowProvider(WorkflowProviderBase):
             # Load collections if they are not already loaded
             if os.path.isfile(os.path.join(root, "collection.conf")):
                 try:
-                    workflowCollection = WorkflowCollection(self.iface, os.path.join(root, "collection.conf"), self)
+                    with open(os.path.join(root, "collection.conf")) as f:
+                        workflowCollectionSettings = json.load(f)
+                    try:
+                        workflowCollectionName = workflowCollectionSettings["name"]
+                    except:
+                        continue
                     collectionAlreadyExists = False
                     for collection in self.collections:
-                        if collection.getName() == workflowCollection.getName():
+                        if collection.getName() == workflowCollectionName:
                             collectionAlreadyExists = True
                             break
                     if not collectionAlreadyExists:
+                            workflowCollection = WorkflowCollection(self.iface, os.path.join(root, "collection.conf"), self)
                             self.collections.append(workflowCollection)
                             self.collectionListeners.append(WorkflowAlgListListener(workflowCollection))
                             Processing.addAlgListListener(self.collectionListeners[-1])
-                            Processing.addProvider(workflowCollection, True)
+                            Processing.addProvider(workflowCollection, False)
                 except WrongWorkflowException:
                     # A warning message was already printed in WorkflowCollection constructor so nothing to do here 
                     pass
+                except Exception, e:
+                    print e
+                    traceback.print_exc()
             else:
                 # Load workflows which do not belong to any collection
                 for descriptionFile in files:
