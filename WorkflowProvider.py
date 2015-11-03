@@ -37,9 +37,9 @@ from processing_workflow.WorkflowProviderBase import WorkflowProviderBase
 from processing_workflow.WorkflowCollection import WorkflowCollection
 from processing_workflow.WorkflowUtils import WorkflowUtils
 from processing_workflow.CreateNewWorkflowAction import CreateNewWorkflowAction
+from processing_workflow.CreateNewCollectionAction import CreateNewCollectionAction
 from processing_workflow.WrongWorkflowException import WrongWorkflowException
 
-import traceback
 
 class WorkflowProvider(WorkflowProviderBase):
 
@@ -53,8 +53,7 @@ class WorkflowProvider(WorkflowProviderBase):
         self.name = "workflow"
         
         WorkflowProviderBase.__init__(self, iface)
-        self.actions.append(CreateNewWorkflowAction())
-        
+        self.actions.append([CreateNewWorkflowAction(),CreateNewCollectionAction()])
         self.collections = []
         self.collectionListeners = []
         
