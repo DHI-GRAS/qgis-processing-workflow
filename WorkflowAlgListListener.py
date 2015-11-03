@@ -8,11 +8,22 @@ class WorkflowAlgListListener():
     def algsListHasChanged(self):
         if self.recursiveCall:
             return
+        
+        # Load algorithms outside any collections
         self.workflowProvider.createAlgsList()
         algs = {}
         for alg in self.workflowProvider.preloadedAlgs:
             algs[alg.commandLineName()] = alg
         Processing.algs[self.workflowProvider.getName()] = algs
+        
+        # Load algorithms in collection
+        for collection in self.workflowProvider.collections:
+            collection.createAlgsList()
+            algs = {}
+            for alg in collection.preloadedAlgs:
+                algs[alg.commandLineName()] = alg
+            Processing.algs[collection.getName()] = algs
+        
         
         # fireAlgsListHasChanged to update the Toolbox GUI but make sure that the 
         # call doesn't lead to infinite loop

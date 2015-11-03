@@ -37,7 +37,6 @@ from processing_workflow.WorkflowProviderBase import WorkflowProviderBase
 from processing_workflow.WorkflowCollection import WorkflowCollection
 from processing_workflow.WorkflowUtils import WorkflowUtils
 from processing_workflow.CreateNewWorkflowAction import CreateNewWorkflowAction
-from processing_workflow.WorkflowAlgListListener import WorkflowAlgListListener
 from processing_workflow.WrongWorkflowException import WrongWorkflowException
 
 import traceback
@@ -66,8 +65,7 @@ class WorkflowProvider(WorkflowProviderBase):
         ProcessingConfig.addSetting(Setting(self.getDescription(), self.getTaskbarButtonSetting(), "Show on workflow button taskbar", True))
 
     def unload(self):
-        for i, collection in enumerate(self.collections):
-            Processing.removeAlgListListener(self.collectionListeners[i])
+        for collection in self.collections:
             Processing.removeProvider(collection)
         self.collection = [] 
         self.collectionListeners = []   
@@ -99,15 +97,11 @@ class WorkflowProvider(WorkflowProviderBase):
                     if not collectionAlreadyExists:
                             workflowCollection = WorkflowCollection(self.iface, os.path.join(root, "collection.conf"), self)
                             self.collections.append(workflowCollection)
-                            self.collectionListeners.append(WorkflowAlgListListener(workflowCollection))
-                            Processing.addAlgListListener(self.collectionListeners[-1])
                             Processing.addProvider(workflowCollection, False)
                 except WrongWorkflowException:
                     # A warning message was already printed in WorkflowCollection constructor so nothing to do here 
                     pass
-                except Exception, e:
-                    print e
-                    traceback.print_exc()
+                
             else:
                 # Load workflows which do not belong to any collection
                 for descriptionFile in files:
