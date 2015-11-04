@@ -7,7 +7,7 @@ from processing_workflow.WorkflowCollection import WorkflowCollection
 from processing_workflow.WorkflowUtils import WorkflowUtils
 
 pluginPath = os.path.dirname(__file__)
-WIDGET, BASE = uic.loadUiType(os.path.join(pluginPath, 'ui', 'CollectionDialog5.ui'))
+WIDGET, BASE = uic.loadUiType(os.path.join(pluginPath, 'ui', 'CollectionDialog.ui'))
 
 class CollectionCreatorDialog(WIDGET, BASE):
     def __init__(self, alg):
