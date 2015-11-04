@@ -20,7 +20,11 @@ class WorkflowCollection(WorkflowProviderBase):
         self.baseDir = os.path.dirname(descriptionFile)
         self.processDescriptionFile()
         
-        WorkflowProviderBase.__init__(self, iface)
+        # If we just want to parse the description file (e.g. when creating
+        # new collection) then iface is not provided and we don't want to do 
+        # proper initialization 
+        if iface:
+            WorkflowProviderBase.__init__(self, iface)
         
         self.workflowProvider = workflowProvider
         
@@ -43,7 +47,7 @@ class WorkflowCollection(WorkflowProviderBase):
                 self.description = settings["description"]
                 self.name = settings["name"]
                 self.icon = os.path.join(self.baseDir, settings["icon"])
-                self.aboutHTML = (' ').join(settings["aboutHTML"])
+                self.aboutHTML = settings["aboutHTML"]
             except ValueError:
                 msg = self.tr("Workflow collection %s could not be loaded due to invalid JSON collection.conf file" % (self.baseDir))
                 self.iface.messageBar().pushMessage(self.tr("Warning"), msg, QgsMessageBar.WARNING, 3)
