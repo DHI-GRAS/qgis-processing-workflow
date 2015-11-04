@@ -39,8 +39,6 @@ from processing_workflow.WorkflowUtils import WorkflowUtils
 from processing_workflow.CreateNewWorkflowAction import CreateNewWorkflowAction
 from processing_workflow.WrongWorkflowException import WrongWorkflowException
 
-import traceback
-
 class WorkflowProvider(WorkflowProviderBase):
 
     def __init__(self, iface):
