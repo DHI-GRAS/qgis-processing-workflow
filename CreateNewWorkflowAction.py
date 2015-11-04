@@ -44,6 +44,6 @@ class CreateNewWorkflowAction(ToolboxAction):
     def execute(self):
         dlg = WorkflowCreatorDialog(None)
         dlg.exec_()
-        if dlg.update:
-            self.toolbox.updateProvider('workflow')
+        #if dlg.update:
+        #    self.toolbox.updateProvider('workflow')
 
