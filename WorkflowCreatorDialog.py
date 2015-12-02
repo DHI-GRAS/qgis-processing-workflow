@@ -34,10 +34,10 @@ from processing.core.parameters import ParameterBoolean
 from processing.core.parameters import ParameterSelection
 from processing.core.parameters import ParameterNumber
 from processing.gui.AlgorithmDialogBase import AlgorithmDialogBase
+from processing.gui.AlgorithmDialog import AlgorithmDialog
 from processing_workflow.Workflow import Workflow
 from processing_workflow.StepDialog import StepDialog, NORMAL_MODE, BATCH_MODE
-from processing_workflow.WorkflowUtils import WorkflowUtils
-from processing.gui.AlgorithmDialog import AlgorithmDialog
+from processing_workflow.WorkflowUtils import WorkflowUtils 
 from processing_workflow.WrongWorkflowException import WrongWorkflowException
 
 # Dialog for creating new workflows from all the available SEXTANTE algorithms
@@ -275,7 +275,7 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
             providers[provider.getName()] = provider
         for providerName in allAlgs.keys():
             # don't show workflows in available algorithms
-            if providerName == "workflow" or providerName == "modelertools":
+            if providerName == "workflow" or providerName == "modelertools" or WorkflowUtils.checkIfCollectionName(providerName):
                 continue
             groups = {}
             provider = allAlgs[providerName]

@@ -66,7 +66,7 @@ class WorkflowProvider(WorkflowProviderBase):
     def unload(self):
         for collection in self.collections:
             Processing.removeProvider(collection)
-        self.collection = [] 
+        self.collections = [] 
         self.collectionListeners = []   
         WorkflowProviderBase.unload(self)
         ProcessingConfig.removeSetting(WorkflowUtils.WORKFLOW_FOLDER)
@@ -97,6 +97,7 @@ class WorkflowProvider(WorkflowProviderBase):
                             workflowCollection = WorkflowCollection(self.iface, os.path.join(root, "collection.conf"), self)
                             self.collections.append(workflowCollection)
                             Processing.addProvider(workflowCollection, False)
+                            WorkflowUtils.addWorkflowCollectionName(workflowCollectionName)
                 except WrongWorkflowException:
                     # A warning message was already printed in WorkflowCollection constructor so nothing to do here 
                     pass
