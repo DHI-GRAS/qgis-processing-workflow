@@ -125,6 +125,11 @@ class StepDialog(QtGui.QDialog):
         self.normalModeDialog = alg.getCustomParametersDialog()
         if not self.normalModeDialog:
             self.normalModeDialog = AlgorithmDialog(alg)
+        # Do not show the "Run as batch process" button in workflows
+        try:
+            self.normalModeDialog.tabWidget.setCornerWidget(None)
+        except:
+            pass
         self.batchModeDialog = BatchAlgorithmDialog(alg)
         self.batchModeDialog.setHidden(True)
         # forwardButton does the job of cancel/close button
