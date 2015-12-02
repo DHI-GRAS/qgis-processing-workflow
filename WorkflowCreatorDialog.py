@@ -155,6 +155,9 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
 
     def closeWindow(self):
         self.close()
+        
+    def closeEvent(self, evt):
+        pass
 
     # For running (testing) the workflow without saving it and closing the creator window
     def runWorkflow(self):
