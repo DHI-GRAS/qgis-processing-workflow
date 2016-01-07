@@ -54,7 +54,7 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
         self.workflow = Workflow(None)
 
         self.help = None
-        self.update = True #indicates whether to update or not the toolbox after closing this dialog
+        self.update = False #indicates whether to update or not the toolbox after closing this dialog
         self.executed = False
         
         if workflow:
