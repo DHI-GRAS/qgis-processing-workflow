@@ -53,7 +53,7 @@ class WorkflowProvider(WorkflowProviderBase):
         self.name = "workflow"
         
         WorkflowProviderBase.__init__(self, iface)
-        self.actions += [CreateNewWorkflowAction(self), CreateNewCollectionAction()]
+        self.actions += [CreateNewWorkflowAction(self), CreateNewCollectionAction(self)]
         self.collections = []
         self.collectionListeners = []
         
@@ -95,9 +95,7 @@ class WorkflowProvider(WorkflowProviderBase):
                             break
                     if not collectionAlreadyExists:
                             workflowCollection = WorkflowCollection(self.iface, os.path.join(root, "collection.conf"), self)
-                            self.collections.append(workflowCollection)
-                            Processing.addProvider(workflowCollection, False)
-                            WorkflowUtils.addWorkflowCollectionName(workflowCollectionName)
+                            self.addCollection(workflowCollection, False)
                 except WrongWorkflowException:
                     # A warning message was already printed in WorkflowCollection constructor so nothing to do here 
                     pass
@@ -107,4 +105,9 @@ class WorkflowProvider(WorkflowProviderBase):
                 for descriptionFile in files:
                     if descriptionFile.endswith(".workflow"):
                         self.loadWorkflow(os.path.join(root,descriptionFile))
+                        
+    def addCollection(self, workflowCollection, updateToolbox):
+        self.collections.append(workflowCollection)
+        Processing.addProvider(workflowCollection, updateToolbox)
+        WorkflowUtils.addWorkflowCollectionName(workflowCollection.getName())
                         

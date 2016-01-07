@@ -11,7 +11,7 @@ from processing_workflow.WrongWorkflowException import WrongWorkflowException
 
 class WorkflowCollection(WorkflowProviderBase):
     
-    def __init__(self, iface, descriptionFile, workflowProvider):
+    def __init__(self, iface, descriptionFile, workflowProvider, activate = False):
         
         self.iface = iface
         
@@ -24,7 +24,7 @@ class WorkflowCollection(WorkflowProviderBase):
         # new collection) then iface is not provided and we don't want to do 
         # proper initialization 
         if iface:
-            WorkflowProviderBase.__init__(self, iface)
+            WorkflowProviderBase.__init__(self, iface, activate)
         
         self.workflowProvider = workflowProvider
         
@@ -36,7 +36,13 @@ class WorkflowCollection(WorkflowProviderBase):
     def initializeSettings(self):
         # The activate collection setting is in the Workflow provider settings group
         name = self.getActivateSetting()
-        ProcessingConfig.addSetting(Setting(self.workflowProvider.getDescription(), name, self.tr('Activate '+self.getName()), self.activate))
+        activateSetting = Setting(self.workflowProvider.getDescription(), name, self.tr('Activate '+self.getName()), self.activate)
+        ProcessingConfig.addSetting(activateSetting)
+        # If activate is True (default is False) then save the setting properly, otherwise it will be set to false
+        # when QGIS is restarted.
+        if self.activate:
+            activateSetting.setValue(self.activate)
+            activateSetting.save()
         ProcessingConfig.addSetting(Setting(self.workflowProvider.getDescription(), self.getTaskbarButtonSetting(), "Show on "+self.getName()+" icon on taskbar", True))
     
     # Read the JSON description file    

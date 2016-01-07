@@ -12,6 +12,7 @@ WIDGET, BASE = uic.loadUiType(os.path.join(pluginPath, 'ui', 'CollectionDialog.u
 class CollectionCreatorDialog(WIDGET, BASE):
     def __init__(self, alg):
         self.update = False
+        self.confFile = ""
         self.basedir = WorkflowUtils.workflowPath()
         super(CollectionCreatorDialog, self).__init__(iface.mainWindow())
         self.setupUi(self)
@@ -80,14 +81,14 @@ class CollectionCreatorDialog(WIDGET, BASE):
         return tail
     
     def createCollection(self):        
-        confFile = os.path.join(self.lineEdit_folder.text(),'collection.conf')
+        self.confFile = os.path.join(self.lineEdit_folder.text(),'collection.conf')
         icon = self.copyIcon()
         confOptions = {}
         confOptions["description"] = self.lineEdit_desc.text()
         confOptions["name"] = self.lineEdit_name.text()
         confOptions["icon"] = icon
         confOptions["aboutHTML"] = self.textEdit_about.toHtml()
-        with open(confFile, 'w') as f1:
+        with open(self.confFile, 'w') as f1:
             json.dump(confOptions, f1, indent=4, separators=(',',':'))
         self.update = True
         self.closeWindow()

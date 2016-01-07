@@ -39,10 +39,10 @@ from processing_workflow.WrongWorkflowException import WrongWorkflowException
 
 class WorkflowProviderBase(AlgorithmProvider):
 
-    def __init__(self, iface):
+    def __init__(self, iface, activate = False):
         AlgorithmProvider.__init__(self)
         
-        self.activate = False
+        self.activate = activate
         self.algs = []
         
         # Create action that will display workflow list dialog when toolbar button is clicked
