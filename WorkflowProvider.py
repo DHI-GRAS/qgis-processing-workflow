@@ -82,9 +82,9 @@ class WorkflowProvider(WorkflowProviderBase):
             # Load collections if they are not already loaded
             if os.path.isfile(os.path.join(root, "collection.conf")):
                 try:
-                    with open(os.path.join(root, "collection.conf")) as f:
-                        workflowCollectionSettings = json.load(f)
                     try:
+                        with open(os.path.join(root, "collection.conf")) as f:
+                            workflowCollectionSettings = json.load(f)
                         workflowCollectionName = workflowCollectionSettings["name"]
                     except:
                         continue
