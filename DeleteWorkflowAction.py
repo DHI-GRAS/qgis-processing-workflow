@@ -46,4 +46,4 @@ class DeleteWorkflowAction(ContextAction):
                             QtGui.QMessageBox.No, QtGui.QMessageBox.No)
         if reply == QtGui.QMessageBox.Yes:
             os.remove(self.alg.descriptionFile)
-            self.toolbox.updateProvider('workflow')
+            self.toolbox.updateProvider(self.alg.provider.getName())

@@ -34,9 +34,10 @@ from PyQt4 import QtGui
 # Class for an action to be added to the SEXTANTE toolbar
 class CreateNewWorkflowAction(ToolboxAction):
 
-    def __init__(self):
+    def __init__(self, workflowProvider):
         self.name="Create new workflow"
         self.group="Tools"
+        self.workflowProvider = workflowProvider
 
     def getIcon(self):
         return QtGui.QIcon(os.path.dirname(__file__) + "/images/icon.png")
@@ -44,6 +45,8 @@ class CreateNewWorkflowAction(ToolboxAction):
     def execute(self):
         dlg = WorkflowCreatorDialog(None)
         dlg.exec_()
-        #if dlg.update:
-        #    self.toolbox.updateProvider('workflow')
+        if dlg.update:
+            self.toolbox.updateProvider(self.workflowProvider.getName())
+            for collection in self.workflowProvider.collections:
+                self.toolbox.updateProvider(collection.getName())
 

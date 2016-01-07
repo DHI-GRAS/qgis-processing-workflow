@@ -43,4 +43,4 @@ class EditWorkflowAction(ContextAction):
         dlg = WorkflowCreatorDialog(self.alg)
         dlg.exec_()
         if dlg.update:
-            self.toolbox.updateProvider('workflow')
+            self.toolbox.updateProvider(self.alg.provider.getName())
