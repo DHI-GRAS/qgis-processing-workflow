@@ -33,6 +33,7 @@ from processing.core.parameters import ParameterString
 from processing.core.parameters import ParameterBoolean
 from processing.core.parameters import ParameterSelection
 from processing.core.parameters import ParameterNumber
+from processing.core.parameters import ParameterExtent
 from processing.gui.AlgorithmDialogBase import AlgorithmDialogBase
 from processing.gui.AlgorithmDialog import AlgorithmDialog
 from processing_workflow.Workflow import Workflow
@@ -176,13 +177,13 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
         if stepDialog.getMode() == NORMAL_MODE:
             if isinstance(stepDialog.normalModeDialog, AlgorithmDialog):
                 for param in stepDialog.alg.parameters:
-                    if isinstance(param, ParameterBoolean) or isinstance(param, ParameterNumber) or isinstance(param, ParameterString) or isinstance(param, ParameterSelection):
+                    if isinstance(param, ParameterBoolean) or isinstance(param, ParameterNumber) or isinstance(param, ParameterString) or isinstance(param, ParameterSelection) or isinstance(param, ParameterExtent):
                         # this is not very nice going so deep into step dialog but there seems to be no other way right now
                         stepDialog.normalModeDialog.setParamValue(param, stepDialog.normalModeDialog.mainWidget.valueItems[param.name])
         elif stepDialog.getMode() == BATCH_MODE:
             col = 0
             for param in stepDialog.alg.parameters:
-                    if isinstance(param, ParameterBoolean) or isinstance(param, ParameterNumber) or isinstance(param, ParameterString) or isinstance(param, ParameterSelection):
+                    if isinstance(param, ParameterBoolean) or isinstance(param, ParameterNumber) or isinstance(param, ParameterString) or isinstance(param, ParameterSelection) or isinstance(param, ParameterExtent):
                         stepDialog.batchModeDialog.setParamValue(param, stepDialog.batchModeDialog.mainWidget.tblParameters.cellWidget(0, col))
                     col += 1
         

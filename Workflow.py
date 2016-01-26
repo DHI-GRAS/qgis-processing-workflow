@@ -35,6 +35,7 @@ from processing.core.parameters import ParameterString
 from processing.core.parameters import ParameterBoolean
 from processing.core.parameters import ParameterSelection
 from processing.core.parameters import ParameterNumber
+from processing.core.parameters import ParameterExtent
 from processing.core.GeoAlgorithm import GeoAlgorithm
 from processing.algs.grass.GrassAlgorithm import GrassAlgorithm
 from processing.algs.grass.GrassUtils import GrassUtils
@@ -64,7 +65,7 @@ class Workflow(GeoAlgorithm):
     def changeStep(self, index, algorithm, mode, instructions, algParameters = {}):
         algParameters = {}
         for param in algorithm.parameters:
-            if isinstance(param, ParameterBoolean) or isinstance(param, ParameterNumber) or isinstance(param, ParameterString) or isinstance(param, ParameterSelection):
+            if isinstance(param, ParameterBoolean) or isinstance(param, ParameterNumber) or isinstance(param, ParameterString) or isinstance(param, ParameterSelection) or isinstance(param, ParameterExtent):
                 algParameters[param.name] = param.value
         self._steps[index] = {'algorithm' : algorithm, 'mode' : mode, 'instructions' : instructions, 'parameters' : algParameters}
     
@@ -130,7 +131,7 @@ class Workflow(GeoAlgorithm):
         alg = step['algorithm']
         for paramName in parameters.iterkeys():
             param = alg.getParameterFromName(paramName)
-            if param and (isinstance(param, ParameterBoolean) or isinstance(param, ParameterNumber) or isinstance(param, ParameterString) or isinstance(param, ParameterSelection)):
+            if param and (isinstance(param, ParameterBoolean) or isinstance(param, ParameterNumber) or isinstance(param, ParameterString) or isinstance(param, ParameterSelection) or isinstance(param, ParameterExtent)):
                 param.default = parameters[paramName]
     
     def executeStep(self, step):
