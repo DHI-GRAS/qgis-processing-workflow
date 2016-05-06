@@ -40,10 +40,11 @@ BATCH_MODE = "Batch"
 # box and option to change from normal to batch mode if the dialog is editable.
 class StepDialog(QtGui.QDialog):
     
-    def __init__(self, alg, mainDialog, canEdit=True):
+    def __init__(self, alg, mainDialog, workflowBaseDir, canEdit=True):
         
         self.alg = alg
         self.mainDialog = mainDialog
+        self.workflowBaseDir = workflowBaseDir
         self.goForward = False
         self.goBackward = False
         
@@ -266,7 +267,8 @@ class StepDialog(QtGui.QDialog):
     
     def setInstructions(self, instructions):
         self.algInstructionsText.setText(instructions)
-
+        self.algInstructionsText.document().setMetaInformation(QtGui.QTextDocument.DocumentUrl, "file:" + self.workflowBaseDir +'/')
+    
     # not used for now    
     def addRasterInputs(self, inputs):
         if self.getMode() == NORMAL_MODE:
