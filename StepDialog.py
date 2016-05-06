@@ -103,7 +103,7 @@ class StepDialog(QtGui.QDialog):
         
         # Size
         self.comboSize = QtGui.QComboBox(self.algInstructionsEditBar)
-        self.comboSize.setMaximumWidth(35)
+        self.comboSize.setMaximumWidth(45)
         self.algInstructionsEditBar.addWidget(self.comboSize)
         self.comboSize.setEditable(True)
         db = QtGui.QFontDatabase()
@@ -158,11 +158,12 @@ class StepDialog(QtGui.QDialog):
         self.batchModeDialog.connect(self.batchModeDialog, QtCore.SIGNAL("finished(int)"), self.forward)    
         
         if self.alg.provider.getName() == "workflowtools" and self.alg.name == "Workflow instructions":
-            self.resize(1120, 790)
             cols = 0
         else:
             cols = 1
-        self.algInstructionsText.setMinimumWidth(250)
+            self.tabLayout.setColumnStretch(1,1)
+        self.resize(1120, 790)
+        self.algInstructionsText.setMinimumWidth(350)
         self.tabLayout.addWidget(self.algInstructionsWidget,0,0)
         self.tabLayout.addWidget(self.normalModeDialog, 0, 1)
         self.tabLayout.addWidget(self.batchModeDialog, 0, 1)
@@ -265,7 +266,7 @@ class StepDialog(QtGui.QDialog):
     
     def setInstructions(self, instructions):
         self.algInstructionsText.setText(instructions)
-    
+
     # not used for now    
     def addRasterInputs(self, inputs):
         if self.getMode() == NORMAL_MODE:
