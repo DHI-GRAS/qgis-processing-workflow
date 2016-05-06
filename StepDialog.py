@@ -269,6 +269,26 @@ class StepDialog(QtGui.QDialog):
         self.algInstructionsText.setText(instructions)
         self.algInstructionsText.document().setMetaInformation(QtGui.QTextDocument.DocumentUrl, "file:" + self.workflowBaseDir +'/')
     
+    # Disconnect all the signals from nomalModeDialog and batchModeDialog when
+    # StepDialog is being closed
+    def closeEvent(self, evt):
+        self.normalModeDialog.disconnect(self.normalModeDialog, QtCore.SIGNAL("finished(int)"), self.forward)
+        self.batchModeDialog.disconnect(self.batchModeDialog, QtCore.SIGNAL("finished(int)"), self.forward)
+        # batchModeDialog could be already closed if the algorithm was executed
+        # in batch mode
+        try:
+            self.batchModeDialog.closeEvent(evt)
+        except TypeError:
+            pass
+        # normalModeDialog could be already closed if the algorithm was executed
+        # in normal mode
+        try:
+            self.normalModeDialog.closeEvent(evt)
+        except TypeError:
+            pass
+        QtGui.QDialog.closeEvent(self, evt)
+            
+    
     # not used for now    
     def addRasterInputs(self, inputs):
         if self.getMode() == NORMAL_MODE:
