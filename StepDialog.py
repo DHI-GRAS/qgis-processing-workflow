@@ -40,10 +40,11 @@ BATCH_MODE = "Batch"
 # box and option to change from normal to batch mode if the dialog is editable.
 class StepDialog(QtGui.QDialog):
     
-    def __init__(self, alg, mainDialog, canEdit=True):
+    def __init__(self, alg, mainDialog, workflowBaseDir, canEdit=True):
         
         self.alg = alg
         self.mainDialog = mainDialog
+        self.workflowBaseDir = workflowBaseDir
         self.goForward = False
         self.goBackward = False
         
@@ -103,7 +104,7 @@ class StepDialog(QtGui.QDialog):
         
         # Size
         self.comboSize = QtGui.QComboBox(self.algInstructionsEditBar)
-        self.comboSize.setMaximumWidth(35)
+        self.comboSize.setMaximumWidth(45)
         self.algInstructionsEditBar.addWidget(self.comboSize)
         self.comboSize.setEditable(True)
         db = QtGui.QFontDatabase()
@@ -158,11 +159,12 @@ class StepDialog(QtGui.QDialog):
         self.batchModeDialog.connect(self.batchModeDialog, QtCore.SIGNAL("finished(int)"), self.forward)    
         
         if self.alg.provider.getName() == "workflowtools" and self.alg.name == "Workflow instructions":
-            self.resize(1120, 790)
             cols = 0
         else:
             cols = 1
-        self.algInstructionsText.setMinimumWidth(250)
+            self.tabLayout.setColumnStretch(1,1)
+        self.resize(1120, 790)
+        self.algInstructionsText.setMinimumWidth(350)
         self.tabLayout.addWidget(self.algInstructionsWidget,0,0)
         self.tabLayout.addWidget(self.normalModeDialog, 0, 1)
         self.tabLayout.addWidget(self.batchModeDialog, 0, 1)
@@ -265,6 +267,27 @@ class StepDialog(QtGui.QDialog):
     
     def setInstructions(self, instructions):
         self.algInstructionsText.setText(instructions)
+        self.algInstructionsText.document().setMetaInformation(QtGui.QTextDocument.DocumentUrl, "file:" + self.workflowBaseDir +'/')
+    
+    # Disconnect all the signals from nomalModeDialog and batchModeDialog when
+    # StepDialog is being closed
+    def closeEvent(self, evt):
+        self.normalModeDialog.disconnect(self.normalModeDialog, QtCore.SIGNAL("finished(int)"), self.forward)
+        self.batchModeDialog.disconnect(self.batchModeDialog, QtCore.SIGNAL("finished(int)"), self.forward)
+        # batchModeDialog could be already closed if the algorithm was executed
+        # in batch mode
+        try:
+            self.batchModeDialog.closeEvent(evt)
+        except TypeError:
+            pass
+        # normalModeDialog could be already closed if the algorithm was executed
+        # in normal mode
+        try:
+            self.normalModeDialog.closeEvent(evt)
+        except TypeError:
+            pass
+        QtGui.QDialog.closeEvent(self, evt)
+            
     
     # not used for now    
     def addRasterInputs(self, inputs):

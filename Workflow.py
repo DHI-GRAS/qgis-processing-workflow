@@ -140,9 +140,9 @@ class Workflow(GeoAlgorithm):
         else:
             GrassUtils.endGrassSession() 
         self.setStepParameters(step)    
-        stepDialog = StepDialog(step['algorithm'], None, False)
-        stepDialog.setMode(step['mode'])
-        stepDialog.setInstructions(step['instructions'])
+        stepDialog = StepDialog(step['algorithm'], None, os.path.dirname(self.descriptionFile), False)
+        stepDialog.setMode(step['mode']) 
+        stepDialog.setInstructions(step['instructions']) 
         stepDialog.setWindowTitle("WOIS Workflow " + unicode(self.name) + ", Step "+unicode(self._steps.index(step)+1)+" of "+unicode(len(self._steps))+": "+step['algorithm'].name)
         stepDialog.setWindowIcon(self.getIcon())
         # set as window modal to allow access to QGIS functions

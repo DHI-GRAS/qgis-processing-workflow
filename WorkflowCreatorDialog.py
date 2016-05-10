@@ -28,6 +28,7 @@
 
 from PyQt4 import QtCore, QtGui
 import codecs
+import os
 from processing.core.Processing import Processing
 from processing.core.parameters import ParameterString
 from processing.core.parameters import ParameterBoolean
@@ -232,7 +233,7 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
                 self.canvasTabWidget.clear()
                 for i in range(0, self.workflow.getLength()):
                     # create a dialog for this algorithm
-                    stepDialog = StepDialog(self.workflow.getAlgorithm(i), self)      
+                    stepDialog = StepDialog(self.workflow.getAlgorithm(i), self, os.path.dirname(filename))      
                     stepDialog.setMode(self.workflow.getMode(i))
                     stepDialog.setInstructions(self.workflow.getInstructions(i))
                     # create new tab for it
@@ -260,7 +261,7 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
             alg = alg.getCopy()#copy.deepcopy(alg)
             
             # create a tab for this algorithm
-            stepDialog = StepDialog(alg, self)      
+            stepDialog = StepDialog(alg, self, "")      
             self.canvasTabWidget.addTab(stepDialog, alg.name)
             
             # add this step to the workflow 
