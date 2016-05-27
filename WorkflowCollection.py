@@ -53,7 +53,7 @@ class WorkflowCollection(WorkflowProviderBase):
                 self.description = settings["description"]
                 self.name = settings["name"]
                 self.icon = os.path.join(self.baseDir, settings["icon"])
-                self.aboutHTML = settings["aboutHTML"]
+                self.aboutHTML = "".join(settings["aboutHTML"])
             except ValueError:
                 msg = self.tr("Workflow collection %s could not be loaded due to invalid JSON collection.conf file" % (self.baseDir))
                 self.iface.messageBar().pushMessage(self.tr("Warning"), msg, QgsMessageBar.WARNING, 3)
