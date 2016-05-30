@@ -14,12 +14,18 @@ about=
 	
 	This plugin is part of the Water Observation Information System (WOIS) developed under the TIGER-NET project funded by the European Space Agency as part of the long-term TIGER initiative aiming at promoting the use of Earth Observation (EO) for improved Integrated Water Resources Management (IWRM) in Africa. Copyright (C) 2014 TIGER-NET (www.tiger-net.org)
 
-version=1.1.3
-qgisMinimumVersion=2.0
+version=1.2
+qgisMinimumVersion=2.14
 
 # Optional items:
 
-changelog= 1.1.3
+changelog=1.2
+    - add workflow collections
+    - add instruction-only workflow step
+    - add basic styling to instructions
+    - make compatible with QGIS 2.14 and up
+    - bug fixes 
+    1.1.3
 	- make compatible with QGIS 2.7 and up
 	- bug fixes 
 	1.1.2
@@ -31,8 +37,8 @@ changelog= 1.1.3
 tags=processing, workflow, instructions
 
 homepage=http://www.tiger-net.org
-tracker=https://github.com/TIGER-NET/Processing-Workflow/issues
-repository=https://github.com/TIGER-NET/Processing-Workflow/tree/clean
+tracker=https://github.com/DHI-GRAS/processing_workflow/issues
+repository=https://github.com/DHI-GRAS/processing_workflow
 icon=images/icon.png
 experimental=False
 
@@ -41,7 +47,7 @@ deprecated=False
 
 # Author contact information
 author=Radoslaw Guzinski
-email=rmgu@dhi-gras.com
+email=radoslaw.guzinski@esa.int
 
 
 

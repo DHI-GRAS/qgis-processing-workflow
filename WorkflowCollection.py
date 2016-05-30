@@ -36,14 +36,14 @@ class WorkflowCollection(WorkflowProviderBase):
     def initializeSettings(self):
         # The activate collection setting is in the Workflow provider settings group
         name = self.getActivateSetting()
-        activateSetting = Setting(self.workflowProvider.getDescription(), name, self.tr('Activate '+self.getName()), self.activate)
+        activateSetting = Setting(self.workflowProvider.getDescription(), name, self.tr('Activate '+self.getName())+' collection', self.activate)
         ProcessingConfig.addSetting(activateSetting)
         # If activate is True (default is False) then save the setting properly, otherwise it will be set to false
         # when QGIS is restarted.
         if self.activate:
             activateSetting.setValue(self.activate)
             activateSetting.save()
-        ProcessingConfig.addSetting(Setting(self.workflowProvider.getDescription(), self.getTaskbarButtonSetting(), "Show on "+self.getName()+" icon on taskbar", True))
+        ProcessingConfig.addSetting(Setting(self.workflowProvider.getDescription(), self.getTaskbarButtonSetting(), "Show "+self.getName()+" collection icon on taskbar", True))
     
     # Read the JSON description file    
     def processDescriptionFile(self):
@@ -53,7 +53,7 @@ class WorkflowCollection(WorkflowProviderBase):
                 self.description = settings["description"]
                 self.name = settings["name"]
                 self.icon = os.path.join(self.baseDir, settings["icon"])
-                self.aboutHTML = settings["aboutHTML"]
+                self.aboutHTML = "".join(settings["aboutHTML"])
             except ValueError:
                 msg = self.tr("Workflow collection %s could not be loaded due to invalid JSON collection.conf file" % (self.baseDir))
                 self.iface.messageBar().pushMessage(self.tr("Warning"), msg, QgsMessageBar.WARNING, 3)

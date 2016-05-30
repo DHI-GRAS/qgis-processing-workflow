@@ -60,8 +60,8 @@ class WorkflowProvider(WorkflowProviderBase):
 
     def initializeSettings(self):
         AlgorithmProvider.initializeSettings(self)
-        ProcessingConfig.addSetting(Setting(self.getDescription(), WorkflowUtils.WORKFLOW_FOLDER, "Workflow algorithms folder", WorkflowUtils.workflowPath()))
-        ProcessingConfig.addSetting(Setting(self.getDescription(), self.getTaskbarButtonSetting(), "Show on workflow button taskbar", True))
+        ProcessingConfig.addSetting(Setting(self.getDescription(), WorkflowUtils.WORKFLOW_FOLDER, "Workflows' folder", WorkflowUtils.workflowPath()))
+        ProcessingConfig.addSetting(Setting(self.getDescription(), self.getTaskbarButtonSetting(), "Show workflow button on taskbar", True))
 
     def unload(self):
         for collection in self.collections:
