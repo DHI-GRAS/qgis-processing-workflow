@@ -16,7 +16,7 @@
 * by the Free Software Foundation, either version 3 of the License,       *
 * or (at your option) any later version.                                  *
 *                                                                         *
-* WOIS is distributed in the hope that it will be useful, but WITHOUT ANY * 
+* WOIS is distributed in the hope that it will be useful, but WITHOUT ANY *
 * WARRANTY; without even the implied warranty of MERCHANTABILITY or       *
 * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License   *
 * for more details.                                                       *
@@ -32,19 +32,20 @@ from processing.core.ProcessingConfig import ProcessingConfig
 from processing.tools.system import mkdir
 
 class WorkflowUtils:
-    
+
     WORKFLOW_FOLDER = "WORKFLOW_FOLDER"
     workflowCollectionNames = []
-    
+
     @staticmethod
     def workflowPath():
         folder = ProcessingConfig.getSetting(WorkflowUtils.WORKFLOW_FOLDER)
-        if folder == None:
-            folder = os.path.join(os.path.dirname(__file__), "workflows")
+        if folder is None:
+            folder = os.path.expanduser(
+                    os.path.join('~', '.qgis2', 'processing', 'workflows'))
         mkdir(folder)
-        
+
         return folder
-    
+
     @staticmethod
     def workflowIcon():
         return  QtGui.QIcon(os.path.join(os.path.dirname(__file__), "images","icon.png"))
@@ -52,7 +53,7 @@ class WorkflowUtils:
     @staticmethod
     def addWorkflowCollectionName(collectionName):
         WorkflowUtils.workflowCollectionNames.append(collectionName)
-        
+
 
     @staticmethod
     def checkIfCollectionName(name):
@@ -60,5 +61,5 @@ class WorkflowUtils:
             if name == collectionName:
                 return True
         return False
-        
-        
+
+
