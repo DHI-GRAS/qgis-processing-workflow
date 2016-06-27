@@ -39,7 +39,7 @@ class WorkflowUtils:
     @staticmethod
     def workflowPath():
         folder = ProcessingConfig.getSetting(WorkflowUtils.WORKFLOW_FOLDER)
-        if folder is None:
+        if folder is None or not os.path.isdir(folder):
             folder = os.path.expanduser(
                     os.path.join('~', '.qgis2', 'processing', 'workflows'))
         mkdir(folder)
