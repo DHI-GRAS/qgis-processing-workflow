@@ -10,7 +10,9 @@ from PyQt4 import QtGui
 class CreateNewCollectionAction(ToolboxAction):
     def __init__(self, workflowProvider):
         self.name = "Create new collection"
+        self.i18n_name = self.tr(self.name)
         self.group = "Tools"
+        self.i18n_group = self.tr(self.group)
         self.workflowProvider = workflowProvider
         
     def getIcon(self):

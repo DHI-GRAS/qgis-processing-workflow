@@ -267,11 +267,17 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
             # add this step to the workflow 
             self.workflow.addStep(alg, stepDialog.getMode(), stepDialog.getInstructions())
     
-    # List all the available algorithms in SEXTANTE
+    # List all the available algorithms in Processing
     def fillAlgorithmTree(self):
         self.algorithmTree.clear()
         text = unicode(self.searchBox.text())
-        allAlgs = Processing.algs
+        try:
+            # QGIS 2.16 (and up?) Processing implementation
+            from processing.core.alglist import algList
+            allAlgs = algList.algs
+        except ImportError:
+            # QGIS 2.14 Processing implementation
+            allAlgs = Processing.algs
         providers = {}
         for provider in Processing.providers:
             providers[provider.getName()] = provider

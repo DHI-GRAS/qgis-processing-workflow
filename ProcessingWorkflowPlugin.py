@@ -49,14 +49,27 @@ class ProcessingWorkflowPlugin:
         self.iface = iface
         
     def initGui(self):
-
         self.algListener = WorkflowAlgListListener(self.provider)
-        Processing.addAlgListListener(self.algListener)
+        try:
+            # QGIS 2.16 (and up?) Processing implementation
+            from processing.core.alglist import algList
+            algList.providerAdded.connect(self.algListener.algsListHasChanged)  
+            algList.providerRemoved.connect(self.algListener.algsListHasChanged)
+        except ImportError:
+            # QGIS 2.14 Processing implementation
+            Processing.addAlgListListener(self.algListener)
+        
         Processing.addProvider(self.provider, updateList = True)
         Processing.addProvider(self.workflowOnlyAlgorithmProvider, updateList = True)
             
     def unload(self):
-        Processing.removeAlgListListener(self.algListener)
+        try:
+            # QGIS 2.16 (and up?) Processing implementation
+            algList.providerAdded.disconnect(self.algListener.algsListHasChanged)
+            algList.providerRemoved.disconnect(self.algListener.algsListHasChanged)
+        except AttributeError:
+            # QGIS 2.14 Processing implementation
+            Processing.removeAlgListListener(self.algListener)
         Processing.removeProvider(self.provider)
         Processing.removeProvider(self.workflowOnlyAlgorithmProvider)
 

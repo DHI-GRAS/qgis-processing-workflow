@@ -47,11 +47,18 @@ class WorkflowProviderBase(AlgorithmProvider):
         
         # Create action that will display workflow list dialog when toolbar button is clicked
         self.action = QAction(self.getIcon(), self.getDescription(), self.iface.mainWindow())
-        QObject.connect(self.action, SIGNAL("triggered()"), self.displayWorkflowListDialog)
+        self.action.triggered.connect(self.displayWorkflowListDialog)
         
         # Right click button actions
         self.contextMenuActions = [EditWorkflowAction(self), DeleteWorkflowAction(self)]
         
+        try:
+            # QGIS 2.16 (and up?) Processing implementation
+            from processing.core.ProcessingConfig import settingsWatcher
+            settingsWatcher.settingsChanged.connect(self.addRemoveTaskbarButton)
+        except ImportError:
+            pass
+                   
     def unload(self):
         AlgorithmProvider.unload(self)
     
@@ -89,8 +96,7 @@ class WorkflowProviderBase(AlgorithmProvider):
     def getTaskbarButtonSetting(self):
         return 'TASKBAR_BUTTON_' + self.getName().upper().replace(' ', '_')
 
-    def loadAlgorithms(self):
-        AlgorithmProvider.loadAlgorithms(self)
+    def addRemoveTaskbarButton(self):
         name = self.getActivateSetting()
         taskbar = self.getTaskbarButtonSetting()
         if not (ProcessingConfig.getSetting(name) and ProcessingConfig.getSetting(taskbar)):
@@ -99,7 +105,11 @@ class WorkflowProviderBase(AlgorithmProvider):
         else:
             # Add toolbar button
             self.iface.addToolBarIcon(self.action)  
-
+        
+    def loadAlgorithms(self):
+        AlgorithmProvider.loadAlgorithms(self)
+        self.addRemoveTaskbarButton()
+        
     def _loadAlgorithms(self):
         self.createAlgsList()
         self.algs = self.preloadedAlgs
