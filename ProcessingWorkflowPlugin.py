@@ -43,7 +43,7 @@ if cmd_folder not in sys.path:
 class ProcessingWorkflowPlugin:
 
     def __init__(self, iface):
-        self.provider = WorkflowProvider(iface)
+        self.provider = WorkflowProvider()
         self.workflowOnlyAlgorithmProvider = WorkflowOnlyAlgorithmProvider()
         # Save reference to the QGIS interface
         self.iface = iface

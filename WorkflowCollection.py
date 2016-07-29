@@ -24,7 +24,7 @@ class WorkflowCollection(WorkflowProviderBase):
         # new collection) then iface is not provided and we don't want to do 
         # proper initialization 
         if iface:
-            WorkflowProviderBase.__init__(self, iface, activate)
+            WorkflowProviderBase.__init__(self, activate)
         
         self.workflowProvider = workflowProvider
         

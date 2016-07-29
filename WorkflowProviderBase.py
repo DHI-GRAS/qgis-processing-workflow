@@ -28,6 +28,7 @@
 
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
+from qgis.utils import iface
 from processing.core.ProcessingConfig import ProcessingConfig
 from processing.core.AlgorithmProvider import AlgorithmProvider
 from processing.core.ProcessingLog import ProcessingLog
@@ -39,14 +40,27 @@ from processing_workflow.WrongWorkflowException import WrongWorkflowException
 
 class WorkflowProviderBase(AlgorithmProvider):
 
-    def __init__(self, iface, activate = False):
+    def __init__(self, activate = False):
         AlgorithmProvider.__init__(self)
+        
         
         self.activate = activate
         self.algs = []
         
-        # Create action that will display workflow list dialog when toolbar button is clicked
-        self.action = QAction(self.getIcon(), self.getDescription(), self.iface.mainWindow())
+        # NOTE: If/when https://github.com/qgis/QGIS/pull/3317 gets merged
+        # this can be removed.
+        # It is required because Processing.initialise() initializes WorkflowProviderBase
+        # while icon, description and name are set in its child classes (i.e. WorkflowProvider
+        # and WorkflowCollection).
+        try:
+            icon = self.getIcon()
+        except AttributeError:
+            icon = QIcon("")
+            self.description = ""
+            self.name = ""
+            
+        # Create action that will display workflow list dialog when toolbar button is clicked    
+        self.action = QAction(icon, self.getDescription(), iface.mainWindow())
         self.action.triggered.connect(self.displayWorkflowListDialog)
         
         # Right click button actions
@@ -101,10 +115,10 @@ class WorkflowProviderBase(AlgorithmProvider):
         taskbar = self.getTaskbarButtonSetting()
         if not (ProcessingConfig.getSetting(name) and ProcessingConfig.getSetting(taskbar)):
             # Remove toolbar button
-            self.iface.removeToolBarIcon(self.action)
+            iface.removeToolBarIcon(self.action)
         else:
             # Add toolbar button
-            self.iface.addToolBarIcon(self.action)  
+            iface.addToolBarIcon(self.action)  
         
     def loadAlgorithms(self):
         AlgorithmProvider.loadAlgorithms(self)
