@@ -14,12 +14,15 @@ about=
 	
 	This plugin is part of the Water Observation Information System (WOIS) developed under the TIGER-NET project funded by the European Space Agency as part of the long-term TIGER initiative aiming at promoting the use of Earth Observation (EO) for improved Integrated Water Resources Management (IWRM) in Africa. Copyright (C) 2014 TIGER-NET (www.tiger-net.org)
 
-version=1.2
+version=1.2.1
 qgisMinimumVersion=2.14
 
 # Optional items:
 
-changelog=1.2
+changelog=1.2.1
+    - fix compatibility with QGIS 2.16
+    - bug fixes
+    1.2
     - add workflow collections
     - add instruction-only workflow step
     - add basic styling to instructions
