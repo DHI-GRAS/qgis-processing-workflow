@@ -35,8 +35,10 @@ from PyQt4 import QtGui
 class CreateNewWorkflowAction(ToolboxAction):
 
     def __init__(self, workflowProvider):
-        self.name="Create new workflow"
-        self.group="Tools"
+        self.name = "Create new workflow"
+        self.i18n_name = self.tr(self.name)
+        self.group = "Tools"
+        self.i18n_group = self.tr(self.group)
         self.workflowProvider = workflowProvider
 
     def getIcon(self):
@@ -45,8 +47,19 @@ class CreateNewWorkflowAction(ToolboxAction):
     def execute(self):
         dlg = WorkflowCreatorDialog(None)
         dlg.exec_()
+        is2_16 = False
         if dlg.update:
-            self.toolbox.updateProvider(self.workflowProvider.getName())
+            try:
+                # QGIS 2.16 (and up?) Processing implementation
+                from processing.core.alglist import algList
+                algList.reloadProvider(self.workflowProvider.getName())
+                is2_16 = True
+            except ImportError:
+                # QGIS 2.14 Processing implementation
+                self.toolbox.updateProvider(self.workflowProvider.getName())
             for collection in self.workflowProvider.collections:
-                self.toolbox.updateProvider(collection.getName())
+                if is2_16:
+                    algList.reloadProvider(collection.getName())
+                else:
+                    self.toolbox.updateProvider(collection.getName())
 

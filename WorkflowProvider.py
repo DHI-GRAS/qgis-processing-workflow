@@ -30,6 +30,7 @@ import os
 import json
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
+from qgis.utils import iface
 from processing.core.ProcessingConfig import ProcessingConfig, Setting
 from processing.core.AlgorithmProvider import AlgorithmProvider
 from processing.core.Processing import Processing
@@ -43,16 +44,14 @@ from processing_workflow.WrongWorkflowException import WrongWorkflowException
 
 class WorkflowProvider(WorkflowProviderBase):
 
-    def __init__(self, iface):
-        
-        self.iface = iface
+    def __init__(self):
         
         # Set constant properties
         self.description = "Processing Workflows (Step by step guidance)"
         self.icon = WorkflowUtils.workflowIcon()
         self.name = "workflow"
         
-        WorkflowProviderBase.__init__(self, iface)
+        WorkflowProviderBase.__init__(self)
         self.actions += [CreateNewWorkflowAction(self), CreateNewCollectionAction(self)]
         self.collections = []
         self.collectionListeners = []
@@ -72,7 +71,7 @@ class WorkflowProvider(WorkflowProviderBase):
         ProcessingConfig.removeSetting(WorkflowUtils.WORKFLOW_FOLDER)
         ProcessingConfig.removeSetting(self.getTaskbarButtonSetting())
         # Remove toolbar button
-        self.iface.removeToolBarIcon(self.action)
+        iface.removeToolBarIcon(self.action)
     
     # Load all the workflows saved in the workflow folder    
     def createAlgsList(self):
@@ -94,7 +93,7 @@ class WorkflowProvider(WorkflowProviderBase):
                             collectionAlreadyExists = True
                             break
                     if not collectionAlreadyExists:
-                            workflowCollection = WorkflowCollection(self.iface, os.path.join(root, "collection.conf"), self)
+                            workflowCollection = WorkflowCollection(iface, os.path.join(root, "collection.conf"), self)
                             self.addCollection(workflowCollection, False)
                 except WrongWorkflowException:
                     # A warning message was already printed in WorkflowCollection constructor so nothing to do here 

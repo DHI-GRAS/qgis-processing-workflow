@@ -37,6 +37,12 @@ class DeleteWorkflowAction(ContextAction):
         self.name="Delete workflow"
         self.provider = provider
 
+    # This is to make the plugin work both in QGIS 2.14 and 2.16. 
+    # In 2.16 Processing self.alg was changed to self.itemData.
+    def setData(self, itemData, toolbox):
+        ContextAction.setData(self, itemData, toolbox)
+        self.alg = itemData
+
     def isEnabled(self):
         return isinstance(self.alg, Workflow) and self.alg.provider == self.provider
 
@@ -46,4 +52,10 @@ class DeleteWorkflowAction(ContextAction):
                             QtGui.QMessageBox.No, QtGui.QMessageBox.No)
         if reply == QtGui.QMessageBox.Yes:
             os.remove(self.alg.descriptionFile)
-            self.toolbox.updateProvider(self.alg.provider.getName())
+            try:
+                # QGIS 2.16 (and up?) Processing implementation
+                from processing.core.alglist import algList
+                algList.reloadProvider(self.alg.provider.getName())
+            except ImportError:
+                # QGIS 2.14 Processing implementation
+                self.toolbox.updateProvider(self.alg.provider.getName())
