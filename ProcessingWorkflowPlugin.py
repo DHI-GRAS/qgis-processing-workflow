@@ -35,6 +35,12 @@ from processing.core.Processing import Processing
 from processing_workflow.WorkflowProvider import WorkflowProvider
 from processing_workflow.WorkflowAlgListListener import WorkflowAlgListListener
 from processing_workflow.WorkflowOnlyAlgorithmProvider import WorkflowOnlyAlgorithmProvider 
+try:
+    # QGIS 2.16 (and up?) Processing implementation
+    from processing.core.alglist import algList
+except ImportError:
+    # QGIS 2.14 Processing implementation
+    algList = None
 
 cmd_folder = os.path.split(inspect.getfile( inspect.currentframe() ))[0]
 if cmd_folder not in sys.path:
@@ -50,12 +56,11 @@ class ProcessingWorkflowPlugin:
         
     def initGui(self):
         self.algListener = WorkflowAlgListListener(self.provider)
-        try:
+        if algList:
             # QGIS 2.16 (and up?) Processing implementation
-            from processing.core.alglist import algList
             algList.providerAdded.connect(self.algListener.algsListHasChanged)  
             algList.providerRemoved.connect(self.algListener.algsListHasChanged)
-        except ImportError:
+        else:
             # QGIS 2.14 Processing implementation
             Processing.addAlgListListener(self.algListener)
         
@@ -63,13 +68,14 @@ class ProcessingWorkflowPlugin:
         Processing.addProvider(self.workflowOnlyAlgorithmProvider, updateList = True)
             
     def unload(self):
-        try:
+        if algList:
             # QGIS 2.16 (and up?) Processing implementation
             algList.providerAdded.disconnect(self.algListener.algsListHasChanged)
             algList.providerRemoved.disconnect(self.algListener.algsListHasChanged)
-        except AttributeError:
+        else:
             # QGIS 2.14 Processing implementation
             Processing.removeAlgListListener(self.algListener)
+
         Processing.removeProvider(self.provider)
         Processing.removeProvider(self.workflowOnlyAlgorithmProvider)
 
