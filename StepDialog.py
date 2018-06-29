@@ -158,16 +158,16 @@ class StepDialog(QtGui.QDialog):
         self.normalModeDialog.connect(self.normalModeDialog, QtCore.SIGNAL("finished(int)"), self.forward)
         self.batchModeDialog.connect(self.batchModeDialog, QtCore.SIGNAL("finished(int)"), self.forward)    
         
+        self.resize(1120, 790)
+        self.algInstructionsText.setMinimumWidth(350)
+        self.tabLayout.addWidget(self.algInstructionsWidget,0,0)
         if self.alg.provider.getName() == "workflowtools" and self.alg.name == "Workflow instructions":
             cols = 0
         else:
             cols = 1
             self.tabLayout.setColumnStretch(1,1)
-        self.resize(1120, 790)
-        self.algInstructionsText.setMinimumWidth(350)
-        self.tabLayout.addWidget(self.algInstructionsWidget,0,0)
-        self.tabLayout.addWidget(self.normalModeDialog, 0, 1)
-        self.tabLayout.addWidget(self.batchModeDialog, 0, 1)
+            self.tabLayout.addWidget(self.normalModeDialog, 0, 1)
+            self.tabLayout.addWidget(self.batchModeDialog, 0, 1)
             
         self.algMode = QtGui.QComboBox()  
         self.algMode.addItems([NORMAL_MODE, BATCH_MODE])
