@@ -54,7 +54,7 @@ class Workflow(GeoAlgorithm):
         self._steps = list()
         self.name = ''
         self.group = ''
-        self.descriptionFile = None
+        self.descriptionFile = ''
         self.parameters = [ParameterString("Info", "Workflow can not be run as a batch process. Please close this dialog and execute as a normal process.", "", False)]
         self.showInModeler = False
 
@@ -144,7 +144,7 @@ class Workflow(GeoAlgorithm):
         stepDialog.setMode(step['mode'])
         stepDialog.setInstructions(step['instructions'])
         stepDialog.setWindowTitle(
-            "{self.provider.name} {self.name}, Step {stepno} of {nsteps}: {algname}"
+            "Workflow {self.name}, Step {stepno} of {nsteps}: {algname}"
             .format(
                 self=self,
                 stepno=(self._steps.index(step) + 1),
