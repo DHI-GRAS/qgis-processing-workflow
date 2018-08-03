@@ -203,7 +203,7 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
         for i in range(0, self.canvasTabWidget.count()):
             self.updateStep(i)
         
-        if self.workflow.descriptionFile != None:
+        if self.workflow.descriptionFile:
             filename = self.workflow.descriptionFile
         else:
             filename = unicode(QtGui.QFileDialog.getSaveFileName(self, "Save Workflow", WorkflowUtils.workflowPath(), "QGIS Processing workflows (*.workflow)"))
