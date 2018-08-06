@@ -32,6 +32,7 @@ from processing.gui.AlgorithmDialog import AlgorithmDialog
 from processing.gui.BatchAlgorithmDialog import BatchAlgorithmDialog
 from processing.gui.InputLayerSelectorPanel import InputLayerSelectorPanel
 from processing_workflow import WorkflowUtils
+import markdown
 
 NORMAL_MODE = "Normal"
 BATCH_MODE = "Batch"
@@ -45,9 +46,10 @@ class StepDialog(QtGui.QDialog):
         self.alg = alg
         self.mainDialog = mainDialog
         self.workflowBaseDir = workflowBaseDir
+        self.canEdit = canEdit
         self.goForward = False
         self.goBackward = False
-        
+       
         QtGui.QDialog.__init__(self)
         
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowSystemMenuHint |
@@ -61,8 +63,8 @@ class StepDialog(QtGui.QDialog):
         self.algInstructionsWidget = QtGui.QWidget()
         self.algInstructionsLayout = QtGui.QGridLayout()
         self.algInstructionsText = QtGui.QTextEdit()
-        self.algInstructionsText.setFontPointSize(10)
-         
+        self.algInstructionsDoc = QtGui.QTextDocument()
+        
         # Tool bar to hold font-editing tools
         self.algInstructionsEditBar = QtGui.QToolBar()
         self.algInstructionsEditBar.setIconSize(QtCore.QSize(16, 16))
@@ -101,7 +103,7 @@ class StepDialog(QtGui.QDialog):
         self.comboFont.setMaximumWidth(95)
         self.algInstructionsEditBar.addWidget(self.comboFont)
         QtCore.QObject.connect(self.comboFont, QtCore.SIGNAL("activated(QString)"), self.textFamily)
-        
+
         # Size
         self.comboSize = QtGui.QComboBox(self.algInstructionsEditBar)
         self.comboSize.setMaximumWidth(45)
@@ -112,6 +114,7 @@ class StepDialog(QtGui.QDialog):
             self.comboSize.addItem(str(size))
         QtCore.QObject.connect(self.comboSize, QtCore.SIGNAL("activated(QString)"), self.textSize)
         self.comboSize.setCurrentIndex(self.comboSize.findText(str(self.algInstructionsText.font().pointSize())))
+
         
         # Only show the editing tool bar when in edit mode
         if not canEdit:
@@ -261,12 +264,18 @@ class StepDialog(QtGui.QDialog):
         else:
             self.batchModeDialog.setHidden(True)
             self.normalModeDialog.setHidden(True)
-    
+
     def getInstructions(self):
-        return self.algInstructionsText.toHtml()
+        return self.algInstructionsText.toPlainText()
     
-    def setInstructions(self, instructions):
-        self.algInstructionsText.setText(instructions)
+    def setInstructions(self, instructions, style):
+        if not self.canEdit:
+            html = markdown.markdown(instructions)
+            self.algInstructionsDoc.setDefaultStyleSheet(style)
+            self.algInstructionsDoc.setHtml(html)
+            self.algInstructionsText.setDocument(self.algInstructionsDoc)
+        else:
+            self.algInstructionsText.setText(instructions)
         self.algInstructionsText.document().setMetaInformation(QtGui.QTextDocument.DocumentUrl, "file:" + self.workflowBaseDir +'/')
     
     # Disconnect all the signals from nomalModeDialog and batchModeDialog when

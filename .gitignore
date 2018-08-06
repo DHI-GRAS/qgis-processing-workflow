@@ -1,4 +1,5 @@
 .settings/org.eclipse.core.resources.prefs
 *.pyc
+*.swp
 .project
 .pydevproject

@@ -43,6 +43,8 @@ from processing_workflow.StepDialog import StepDialog, NORMAL_MODE, BATCH_MODE
 from processing_workflow.WrongWorkflowException import WrongWorkflowException
 from processing_workflow.WorkflowUtils import WorkflowUtils
 
+DIRNAME = os.path.dirname(__file__)
+
 # Class containing the list of steps (algorithms) in the workflow together with the mode
 # and instructions for each step
 class Workflow(GeoAlgorithm):
@@ -55,6 +57,7 @@ class Workflow(GeoAlgorithm):
         self.name = ''
         self.group = ''
         self.descriptionFile = ''
+        self.style = None
         self.parameters = [ParameterString("Info", "Workflow can not be run as a batch process. Please close this dialog and execute as a normal process.", "", False)]
         self.showInModeler = False
 
@@ -142,7 +145,7 @@ class Workflow(GeoAlgorithm):
         self.setStepParameters(step)
         stepDialog = StepDialog(step['algorithm'], None, os.path.dirname(self.descriptionFile), False)
         stepDialog.setMode(step['mode'])
-        stepDialog.setInstructions(step['instructions'])
+        stepDialog.setInstructions(step['instructions'], self.style)
         stepDialog.setWindowTitle(
             "Workflow {self.name}, Step {stepno} of {nsteps}: {algname}"
             .format(
@@ -191,6 +194,12 @@ class Workflow(GeoAlgorithm):
         self.descriptionFile = filename
         instructions = False
         try:
+            styleFile = os.path.join(os.path.dirname(filename), "style.css")
+            if not os.path.exists(styleFile):
+                styleFile = os.path.join(DIRNAME, "style.css")
+            with open(styleFile, 'r') as fi:
+                self.style = fi.read()
+
             for line in fileinput.input(filename, openhook = fileinput.hook_encoded("utf-8")):
                 line= line.rstrip()
 

@@ -87,7 +87,7 @@ class CollectionCreatorDialog(WIDGET, BASE):
         confOptions["description"] = self.lineEdit_desc.text()
         confOptions["name"] = self.lineEdit_name.text()
         confOptions["icon"] = icon
-        confOptions["aboutHTML"] = self.textEdit_about.toHtml()
+        confOptions["aboutHTML"] = self.textEdit_about.toPlainText()
         with open(self.confFile, 'w') as f1:
             json.dump(confOptions, f1, indent=4, separators=(',',':'))
         self.update = True

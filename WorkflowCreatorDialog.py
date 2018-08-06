@@ -235,7 +235,7 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
                     # create a dialog for this algorithm
                     stepDialog = StepDialog(self.workflow.getAlgorithm(i), self, os.path.dirname(filename))      
                     stepDialog.setMode(self.workflow.getMode(i))
-                    stepDialog.setInstructions(self.workflow.getInstructions(i))
+                    stepDialog.setInstructions(self.workflow.getInstructions(i), self.workflow.style)
                     # create new tab for it
                     self.canvasTabWidget.addTab(stepDialog, self.workflow.getAlgorithm(i).name)
 
