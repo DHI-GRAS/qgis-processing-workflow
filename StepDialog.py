@@ -91,31 +91,6 @@ class StepDialog(QtGui.QDialog):
         self.algInstructionsEditBar.addAction(self.actionTextUnderline)
         self.actionTextUnderline.setCheckable(True)
         
-        # Colour
-        pix = QtGui.QPixmap(16, 16)
-        pix.fill(QtGui.QColor("black"))
-        self.actionTextColor = QtGui.QAction(QtGui.QIcon(pix), "&Color...", self)
-        QtCore.QObject.connect(self.actionTextColor, QtCore.SIGNAL("triggered()"), self.textColor)
-        self.algInstructionsEditBar.addAction(self.actionTextColor)
-        
-        # Font
-        self.comboFont = QtGui.QFontComboBox(self.algInstructionsEditBar)
-        self.comboFont.setMaximumWidth(95)
-        self.algInstructionsEditBar.addWidget(self.comboFont)
-        QtCore.QObject.connect(self.comboFont, QtCore.SIGNAL("activated(QString)"), self.textFamily)
-
-        # Size
-        self.comboSize = QtGui.QComboBox(self.algInstructionsEditBar)
-        self.comboSize.setMaximumWidth(45)
-        self.algInstructionsEditBar.addWidget(self.comboSize)
-        self.comboSize.setEditable(True)
-        db = QtGui.QFontDatabase()
-        for size in db.standardSizes():
-            self.comboSize.addItem(str(size))
-        QtCore.QObject.connect(self.comboSize, QtCore.SIGNAL("activated(QString)"), self.textSize)
-        self.comboSize.setCurrentIndex(self.comboSize.findText(str(self.algInstructionsText.font().pointSize())))
-
-        
         # Only show the editing tool bar when in edit mode
         if not canEdit:
             self.algInstructionsText.setReadOnly(True)
@@ -199,47 +174,22 @@ class StepDialog(QtGui.QDialog):
         
     
     def textBold(self):
-        fmt = QtGui.QTextCharFormat()
-        fmt.setFontWeight(QtGui.QFont.Bold if self.actionTextBold.isChecked() else QtGui.QFont.Normal)
-        self.mergeFormatOnWordOrSelection(fmt)
+        cursor = self.algInstructionsText.textCursor()
+        text = cursor.selectedText()
+        if text:
+            cursor.insertText("**" + text + "**")
         
     def textItalic(self):
-        fmt = QtGui.QTextCharFormat()
-        fmt.setFontItalic(self.actionTextItalic.isChecked())
-        self.mergeFormatOnWordOrSelection(fmt)
+        cursor = self.algInstructionsText.textCursor()
+        text = cursor.selectedText()
+        if text:
+            cursor.insertText("*" + text + "*")
         
     def textUnderline(self):
-        fmt = QtGui.QTextCharFormat()
-        fmt.setFontUnderline(self.actionTextUnderline.isChecked())
-        self.mergeFormatOnWordOrSelection(fmt)
-        
-    def textColor(self):
-        col = QtGui.QColorDialog.getColor(self.algInstructionsText.textColor(), self);
-        if not col.isValid():
-            return
-        fmt = QtGui.QTextCharFormat()
-        fmt.setForeground(col);
-        self.mergeFormatOnWordOrSelection(fmt)
-        pix = QtGui.QPixmap(16, 16)
-        pix.fill(col)
-        self.actionTextColor.setIcon(QtGui.QIcon(pix))
-        
-    def textFamily(self, f):
-        fmt = QtGui.QTextCharFormat()
-        fmt.setFontFamily(f)
-        self.mergeFormatOnWordOrSelection(fmt)
-    
-    def textSize(self, p):
-        pointSize = float(p)
-        if pointSize > 0:
-            fmt = QtGui.QTextCharFormat()
-            fmt.setFontPointSize(pointSize)
-            self.mergeFormatOnWordOrSelection(fmt)
-
-    def mergeFormatOnWordOrSelection(self, fontFormat):
         cursor = self.algInstructionsText.textCursor()
-        cursor.mergeCharFormat(fontFormat)
-        self.algInstructionsText.mergeCurrentCharFormat(fontFormat)
+        text = cursor.selectedText()
+        if text:
+            cursor.insertText("<u>" + text + "</u>")
 
     def forward(self):
         self.goForward = True
