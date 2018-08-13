@@ -143,9 +143,9 @@ class Workflow(GeoAlgorithm):
         else:
             GrassUtils.endGrassSession()
         self.setStepParameters(step)
-        stepDialog = StepDialog(step['algorithm'], None, os.path.dirname(self.descriptionFile), False)
+        stepDialog = StepDialog(step['algorithm'], None, os.path.dirname(self.descriptionFile), False, style=self.style)
         stepDialog.setMode(step['mode'])
-        stepDialog.setInstructions(step['instructions'], self.style)
+        stepDialog.setInstructions(step['instructions'])
         stepDialog.setWindowTitle(
             "Workflow {self.name}, Step {stepno} of {nsteps}: {algname}"
             .format(

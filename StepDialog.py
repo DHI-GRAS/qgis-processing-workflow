@@ -41,7 +41,7 @@ BATCH_MODE = "Batch"
 # box and option to change from normal to batch mode if the dialog is editable.
 class StepDialog(QtGui.QDialog):
     
-    def __init__(self, alg, mainDialog, workflowBaseDir, canEdit=True):
+    def __init__(self, alg, mainDialog, workflowBaseDir, canEdit=True, style=None):
         
         self.alg = alg
         self.mainDialog = mainDialog
@@ -49,6 +49,7 @@ class StepDialog(QtGui.QDialog):
         self.canEdit = canEdit
         self.goForward = False
         self.goBackward = False
+        self.style = style
        
         QtGui.QDialog.__init__(self)
         
@@ -64,6 +65,8 @@ class StepDialog(QtGui.QDialog):
         self.algInstructionsLayout = QtGui.QGridLayout()
         self.algInstructionsText = QtGui.QTextEdit()
         self.algInstructionsDoc = QtGui.QTextDocument()
+        self.algInstructionsDoc.setDefaultStyleSheet(self.style)
+        self.algInstructionsText.setDocument(self.algInstructionsDoc)
         
         # Tool bar to hold font-editing tools
         self.algInstructionsEditBar = QtGui.QToolBar()
@@ -75,21 +78,24 @@ class StepDialog(QtGui.QDialog):
         self.actionTextBold.setShortcut("Ctrl+B")
         QtCore.QObject.connect(self.actionTextBold, QtCore.SIGNAL("triggered()"), self.textBold)
         self.algInstructionsEditBar.addAction(self.actionTextBold)
-        self.actionTextBold.setCheckable(True)
         
         # Italic
         self.actionTextItalic = QtGui.QAction(QtGui.QIcon.fromTheme("format-text-italic", QtGui.QIcon(os.path.join(iconDir, "italicA.png"))), "&Italic", self)
         self.actionTextItalic.setShortcut("Ctrl+I")
         QtCore.QObject.connect(self.actionTextItalic, QtCore.SIGNAL("triggered()"), self.textItalic)
         self.algInstructionsEditBar.addAction(self.actionTextItalic)
-        self.actionTextItalic.setCheckable(True)
         
         # Underline
         self.actionTextUnderline = QtGui.QAction(QtGui.QIcon.fromTheme("format-text-underline", QtGui.QIcon(os.path.join(iconDir, "underlineA.png"))), "&Underline", self)
         self.actionTextUnderline.setShortcut("Ctrl+U")
         QtCore.QObject.connect(self.actionTextUnderline, QtCore.SIGNAL("triggered()"), self.textUnderline)
         self.algInstructionsEditBar.addAction(self.actionTextUnderline)
-        self.actionTextUnderline.setCheckable(True)
+
+        # toggle preview
+        self.actionTogglePreview = QtGui.QAction(QtGui.QIcon.fromTheme("document-print-preview", QtGui.QIcon(os.path.join(iconDir, "eye.png"))), "&Preview", self)
+        # self.actionTogglePreview.setShortcut("Ctrl-P")
+        self.actionTogglePreview.triggered.connect(self.textTogglePreview)
+        self.algInstructionsEditBar.addAction(self.actionTogglePreview)
         
         # Only show the editing tool bar when in edit mode
         if not canEdit:
@@ -191,6 +197,11 @@ class StepDialog(QtGui.QDialog):
         if text:
             cursor.insertText("<u>" + text + "</u>")
 
+    def textTogglePreview(self):
+        text = self.getInstructions()
+        self.canEdit = not self.canEdit
+        self.setInstructions(text)
+
     def forward(self):
         self.goForward = True
         self.close()
@@ -216,18 +227,25 @@ class StepDialog(QtGui.QDialog):
             self.normalModeDialog.setHidden(True)
 
     def getInstructions(self):
-        return self.algInstructionsText.toPlainText()
+        if self.canEdit:
+            self._instructions = self.algInstructionsText.toPlainText()
+        return self._instructions
     
-    def setInstructions(self, instructions, style):
+    def setInstructions(self, instructions):
+        self._instructions = instructions
+        self.algInstructionsDoc.clear()
+        self.algInstructionsText.clear()
         if not self.canEdit:
             html = markdown.markdown(instructions)
-            self.algInstructionsDoc.setDefaultStyleSheet(style)
+            self.algInstructionsDoc.setDefaultStyleSheet(self.style)
             self.algInstructionsDoc.setHtml(html)
             self.algInstructionsText.setDocument(self.algInstructionsDoc)
         else:
+            self.algInstructionsDoc.setDefaultStyleSheet("")
+            self.algInstructionsText.setFontPointSize(12)
             self.algInstructionsText.setText(instructions)
         self.algInstructionsText.document().setMetaInformation(QtGui.QTextDocument.DocumentUrl, "file:" + self.workflowBaseDir +'/')
-    
+
     # Disconnect all the signals from nomalModeDialog and batchModeDialog when
     # StepDialog is being closed
     def closeEvent(self, evt):
