@@ -36,6 +36,7 @@ import markdown
 
 NORMAL_MODE = "Normal"
 BATCH_MODE = "Batch"
+DIRNAME = os.path.dirname(__file__)
 
 # Dialog grouping the appropriate algorithm dialog (normal or batch mode), instructions
 # box and option to change from normal to batch mode if the dialog is editable.
@@ -67,6 +68,7 @@ class StepDialog(QtGui.QDialog):
         self.algInstructionsDoc = QtGui.QTextDocument()
         self.algInstructionsDoc.setDefaultStyleSheet(self.style)
         self.algInstructionsText.setDocument(self.algInstructionsDoc)
+        self.setDefaultInstructionsText()
         
         # Tool bar to hold font-editing tools
         self.algInstructionsEditBar = QtGui.QToolBar()
@@ -200,7 +202,7 @@ class StepDialog(QtGui.QDialog):
     def textTogglePreview(self):
         text = self.getInstructions()
         self.canEdit = not self.canEdit
-        self.setInstructions(text)
+        self.setInstructions(self._raw_instructions)
 
     def forward(self):
         self.goForward = True
@@ -228,23 +230,38 @@ class StepDialog(QtGui.QDialog):
 
     def getInstructions(self):
         if self.canEdit:
-            self._instructions = self.algInstructionsText.toPlainText()
-        return self._instructions
+            self._raw_instructions = self.algInstructionsText.toPlainText()
+            self._html_instructions = self.algInstructionsText.toHtml()
+        return self._raw_instructions
     
     def setInstructions(self, instructions):
-        self._instructions = instructions
+        self._raw_instructions = instructions
+        html = markdown.markdown(instructions)
+        self._html_instructions = html
+
         self.algInstructionsDoc.clear()
         self.algInstructionsText.clear()
         if not self.canEdit:
-            html = markdown.markdown(instructions)
             self.algInstructionsDoc.setDefaultStyleSheet(self.style)
-            self.algInstructionsDoc.setHtml(html)
+            self.algInstructionsDoc.setHtml(self._html_instructions)
             self.algInstructionsText.setDocument(self.algInstructionsDoc)
         else:
             self.algInstructionsDoc.setDefaultStyleSheet("")
             self.algInstructionsText.setFontPointSize(12)
-            self.algInstructionsText.setText(instructions)
+            self.algInstructionsText.setPlainText(self._raw_instructions)
         self.algInstructionsText.document().setMetaInformation(QtGui.QTextDocument.DocumentUrl, "file:" + self.workflowBaseDir +'/')
+
+    def setDefaultInstructionsText(self):
+        with open(os.path.join(DIRNAME, "defaultInstructionsText.md"), 'r') as fi:
+            text = fi.read()
+        if self.canEdit:
+            self.algInstructionsText.setFontPointSize(12)
+            self.algInstructionsText.setPlainText(text)
+        else:
+            self.algInstructionsDoc.setDefaultStyleSheet(self.style)
+            self.algInstructionsDoc.setHtml(text)
+            self.algInstructionsText.setDocument(self.algInstructionsDoc)
+
 
     # Disconnect all the signals from nomalModeDialog and batchModeDialog when
     # StepDialog is being closed
