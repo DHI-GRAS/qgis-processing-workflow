@@ -196,6 +196,7 @@ class StepDialog(QtGui.QDialog):
             cursor.insertText("<u>" + text + "</u>")
 
     def textTogglePreview(self):
+        self.getInstructions()
         self.canEdit = not self.canEdit
         if not self.canEdit:
             self.algInstructionsText.setTextInteractionFlags(QtCore.Qt.TextBrowserInteraction)
@@ -268,7 +269,6 @@ class StepDialog(QtGui.QDialog):
         else:
             self.algInstructionsDoc.setDefaultStyleSheet(self.style)
             self.algInstructionsDoc.setHtml(text)
-            self.algInstructionsDoc.begin()
             self.algInstructionsText.setDocument(self.algInstructionsDoc)
 
     # Disconnect all the signals from nomalModeDialog and batchModeDialog when
