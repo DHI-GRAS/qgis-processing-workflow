@@ -4,7 +4,8 @@ from processing_workflow.WorkflowUtils import WorkflowUtils
 from processing_workflow.WorkflowInstructionsAlgorithm import WorkflowInstructionsAlgorithm
 
 # A basic provider for algorithms that can only be used within workflows.
-# Currently it only includes the workflow instructions algorithm. 
+# Currently it only includes the workflow instructions algorithm.
+
 
 class WorkflowOnlyAlgorithmProvider(AlgorithmProvider):
 

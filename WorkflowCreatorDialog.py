@@ -16,7 +16,7 @@
 * by the Free Software Foundation, either version 3 of the License,       *
 * or (at your option) any later version.                                  *
 *                                                                         *
-* WOIS is distributed in the hope that it will be useful, but WITHOUT ANY * 
+* WOIS is distributed in the hope that it will be useful, but WITHOUT ANY *
 * WARRANTY; without even the implied warranty of MERCHANTABILITY or       *
 * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License   *
 * for more details.                                                       *
@@ -39,8 +39,9 @@ from processing.gui.AlgorithmDialogBase import AlgorithmDialogBase
 from processing.gui.AlgorithmDialog import AlgorithmDialog
 from processing_workflow.Workflow import Workflow
 from processing_workflow.StepDialog import StepDialog, NORMAL_MODE, BATCH_MODE
-from processing_workflow.WorkflowUtils import WorkflowUtils 
+from processing_workflow.WorkflowUtils import WorkflowUtils
 from processing_workflow.WrongWorkflowException import WrongWorkflowException
+
 
 # Dialog for creating new workflows from all the available SEXTANTE algorithms
 class WorkflowCreatorDialog(AlgorithmDialogBase):
@@ -49,14 +50,15 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
         self.setupUi()
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowSystemMenuHint |
                             QtCore.Qt.WindowMinMaxButtonsHint)
-        
+
         # set as window modal
         self.setWindowModality(1)
-        
+
         self.help = None
-        self.update = False #indicates whether to update or not the toolbox after closing this dialog
+        # indicates whether to update or not the toolbox after closing this dialog
+        self.update = False
         self.executed = False
-        
+
         if workflow:
             self.workflow = workflow
             self.openWorkflow(workflow.descriptionFile)
@@ -71,9 +73,9 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
         self.tabWidget = QtGui.QTabWidget()
         self.tabWidget.setMaximumSize(QtCore.QSize(350, 10000))
         self.tabWidget.setMinimumWidth(300)
-        
-        #left hand side part
-        #==================================
+
+        # left hand side part
+        # ==================================
         self.verticalLayout = QtGui.QVBoxLayout()
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
@@ -90,8 +92,8 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
         self.algorithmsTab.setLayout(self.verticalLayout)
         self.tabWidget.addTab(self.algorithmsTab, "Algorithms")
 
-        #right hand side part
-        #==================================
+        # right hand side part
+        # ==================================
         self.textName = QtGui.QLineEdit()
         if hasattr(self.textName, 'setPlaceholderText'):
             self.textName.setPlaceholderText("[Enter workflow name here]")
@@ -114,16 +116,16 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
         self.canvasLayout.addLayout(self.horizontalLayoutNames)
         self.canvasLayout.addWidget(self.canvasTabWidget)
 
-        #upper part, putting the two previous parts together
-        #===================================================
+        # upper part, putting the two previous parts together
+        # ===================================================
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setSpacing(2)
         self.horizontalLayout.setMargin(0)
         self.horizontalLayout.addWidget(self.tabWidget)
         self.horizontalLayout.addLayout(self.canvasLayout)
 
-        #And the whole layout
-        #==========================
+        # And the whole layout
+        # ==========================
 
         self.buttonBox = QtGui.QDialogButtonBox()
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
@@ -147,7 +149,7 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
         QtCore.QObject.connect(self.closeButton, QtCore.SIGNAL("clicked()"), self.closeWindow)
         QtCore.QObject.connect(self.runButton, QtCore.SIGNAL("clicked()"), self.runWorkflow)
         QtCore.QObject.connect(self.removeButton, QtCore.SIGNAL("clicked()"), self.removeStep)
-        
+
         self.globalLayout = QtGui.QVBoxLayout()
         self.globalLayout.setSpacing(2)
         self.globalLayout.setMargin(0)
@@ -158,7 +160,7 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
 
     def closeWindow(self):
         self.close()
-        
+
     def closeEvent(self, evt):
         pass
 
@@ -167,72 +169,93 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
         for i in range(0, self.canvasTabWidget.count()):
             self.updateStep(i)
         self.workflow.run()
-        
+
     def removeStep(self):
         removeIndex = self.canvasTabWidget.currentIndex()
-        self.canvasTabWidget.removeTab(removeIndex)   
-        self.workflow.removeStep(removeIndex) 
-    
+        self.canvasTabWidget.removeTab(removeIndex)
+        self.workflow.removeStep(removeIndex)
+
     def updateStep(self, stepNumber):
         stepDialog = self.canvasTabWidget.widget(stepNumber)
         # get customised default values for some parameter types
         if stepDialog.getMode() == NORMAL_MODE:
             if isinstance(stepDialog.normalModeDialog, AlgorithmDialog):
                 for param in stepDialog.alg.parameters:
-                    if isinstance(param, ParameterBoolean) or isinstance(param, ParameterNumber) or isinstance(param, ParameterString) or isinstance(param, ParameterSelection) or isinstance(param, ParameterExtent):
-                        # this is not very nice going so deep into step dialog but there seems to be no other way right now
-                        stepDialog.normalModeDialog.setParamValue(param, stepDialog.normalModeDialog.mainWidget.valueItems[param.name])
+                    if isinstance(param, ParameterBoolean) or\
+                       isinstance(param, ParameterNumber) or\
+                       isinstance(param, ParameterString) or\
+                       isinstance(param, ParameterSelection) or\
+                       isinstance(param, ParameterExtent):
+                        # this is not very nice going so deep into step dialog but there seems to
+                        # be no other way right now
+                        stepDialog.normalModeDialog.setParamValue(
+                                param,
+                                stepDialog.normalModeDialog.mainWidget.valueItems[param.name])
         elif stepDialog.getMode() == BATCH_MODE:
             col = 0
             for param in stepDialog.alg.parameters:
-                    if isinstance(param, ParameterBoolean) or isinstance(param, ParameterNumber) or isinstance(param, ParameterString) or isinstance(param, ParameterSelection) or isinstance(param, ParameterExtent):
-                        stepDialog.batchModeDialog.setParamValue(param, stepDialog.batchModeDialog.mainWidget.tblParameters.cellWidget(0, col))
+                    if isinstance(param, ParameterBoolean) or\
+                       isinstance(param, ParameterNumber) or\
+                       isinstance(param, ParameterString) or\
+                       isinstance(param, ParameterSelection) or\
+                       isinstance(param, ParameterExtent):
+                        stepDialog.batchModeDialog.setParamValue(
+                                param,
+                                stepDialog.batchModeDialog.mainWidget.tblParameters.cellWidget(0, col))
                     col += 1
-        
-        # update the step in the workflow            
-        self.workflow.changeStep(stepNumber, stepDialog.alg, stepDialog.getMode(), stepDialog.getInstructions())
-    
-    # Save workflow to text file        
+
+        # update the step in the workflow
+        self.workflow.changeStep(stepNumber, stepDialog.alg, stepDialog.getMode(),
+                                 stepDialog.getInstructions())
+
+    # Save workflow to text file
     def saveWorkflow(self):
-        if unicode(self.textGroup.text()).strip() == "" or unicode(self.textName.text()).strip() == "":
-            QtGui.QMessageBox.warning(self, "Warning", "Please enter group and model names before saving")
+        if unicode(self.textGroup.text()).strip() == "" or\
+           unicode(self.textName.text()).strip() == "":
+            QtGui.QMessageBox.warning(self, "Warning",
+                                      "Please enter group and model names before saving")
             return
         self.workflow.name = unicode(self.textName.text())
         self.workflow.group = unicode(self.textGroup.text())
-        
+
         # save the instructions for all the steps in the workflow
         for i in range(0, self.canvasTabWidget.count()):
             self.updateStep(i)
-        
+
         if self.workflow.descriptionFile:
             filename = self.workflow.descriptionFile
         else:
-            filename = unicode(QtGui.QFileDialog.getSaveFileName(self, "Save Workflow", WorkflowUtils.workflowPath(), "QGIS Processing workflows (*.workflow)"))
+            filename = unicode(QtGui.QFileDialog.getSaveFileName(self, "Save Workflow",
+                                                                 WorkflowUtils.workflowPath(),
+                                                                 "QGIS Processing workflows (*.workflow)"))
             if filename:
                 if not filename.endswith(".workflow"):
                     filename += ".workflow"
                 self.workflow.descriptionFile = filename
-        
+
         if filename:
             text = self.workflow.serialize()
-            fout = codecs.open(filename, 'w', encoding='utf-8') #open(filename, "w")
+            fout = codecs.open(filename, 'w', encoding='utf-8')
             fout.write(text)
             fout.close()
             self.update = True
             QtGui.QMessageBox.information(self, "Workflow saving", "Workflow was correctly saved.")
 
     # Open workflow from text file
-    def openWorkflow(self, filename = None):
+    def openWorkflow(self, filename=None):
         if not filename:
-            filename = QtGui.QFileDialog.getOpenFileName(self, "Open Workflow",  WorkflowUtils.workflowPath(), "Processing workflows (*.workflow)")
+            filename = QtGui.QFileDialog.getOpenFileName(self, "Open Workflow",
+                                                         WorkflowUtils.workflowPath(),
+                                                         "Processing workflows (*.workflow)")
         if filename:
             try:
                 self.workflow.openWorkflow(filename)
-                
+
                 self.canvasTabWidget.clear()
                 for i in range(0, self.workflow.getLength()):
                     # create a dialog for this algorithm
-                    stepDialog = StepDialog(self.workflow.getAlgorithm(i), self, os.path.dirname(filename), style=self.workflow.style)
+                    stepDialog = StepDialog(self.workflow.getAlgorithm(i), self,
+                                            os.path.dirname(filename), style=self.workflow.style)
                     stepDialog.setMode(self.workflow.getMode(i))
                     stepDialog.setInstructions(self.workflow.getInstructions(i))
                     # create new tab for it
@@ -242,30 +265,31 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
                 self.textName.setText(self.workflow.name)
 
             except WrongWorkflowException, e:
-                QtGui.QMessageBox.critical(self, "Could not open workflow", "The selected workflow could not be loaded\nWrong line:" + e.msg)
- 
+                QtGui.QMessageBox.critical(self, "Could not open workflow",
+                                           "The selected workflow could not be loaded\nWrong line:" + e.msg)
+
     # Change the mode (normal or batch execution) for the currently open StepDialog
     # This is a slot for a StepDialog signal
     def changeAlgMode(self, mode):
         # change the mode in the dialog
         self.canvasTabWidget.currentWidget().setMode(mode)
         # and in the step object
-        self.workflow.changeMode(self.canvasTabWidget.currentIndex(),mode)
-        
+        self.workflow.changeMode(self.canvasTabWidget.currentIndex(), mode)
+
     # Add new step (algorithm) to the workflow
     def addAlgorithm(self):
         item = self.algorithmTree.currentItem()
         if isinstance(item, TreeAlgorithmItem):
             alg = Processing.getAlgorithm(item.alg.commandLineName())
-            alg = alg.getCopy()#copy.deepcopy(alg)
-            
+            alg = alg.getCopy()
+
             # create a tab for this algorithm
-            stepDialog = StepDialog(alg, self, "")      
+            stepDialog = StepDialog(alg, self, "")
             self.canvasTabWidget.addTab(stepDialog, alg.name)
-            
-            # add this step to the workflow 
+
+            # add this step to the workflow
             self.workflow.addStep(alg, stepDialog.getMode(), stepDialog.getInstructions())
-    
+
     # List all the available algorithms in Processing
     def fillAlgorithmTree(self):
         self.algorithmTree.clear()
@@ -282,12 +306,13 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
             providers[provider.getName()] = provider
         for providerName in allAlgs.keys():
             # don't show workflows in available algorithms
-            if providerName == "workflow" or providerName == "modelertools" or WorkflowUtils.checkIfCollectionName(providerName):
+            if providerName == "workflow" or providerName == "modelertools" or\
+               WorkflowUtils.checkIfCollectionName(providerName):
                 continue
             groups = {}
             provider = allAlgs[providerName]
             algs = provider.values()
-            #add algorithms
+            # add algorithms
             for alg in algs:
                 if text == "" or text.lower() in alg.name.lower():
                     if alg.group in groups:
@@ -321,7 +346,3 @@ class TreeAlgorithmItem(QtGui.QTreeWidgetItem):
         self.alg = alg
         self.setText(0, alg.name)
         self.setIcon(0, alg.getIcon())
-
-
-
-        

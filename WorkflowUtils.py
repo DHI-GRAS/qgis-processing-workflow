@@ -31,6 +31,7 @@ from PyQt4 import QtGui
 from processing.core.ProcessingConfig import ProcessingConfig
 from processing.tools.system import mkdir
 
+
 class WorkflowUtils:
 
     WORKFLOW_FOLDER = "WORKFLOW_FOLDER"
@@ -48,12 +49,11 @@ class WorkflowUtils:
 
     @staticmethod
     def workflowIcon():
-        return  QtGui.QIcon(os.path.join(os.path.dirname(__file__), "images","icon.png"))
+        return QtGui.QIcon(os.path.join(os.path.dirname(__file__), "images", "icon.png"))
 
     @staticmethod
     def addWorkflowCollectionName(collectionName):
         WorkflowUtils.workflowCollectionNames.append(collectionName)
-
 
     @staticmethod
     def checkIfCollectionName(name):
@@ -61,5 +61,3 @@ class WorkflowUtils:
             if name == collectionName:
                 return True
         return False
-
-

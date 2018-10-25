@@ -16,7 +16,7 @@
 * by the Free Software Foundation, either version 3 of the License,       *
 * or (at your option) any later version.                                  *
 *                                                                         *
-* WOIS is distributed in the hope that it will be useful, but WITHOUT ANY * 
+* WOIS is distributed in the hope that it will be useful, but WITHOUT ANY *
 * WARRANTY; without even the implied warranty of MERCHANTABILITY or       *
 * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License   *
 * for more details.                                                       *
@@ -38,15 +38,15 @@ from processing_workflow.Workflow import Workflow
 from processing_workflow.WorkflowListDialog import WorkflowListDialog
 from processing_workflow.WrongWorkflowException import WrongWorkflowException
 
+
 class WorkflowProviderBase(AlgorithmProvider):
 
-    def __init__(self, activate = False):
+    def __init__(self, activate=False):
         AlgorithmProvider.__init__(self)
-        
-        
+
         self.activate = activate
         self.algs = []
-        
+
         self.descriptionFile = ""
         self.baseDir = ""
         self.description = ""
@@ -54,28 +54,28 @@ class WorkflowProviderBase(AlgorithmProvider):
         self.icon = ""
         self.aboutHTML = ""
         self.css = ""
-            
-        # Create action that will display workflow list dialog when toolbar button is clicked    
+
+        # Create action that will display workflow list dialog when toolbar button is clicked
         self.action = QAction(QIcon(""), self.getDescription(), iface.mainWindow())
         self.action.triggered.connect(self.displayWorkflowListDialog)
-        
+
         # Right click button actions
         self.contextMenuActions = [EditWorkflowAction(self), DeleteWorkflowAction(self)]
-        
+
         try:
             # QGIS 2.16 (and up?) Processing implementation
             from processing.core.ProcessingConfig import settingsWatcher
             settingsWatcher.settingsChanged.connect(self.addRemoveTaskbarButton)
         except ImportError:
             pass
-                   
+
     def unload(self):
         AlgorithmProvider.unload(self)
-    
-    # Load all the workflows saved in the workflow folder    
+
+    # Load all the workflows saved in the workflow folder
     def createAlgsList(self):
         pass
-                        
+
     def loadWorkflow(self, workflowFilePath):
         try:
             workflow = Workflow(self)
@@ -84,13 +84,17 @@ class WorkflowProviderBase(AlgorithmProvider):
                 workflow.provider = self
                 self.preloadedAlgs.append(workflow)
             else:
-                ProcessingLog.addToLog(ProcessingLog.LOG_ERROR, "Could not open Workflow algorithm: " + workflowFilePath)
+                ProcessingLog.addToLog(ProcessingLog.LOG_ERROR,
+                                       "Could not open Workflow algorithm: " + workflowFilePath)
         except WrongWorkflowException,e:
-            ProcessingLog.addToLog(ProcessingLog.LOG_ERROR, "Could not open Workflow algorithm " + workflowFilePath + ". "+e.msg)
+            ProcessingLog.addToLog(ProcessingLog.LOG_ERROR,
+                                   "Could not open Workflow algorithm " + workflowFilePath +
+                                   ". " + e.msg)
         except Exception,e:
-            ProcessingLog.addToLog(ProcessingLog.LOG_ERROR, "Could not open Workflow algorithm: " + workflowFilePath + ". Unknown exception: "+unicode(e)+"\n")
+            ProcessingLog.addToLog(ProcessingLog.LOG_ERROR,
+                                   "Could not open Workflow algorithm: " + workflowFilePath +
+                                   ". Unknown exception: "+unicode(e)+"\n")
 
-                    
     def getDescription(self):
         return self.description
 
@@ -102,7 +106,7 @@ class WorkflowProviderBase(AlgorithmProvider):
 
     def getActivateSetting(self):
         return 'ACTIVATE_' + self.getName().upper().replace(' ', '_')
-    
+
     def getTaskbarButtonSetting(self):
         return 'TASKBAR_BUTTON_' + self.getName().upper().replace(' ', '_')
 
@@ -114,16 +118,16 @@ class WorkflowProviderBase(AlgorithmProvider):
             iface.removeToolBarIcon(self.action)
         else:
             # Add toolbar button
-            iface.addToolBarIcon(self.action)  
-        
+            iface.addToolBarIcon(self.action)
+
     def loadAlgorithms(self):
         AlgorithmProvider.loadAlgorithms(self)
         self.addRemoveTaskbarButton()
-        
+
     def _loadAlgorithms(self):
         self.createAlgsList()
         self.algs = self.preloadedAlgs
-        
+
     # display a dialog listing all the workflows
     def displayWorkflowListDialog(self):
         dlg = WorkflowListDialog(self)

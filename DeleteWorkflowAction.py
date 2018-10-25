@@ -16,7 +16,7 @@
 * by the Free Software Foundation, either version 3 of the License,       *
 * or (at your option) any later version.                                  *
 *                                                                         *
-* WOIS is distributed in the hope that it will be useful, but WITHOUT ANY * 
+* WOIS is distributed in the hope that it will be useful, but WITHOUT ANY *
 * WARRANTY; without even the implied warranty of MERCHANTABILITY or       *
 * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License   *
 * for more details.                                                       *
@@ -31,13 +31,14 @@ from processing.gui.ContextAction import ContextAction
 import os
 from PyQt4 import QtGui
 
+
 class DeleteWorkflowAction(ContextAction):
 
     def __init__(self, provider):
-        self.name="Delete workflow"
+        self.name = "Delete workflow"
         self.provider = provider
 
-    # This is to make the plugin work both in QGIS 2.14 and 2.16. 
+    # This is to make the plugin work both in QGIS 2.14 and 2.16.
     # In 2.16 Processing self.alg was changed to self.itemData.
     def setData(self, itemData, toolbox):
         ContextAction.setData(self, itemData, toolbox)
@@ -48,8 +49,9 @@ class DeleteWorkflowAction(ContextAction):
 
     def execute(self, alg):
         reply = QtGui.QMessageBox.question(None, 'Confirmation',
-                            "Are you sure you want to delete this workflow?", QtGui.QMessageBox.Yes |
-                            QtGui.QMessageBox.No, QtGui.QMessageBox.No)
+                                           "Are you sure you want to delete this workflow?",
+                                           QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
+                                           QtGui.QMessageBox.No)
         if reply == QtGui.QMessageBox.Yes:
             os.remove(self.alg.descriptionFile)
             try:

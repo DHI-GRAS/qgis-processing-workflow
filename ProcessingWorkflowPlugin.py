@@ -16,7 +16,7 @@
 * by the Free Software Foundation, either version 3 of the License,       *
 * or (at your option) any later version.                                  *
 *                                                                         *
-* WOIS is distributed in the hope that it will be useful, but WITHOUT ANY * 
+* WOIS is distributed in the hope that it will be useful, but WITHOUT ANY *
 * WARRANTY; without even the implied warranty of MERCHANTABILITY or       *
 * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License   *
 * for more details.                                                       *
@@ -26,25 +26,20 @@
 ***************************************************************************
 """
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-from qgis.core import *
-import os, sys
+import os
+import sys
 import inspect
-from processing.core.Processing import Processing  
+from processing.core.Processing import Processing
 from processing_workflow.WorkflowProvider import WorkflowProvider
 from processing_workflow.WorkflowAlgListListener import WorkflowAlgListListener
-from processing_workflow.WorkflowOnlyAlgorithmProvider import WorkflowOnlyAlgorithmProvider 
-try:
-    # QGIS 2.16 (and up?) Processing implementation
-    from processing.core.alglist import algList
-except ImportError:
-    # QGIS 2.14 Processing implementation
-    algList = None
+from processing_workflow.WorkflowOnlyAlgorithmProvider import WorkflowOnlyAlgorithmProvider
+from processing.core.alglist import algList
 
-cmd_folder = os.path.split(inspect.getfile( inspect.currentframe() ))[0]
+
+cmd_folder = os.path.split(inspect.getfile(inspect.currentframe()))[0]
 if cmd_folder not in sys.path:
     sys.path.insert(0, cmd_folder)
+
 
 class ProcessingWorkflowPlugin:
 
@@ -53,20 +48,20 @@ class ProcessingWorkflowPlugin:
         self.workflowOnlyAlgorithmProvider = WorkflowOnlyAlgorithmProvider()
         # Save reference to the QGIS interface
         self.iface = iface
-        
+
     def initGui(self):
         self.algListener = WorkflowAlgListListener(self.provider)
         if algList:
             # QGIS 2.16 (and up?) Processing implementation
-            algList.providerAdded.connect(self.algListener.algsListHasChanged)  
+            algList.providerAdded.connect(self.algListener.algsListHasChanged)
             algList.providerRemoved.connect(self.algListener.algsListHasChanged)
         else:
             # QGIS 2.14 Processing implementation
             Processing.addAlgListListener(self.algListener)
-        
-        Processing.addProvider(self.provider, updateList = True)
-        Processing.addProvider(self.workflowOnlyAlgorithmProvider, updateList = True)
-            
+
+        Processing.addProvider(self.provider, updateList=True)
+        Processing.addProvider(self.workflowOnlyAlgorithmProvider, updateList=True)
+
     def unload(self):
         if algList:
             # QGIS 2.16 (and up?) Processing implementation
@@ -78,4 +73,3 @@ class ProcessingWorkflowPlugin:
 
         Processing.removeProvider(self.provider)
         Processing.removeProvider(self.workflowOnlyAlgorithmProvider)
-

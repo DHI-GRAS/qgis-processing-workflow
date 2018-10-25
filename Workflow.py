@@ -45,6 +45,7 @@ from processing_workflow.WorkflowUtils import WorkflowUtils
 
 DIRNAME = os.path.dirname(__file__)
 
+
 # Class containing the list of steps (algorithms) in the workflow together with the mode
 # and instructions for each step
 class Workflow(GeoAlgorithm):
@@ -58,19 +59,26 @@ class Workflow(GeoAlgorithm):
         self.group = ''
         self.descriptionFile = ''
         self.style = None
-        self.parameters = [ParameterString("Info", "Workflow can not be run as a batch process. Please close this dialog and execute as a normal process.", "", False)]
+        self.parameters = [ParameterString("Info", "Workflow can not be run as a batch process." +
+                                                   "Please close this dialog and execute as a " +
+                                                   "normal process.",
+                                           "", False)]
         self.showInModeler = False
 
-    def addStep(self, algorithm, mode, instructions, algParameters = {}):
-        step = {'algorithm' : algorithm, 'mode' : mode, 'instructions' : instructions, 'parameters' : algParameters}
+    def addStep(self, algorithm, mode, instructions, algParameters={}):
+        step = {'algorithm': algorithm, 'mode': mode, 'instructions': instructions,
+                'parameters': algParameters}
         self._steps.append(step)
 
-    def changeStep(self, index, algorithm, mode, instructions, algParameters = {}):
+    def changeStep(self, index, algorithm, mode, instructions, algParameters={}):
         algParameters = {}
         for param in algorithm.parameters:
-            if isinstance(param, ParameterBoolean) or isinstance(param, ParameterNumber) or isinstance(param, ParameterString) or isinstance(param, ParameterSelection) or isinstance(param, ParameterExtent):
+            if isinstance(param, ParameterBoolean) or isinstance(param, ParameterNumber) or\
+               isinstance(param, ParameterString) or isinstance(param, ParameterSelection) or\
+               isinstance(param, ParameterExtent):
                 algParameters[param.name] = param.value
-        self._steps[index] = {'algorithm' : algorithm, 'mode' : mode, 'instructions' : instructions, 'parameters' : algParameters}
+        self._steps[index] = {'algorithm': algorithm, 'mode': mode, 'instructions': instructions,
+                              'parameters': algParameters}
 
     def changeMode(self, index, mode):
         self._steps[index]['mode'] = mode
@@ -94,7 +102,7 @@ class Workflow(GeoAlgorithm):
         try:
             return self.provider.getIcon()
         except:
-            return  WorkflowUtils.workflowIcon()
+            return WorkflowUtils.workflowIcon()
 
     def getStyle(self):
         styleFile = os.path.join(self.provider.baseDir, self.provider.css)
@@ -130,7 +138,7 @@ class Workflow(GeoAlgorithm):
                 step = None
 
             # finish the workflow or execute the next step
-            if step == None:
+            if step is None:
                 GrassUtils.endGrassSession()
                 return stepDialog.executed
             else:
@@ -141,7 +149,11 @@ class Workflow(GeoAlgorithm):
         alg = step['algorithm']
         for paramName in parameters.iterkeys():
             param = alg.getParameterFromName(paramName)
-            if param and (isinstance(param, ParameterBoolean) or isinstance(param, ParameterNumber) or isinstance(param, ParameterString) or isinstance(param, ParameterSelection) or isinstance(param, ParameterExtent)):
+            if param and (isinstance(param, ParameterBoolean) or
+                          isinstance(param, ParameterNumber) or
+                          isinstance(param, ParameterString) or
+                          isinstance(param, ParameterSelection) or
+                          isinstance(param, ParameterExtent)):
                 param.default = parameters[paramName]
 
     def executeStep(self, step):
@@ -150,7 +162,8 @@ class Workflow(GeoAlgorithm):
         else:
             GrassUtils.endGrassSession()
         self.setStepParameters(step)
-        stepDialog = StepDialog(step['algorithm'], None, os.path.dirname(self.descriptionFile), False, style=self.style)
+        stepDialog = StepDialog(step['algorithm'], None, os.path.dirname(self.descriptionFile),
+                                False, style=self.style)
         stepDialog.setMode(step['mode'])
         stepDialog.setInstructions(step['instructions'])
         stepDialog.setWindowTitle(
@@ -181,8 +194,8 @@ class Workflow(GeoAlgorithm):
             return (self._steps[0])
 
     def serialize(self):
-        s=".NAME:" + unicode(self.name) + "\n"
-        s +=".GROUP:" + unicode(self.group) + "\n"
+        s = ".NAME:" + unicode(self.name) + "\n"
+        s += ".GROUP:" + unicode(self.group) + "\n"
 
         for step in self._steps:
             s += ".ALGORITHM:" + step['algorithm'].commandLineName() + "\n"
@@ -190,8 +203,8 @@ class Workflow(GeoAlgorithm):
             s += ".MODE:" + step['mode'] + "\n"
             s += ".INSTRUCTIONS:" + step['instructions']
             if not unicode(s).endswith("\n"):
-                s+="\n"
-            s +="!INSTRUCTIONS" + "\n"
+                s += "\n"
+            s += "!INSTRUCTIONS" + "\n"
 
         return s
 
@@ -202,8 +215,8 @@ class Workflow(GeoAlgorithm):
         self.descriptionFile = filename
         instructions = False
         try:
-            for line in fileinput.input(filename, openhook = fileinput.hook_encoded("utf-8")):
-                line= line.rstrip()
+            for line in fileinput.input(filename, openhook=fileinput.hook_encoded("utf-8")):
+                line = line.rstrip()
 
                 # comment line
                 if line.startswith("#"):
@@ -252,9 +265,9 @@ class Workflow(GeoAlgorithm):
                     if line == "!INSTRUCTIONS":
                         instructions = False
                     elif line == "":
-                        self._steps[-1]['instructions'] +="\n"
+                        self._steps[-1]['instructions'] += "\n"
                     else:
-                        self._steps[-1]['instructions'] +=line+"\n"
+                        self._steps[-1]['instructions'] += line+"\n"
 
         except WrongWorkflowException:
             msg = "Error on line number "+unicode(fileinput.filelineno())+": "+line+"\n"
@@ -281,4 +294,3 @@ class WorkflowDialog(QtGui.QDialog):
 
     def show(self):
         None
-

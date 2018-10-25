@@ -13,16 +13,15 @@ class CreateEditCollectionAction(ToolboxAction):
         self.group = "Tools"
         self.i18n_group = self.tr(self.group)
         self.workflowProvider = workflowProvider
-        
+
     def getIcon(self):
         return QtGui.QIcon(os.path.dirname(__file__) + "/images/icon.png")
-    
+
     def execute(self):
         dlg = CollectionCreatorDialog(None)
         dlg.exec_()
         if dlg.update and dlg.confFile:
             # Load the new collection, activate it and update Processing Toolbox
-            workflowCollection = WorkflowCollection(iface, dlg.confFile, self.workflowProvider, activate = True)
-            self.workflowProvider.addCollection(workflowCollection, updateToolbox = True)
-
-            
+            workflowCollection = WorkflowCollection(iface, dlg.confFile, self.workflowProvider,
+                                                    activate=True)
+            self.workflowProvider.addCollection(workflowCollection, updateToolbox=True)

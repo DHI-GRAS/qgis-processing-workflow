@@ -16,7 +16,7 @@
 * by the Free Software Foundation, either version 3 of the License,       *
 * or (at your option) any later version.                                  *
 *                                                                         *
-* WOIS is distributed in the hope that it will be useful, but WITHOUT ANY * 
+* WOIS is distributed in the hope that it will be useful, but WITHOUT ANY *
 * WARRANTY; without even the implied warranty of MERCHANTABILITY or       *
 * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License   *
 * for more details.                                                       *
@@ -30,13 +30,14 @@ from processing_workflow.Workflow import Workflow
 from processing.gui.ContextAction import ContextAction
 from processing_workflow.WorkflowCreatorDialog import WorkflowCreatorDialog
 
+
 class EditWorkflowAction(ContextAction):
 
     def __init__(self, provider):
-        self.name="Edit workflow"
+        self.name = "Edit workflow"
         self.provider = provider
 
-    # This is to make the plugin work both in QGIS 2.14 and 2.16. 
+    # This is to make the plugin work both in QGIS 2.14 and 2.16.
     # In 2.16 Processing self.alg was changed to self.itemData.
     def setData(self, itemData, toolbox):
         ContextAction.setData(self, itemData, toolbox)

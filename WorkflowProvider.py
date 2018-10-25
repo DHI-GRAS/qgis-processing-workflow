@@ -16,7 +16,7 @@
 * by the Free Software Foundation, either version 3 of the License,       *
 * or (at your option) any later version.                                  *
 *                                                                         *
-* WOIS is distributed in the hope that it will be useful, but WITHOUT ANY * 
+* WOIS is distributed in the hope that it will be useful, but WITHOUT ANY *
 * WARRANTY; without even the implied warranty of MERCHANTABILITY or       *
 * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License   *
 * for more details.                                                       *
@@ -28,8 +28,6 @@
 
 import os
 import json
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
 from qgis.utils import iface
 from processing.core.ProcessingConfig import ProcessingConfig, Setting
 from processing.core.AlgorithmProvider import AlgorithmProvider
@@ -45,36 +43,37 @@ from processing_workflow.WrongWorkflowException import WrongWorkflowException
 class WorkflowProvider(WorkflowProviderBase):
 
     def __init__(self):
-        
+
         WorkflowProviderBase.__init__(self)
-        
+
         # Set constant properties
         self.description = "Processing Workflows (Step by step guidance)"
         self.icon = WorkflowUtils.workflowIcon()
         self.name = "workflow"
-        
+
         self.actions += [CreateNewWorkflowAction(self), CreateEditCollectionAction(self)]
         self.collections = []
         self.collectionListeners = []
-        
 
     def initializeSettings(self):
         AlgorithmProvider.initializeSettings(self)
-        ProcessingConfig.addSetting(Setting(self.getDescription(), WorkflowUtils.WORKFLOW_FOLDER, "Workflows' folder", WorkflowUtils.workflowPath()))
-        ProcessingConfig.addSetting(Setting(self.getDescription(), self.getTaskbarButtonSetting(), "Show workflow button on taskbar", True))
+        ProcessingConfig.addSetting(Setting(self.getDescription(), WorkflowUtils.WORKFLOW_FOLDER,
+                                            "Workflows' folder", WorkflowUtils.workflowPath()))
+        ProcessingConfig.addSetting(Setting(self.getDescription(), self.getTaskbarButtonSetting(),
+                                            "Show workflow button on taskbar", True))
 
     def unload(self):
         for collection in self.collections:
             Processing.removeProvider(collection)
-        self.collections = [] 
-        self.collectionListeners = []   
+        self.collections = []
+        self.collectionListeners = []
         WorkflowProviderBase.unload(self)
         ProcessingConfig.removeSetting(WorkflowUtils.WORKFLOW_FOLDER)
         ProcessingConfig.removeSetting(self.getTaskbarButtonSetting())
         # Remove toolbar button
         iface.removeToolBarIcon(self.action)
-    
-    # Load all the workflows saved in the workflow folder    
+
+    # Load all the workflows saved in the workflow folder
     def createAlgsList(self):
         self.preloadedAlgs = []
         folder = WorkflowUtils.workflowPath()
@@ -94,20 +93,21 @@ class WorkflowProvider(WorkflowProviderBase):
                             collectionAlreadyExists = True
                             break
                     if not collectionAlreadyExists:
-                            workflowCollection = WorkflowCollection(iface, os.path.join(root, "collection.conf"), self)
+                            workflowCollection = WorkflowCollection(
+                                    iface, os.path.join(root, "collection.conf"), self)
                             self.addCollection(workflowCollection, False)
                 except WrongWorkflowException:
-                    # A warning message was already printed in WorkflowCollection constructor so nothing to do here 
+                    # A warning message was already printed in WorkflowCollection constructor so
+                    # nothing to do here
                     pass
-                
+
             else:
                 # Load workflows which do not belong to any collection
                 for descriptionFile in files:
                     if descriptionFile.endswith(".workflow"):
-                        self.loadWorkflow(os.path.join(root,descriptionFile))
-                        
+                        self.loadWorkflow(os.path.join(root, descriptionFile))
+
     def addCollection(self, workflowCollection, updateToolbox):
         self.collections.append(workflowCollection)
         Processing.addProvider(workflowCollection, updateToolbox)
         WorkflowUtils.addWorkflowCollectionName(workflowCollection.getName())
-                        
