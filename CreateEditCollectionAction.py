@@ -5,11 +5,10 @@ from processing_workflow.CollectionCreatorDialog import CollectionCreatorDialog
 import os
 from PyQt4 import QtGui
 
-#import traceback
 
-class CreateNewCollectionAction(ToolboxAction):
+class CreateEditCollectionAction(ToolboxAction):
     def __init__(self, workflowProvider):
-        self.name = "Create new collection"
+        self.name = "Create/edit collection"
         self.i18n_name = self.tr(self.name)
         self.group = "Tools"
         self.i18n_group = self.tr(self.group)
