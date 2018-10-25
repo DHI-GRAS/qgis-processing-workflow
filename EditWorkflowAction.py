@@ -46,7 +46,7 @@ class EditWorkflowAction(ContextAction):
         return isinstance(self.alg, Workflow) and self.alg.provider == self.provider
 
     def execute(self):
-        dlg = WorkflowCreatorDialog(self.alg)
+        dlg = WorkflowCreatorDialog(self.alg, self.provider)
         dlg.exec_()
         if dlg.update:
             try:

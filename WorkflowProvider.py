@@ -50,6 +50,8 @@ class WorkflowProvider(WorkflowProviderBase):
         self.description = "Processing Workflows (Step by step guidance)"
         self.icon = WorkflowUtils.workflowIcon()
         self.name = "workflow"
+        self.baseDir = ""
+        self.css = ""
         
         WorkflowProviderBase.__init__(self)
         self.actions += [CreateNewWorkflowAction(self), CreateNewCollectionAction(self)]

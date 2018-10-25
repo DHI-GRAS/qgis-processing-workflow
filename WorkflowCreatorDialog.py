@@ -44,7 +44,7 @@ from processing_workflow.WrongWorkflowException import WrongWorkflowException
 
 # Dialog for creating new workflows from all the available SEXTANTE algorithms
 class WorkflowCreatorDialog(AlgorithmDialogBase):
-    def __init__(self, workflow):
+    def __init__(self, workflow, provider=None):
         QtGui.QDialog.__init__(self)
         self.setupUi()
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowSystemMenuHint |
@@ -53,15 +53,16 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
         # set as window modal
         self.setWindowModality(1)
         
-        self.workflow = Workflow(None)
-
         self.help = None
         self.update = False #indicates whether to update or not the toolbox after closing this dialog
         self.executed = False
         
         if workflow:
+            self.workflow = workflow
             self.openWorkflow(workflow.descriptionFile)
             self.setWindowIcon = workflow.getIcon()
+        else:
+            self.workflow = Workflow(provider)
 
     def setupUi(self):
         self.resize(1200, 600)
@@ -223,27 +224,25 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
     # Open workflow from text file
     def openWorkflow(self, filename = None):
         if not filename:
-            filename = QtGui.QFileDialog.getOpenFileName(self, "Open Workflow",  WorkflowUtils.workflowPath(), "SEXTANTE workflows (*.workflow)")
+            filename = QtGui.QFileDialog.getOpenFileName(self, "Open Workflow",  WorkflowUtils.workflowPath(), "Processing workflows (*.workflow)")
         if filename:
             try:
-                workflow = Workflow(None)
-                workflow.openWorkflow(filename)
-                self.workflow = workflow
+                self.workflow.openWorkflow(filename)
                 
                 self.canvasTabWidget.clear()
                 for i in range(0, self.workflow.getLength()):
                     # create a dialog for this algorithm
-                    stepDialog = StepDialog(self.workflow.getAlgorithm(i), self, os.path.dirname(filename), style=workflow.style)
+                    stepDialog = StepDialog(self.workflow.getAlgorithm(i), self, os.path.dirname(filename), style=self.workflow.style)
                     stepDialog.setMode(self.workflow.getMode(i))
                     stepDialog.setInstructions(self.workflow.getInstructions(i))
                     # create new tab for it
                     self.canvasTabWidget.addTab(stepDialog, self.workflow.getAlgorithm(i).name)
 
-                self.textGroup.setText(workflow.group)
-                self.textName.setText(workflow.name)
+                self.textGroup.setText(self.workflow.group)
+                self.textName.setText(self.workflow.name)
 
             except WrongWorkflowException, e:
-                QtGui.QMessageBox.critical(self, "Could not open workflowl", "The selected workflow could not be loaded\nWrong line:" + e.msg)
+                QtGui.QMessageBox.critical(self, "Could not open workflow", "The selected workflow could not be loaded\nWrong line:" + e.msg)
  
     # Change the mode (normal or batch execution) for the currently open StepDialog
     # This is a slot for a StepDialog signal

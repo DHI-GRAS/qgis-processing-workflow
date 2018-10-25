@@ -96,6 +96,13 @@ class Workflow(GeoAlgorithm):
         except:
             return  WorkflowUtils.workflowIcon()
 
+    def getStyle(self):
+        styleFile = os.path.join(self.provider.baseDir, self.provider.css)
+        if not os.path.isfile(styleFile):
+            styleFile = os.path.join(DIRNAME, "style.css")
+        with open(styleFile, 'r') as fi:
+            self.style = fi.read()
+
     def getCopy(self):
         newone = Workflow(self.provider)
         newone.openWorkflow(self.descriptionFile)
@@ -190,16 +197,11 @@ class Workflow(GeoAlgorithm):
 
     # Read workflow from text file
     def openWorkflow(self, filename):
+        self.getStyle()
         self._steps = list()
         self.descriptionFile = filename
         instructions = False
         try:
-            styleFile = os.path.join(os.path.dirname(filename), "style.css")
-            if not os.path.exists(styleFile):
-                styleFile = os.path.join(DIRNAME, "style.css")
-            with open(styleFile, 'r') as fi:
-                self.style = fi.read()
-
             for line in fileinput.input(filename, openhook = fileinput.hook_encoded("utf-8")):
                 line= line.rstrip()
 

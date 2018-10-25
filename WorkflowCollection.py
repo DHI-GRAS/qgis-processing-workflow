@@ -18,6 +18,11 @@ class WorkflowCollection(WorkflowProviderBase):
         # Read properties from configuration file
         self.descriptionFile = descriptionFile
         self.baseDir = os.path.dirname(descriptionFile)
+        self.description = ""
+        self.name = ""
+        self.icon = ""
+        self.aboutHTML = ""
+        self.css = ""
         self.processDescriptionFile()
         
         # If we just want to parse the description file (e.g. when creating
@@ -54,19 +59,25 @@ class WorkflowCollection(WorkflowProviderBase):
                 self.name = settings["name"]
                 self.icon = os.path.join(self.baseDir, settings["icon"])
                 self.aboutHTML = "".join(settings["aboutHTML"])
+                self.css = os.path.join(self.baseDir, settings["css"])
             except ValueError:
                 msg = self.tr("Workflow collection %s could not be loaded due to invalid JSON collection.conf file" % (self.baseDir))
-                self.iface.messageBar().pushMessage(self.tr("Warning"), msg, QgsMessageBar.WARNING, 3)
+                if self.iface:
+                    self.iface.messageBar().pushMessage(self.tr("Warning"), msg, QgsMessageBar.WARNING, 3)
                 ProcessingLog.addToLog(ProcessingLog.LOG_ERROR, msg)
                 raise WrongWorkflowException
             except KeyError, e:
-                msg = self.tr("Workflow collection %s could not be loaded due to missing %s field in JSON collection.conf file" % (self.baseDir, str(e)))
-                self.iface.messageBar().pushMessage(self.tr("Warning"), msg, QgsMessageBar.WARNING, 3)
+                msg = self.tr("Workflow collection %s could not be fully loaded due to missing %s field in JSON collection.conf file" % (self.baseDir, str(e)))
+                if self.iface:
+                    self.iface.messageBar().pushMessage(self.tr("Warning"), msg, QgsMessageBar.WARNING, 3)
                 ProcessingLog.addToLog(ProcessingLog.LOG_ERROR, msg)
-                raise WrongWorkflowException
        
     # Load all the workflows saved in the workflow folder    
     def createAlgsList(self):
         self.preloadedAlgs = []
         for descriptionFile in glob.glob(os.path.join(self.baseDir, "*.workflow")):
             self.loadWorkflow(descriptionFile)
+            
+    def loadAlgorithms(self):
+        self.processDescriptionFile()
+        super(WorkflowCollection, self).loadAlgorithms()
