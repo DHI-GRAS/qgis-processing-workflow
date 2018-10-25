@@ -47,20 +47,16 @@ class WorkflowProviderBase(AlgorithmProvider):
         self.activate = activate
         self.algs = []
         
-        # NOTE: If/when https://github.com/qgis/QGIS/pull/3317 gets merged
-        # this can be removed.
-        # It is required because Processing.initialise() initializes WorkflowProviderBase
-        # while icon, description and name are set in its child classes (i.e. WorkflowProvider
-        # and WorkflowCollection).
-        try:
-            icon = self.getIcon()
-        except AttributeError:
-            icon = QIcon("")
-            self.description = ""
-            self.name = ""
+        self.descriptionFile = ""
+        self.baseDir = ""
+        self.description = ""
+        self.name = ""
+        self.icon = ""
+        self.aboutHTML = ""
+        self.css = ""
             
         # Create action that will display workflow list dialog when toolbar button is clicked    
-        self.action = QAction(icon, self.getDescription(), iface.mainWindow())
+        self.action = QAction(QIcon(""), self.getDescription(), iface.mainWindow())
         self.action.triggered.connect(self.displayWorkflowListDialog)
         
         # Right click button actions

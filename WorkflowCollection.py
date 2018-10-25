@@ -15,21 +15,16 @@ class WorkflowCollection(WorkflowProviderBase):
         
         self.iface = iface
         
-        # Read properties from configuration file
-        self.descriptionFile = descriptionFile
-        self.baseDir = os.path.dirname(descriptionFile)
-        self.description = ""
-        self.name = ""
-        self.icon = ""
-        self.aboutHTML = ""
-        self.css = ""
-        self.processDescriptionFile()
-        
         # If we just want to parse the description file (e.g. when creating
         # new collection) then iface is not provided and we don't want to do 
         # proper initialization 
         if iface:
             WorkflowProviderBase.__init__(self, activate)
+        
+        # Read properties from configuration file
+        self.descriptionFile = descriptionFile
+        self.baseDir = os.path.dirname(descriptionFile)
+        self.processDescriptionFile()
         
         self.workflowProvider = workflowProvider
         

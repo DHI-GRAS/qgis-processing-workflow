@@ -46,14 +46,13 @@ class WorkflowProvider(WorkflowProviderBase):
 
     def __init__(self):
         
+        WorkflowProviderBase.__init__(self)
+        
         # Set constant properties
         self.description = "Processing Workflows (Step by step guidance)"
         self.icon = WorkflowUtils.workflowIcon()
         self.name = "workflow"
-        self.baseDir = ""
-        self.css = ""
         
-        WorkflowProviderBase.__init__(self)
         self.actions += [CreateNewWorkflowAction(self), CreateNewCollectionAction(self)]
         self.collections = []
         self.collectionListeners = []
