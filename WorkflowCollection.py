@@ -27,6 +27,9 @@ class WorkflowCollection(WorkflowProviderBase):
         self.baseDir = os.path.dirname(descriptionFile)
         self.processDescriptionFile()
 
+        if iface:
+            self._addToolbarIcon()
+
         self.workflowProvider = workflowProvider
 
     def unload(self):

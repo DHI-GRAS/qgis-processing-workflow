@@ -55,10 +55,6 @@ class WorkflowProviderBase(AlgorithmProvider):
         self.aboutHTML = ""
         self.css = ""
 
-        # Create action that will display workflow list dialog when toolbar button is clicked
-        self.action = QAction(QIcon(""), self.getDescription(), iface.mainWindow())
-        self.action.triggered.connect(self.displayWorkflowListDialog)
-
         # Right click button actions
         self.contextMenuActions = [EditWorkflowAction(self), DeleteWorkflowAction(self)]
 
@@ -72,6 +68,11 @@ class WorkflowProviderBase(AlgorithmProvider):
     def unload(self):
         AlgorithmProvider.unload(self)
 
+    def _addToolbarIcon(self):
+        # Create action that will display workflow list dialog when toolbar button is clicked
+        self.action = QAction(self.getIcon(), self.getDescription(), iface.mainWindow())
+        self.action.triggered.connect(self.displayWorkflowListDialog)
+    
     # Load all the workflows saved in the workflow folder
     def createAlgsList(self):
         pass

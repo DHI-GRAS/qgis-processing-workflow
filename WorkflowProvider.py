@@ -54,6 +54,8 @@ class WorkflowProvider(WorkflowProviderBase):
         self.actions += [CreateNewWorkflowAction(self), CreateEditCollectionAction(self)]
         self.collections = []
         self.collectionListeners = []
+  
+        self._addToolbarIcon()
 
     def initializeSettings(self):
         AlgorithmProvider.initializeSettings(self)
