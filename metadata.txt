@@ -13,13 +13,19 @@ about=
 	Plugin for QGIS Processing Toolbox for creating processing workflows. Workflows provide step-by-step instructions and guidance for less experienced users thus facilitating capacity building in Earth observation data analysis and GIS tasks.
 	
 	This plugin is part of the Water Observation Information System (WOIS) developed under the TIGER-NET project funded by the European Space Agency as part of the long-term TIGER initiative aiming at promoting the use of Earth Observation (EO) for improved Integrated Water Resources Management (IWRM) in Africa. Copyright (C) 2014 TIGER-NET (www.tiger-net.org)
+    
+The plugin contains Python markdown package. See https://github.com/Python-Markdown/markdown for license and details.
 
-version=1.2.2
-qgisMinimumVersion=2.14
+
+version=1.3.0
+qgisMinimumVersion=2.16
 
 # Optional items:
 
-changelog=1.2.2
+changelog=1.3.0
+    - add possibility to use Markdown to set workflow instructions
+    - add CSS styling to collections to ensure consistent look
+    1.2.2
     - fix occasional exception when closing QGIS
     1.2.1
     - fix compatibility with QGIS 2.16
@@ -41,7 +47,7 @@ changelog=1.2.2
 # tags are comma separated with spaces allowed
 tags=processing, workflow, instructions
 
-homepage=http://www.tiger-net.org
+homepage=https://github.com/DHI-GRAS/qgis-processing-workflow/blob/master/README.md
 tracker=https://github.com/DHI-GRAS/processing_workflow/issues
 repository=https://github.com/DHI-GRAS/processing_workflow
 icon=images/icon.png
@@ -52,7 +58,7 @@ deprecated=False
 
 # Author contact information
 author=Radoslaw Guzinski
-email=radoslaw.guzinski@esa.int
+email=rmgu@dhigroup.com
 
 
 
