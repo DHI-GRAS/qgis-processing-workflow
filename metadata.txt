@@ -10,19 +10,21 @@ name= Processing Workflows
 description=A plugin that adds workflow functionality to Processing.
 
 about= 
-	Plugin for QGIS Processing Toolbox for creating processing workflows. Workflows provide step-by-step instructions and guidance for less experienced users thus facilitating capacity building in Earth observation data analysis and GIS tasks.
+	Plugin for QGIS Processing Toolbox for creating processing workflows and workflow collections. Workflows provide step-by-step instructions and guidance for less experienced users thus facilitating capacity building in Earth observation data analysis and GIS tasks.
 	
-	This plugin is part of the Water Observation Information System (WOIS) developed under the TIGER-NET project funded by the European Space Agency as part of the long-term TIGER initiative aiming at promoting the use of Earth Observation (EO) for improved Integrated Water Resources Management (IWRM) in Africa. Copyright (C) 2014 TIGER-NET (www.tiger-net.org)
+	This plugin is part of the Water Observation Information System (WOIS) developed under the TIGER-NET project and GlobWetland Toolbox developed under the GlobWetland Agrica project. Both projects were funded by the European Space Agency as part of a long-term initiative aiming at promoting the use of Earth Observation (EO) for improved Integrated Water Resources Management (IWRM) and environmental monitoring and reporting in Africa. Copyright (C) 2014-2018 DHI GRAS (www.dhi-gras.com)
     
 The plugin contains Python markdown package. See https://github.com/Python-Markdown/markdown for license and details.
 
 
-version=1.3.0
+version=1.3.1
 qgisMinimumVersion=2.16
 
 # Optional items:
 
-changelog=1.3.0
+changelog=1.3.1
+    - fix an exception when an existing collection does not have the css field
+    1.3.0
     - add possibility to use Markdown to set workflow instructions
     - add CSS styling to collections to ensure consistent look
     1.2.2
