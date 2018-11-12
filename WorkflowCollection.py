@@ -72,8 +72,8 @@ class WorkflowCollection(WorkflowProviderBase):
                 ProcessingLog.addToLog(ProcessingLog.LOG_ERROR, msg)
                 raise WrongWorkflowException
             except KeyError, e:
-                msg = self.tr("Workflow collection %s could not be fully loaded due to missing " +
-                              "%s field in JSON collection.conf file" % (self.baseDir, str(e)))
+                msg = self.tr("Workflow collection %s could not be fully loaded " % self.baseDir +
+                              "due to missing %s field in JSON collection.conf file" % e)
                 if self.iface:
                     self.iface.messageBar().pushMessage(self.tr("Warning"), msg,
                                                         QgsMessageBar.WARNING, 3)
