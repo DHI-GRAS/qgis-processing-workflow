@@ -1,3 +1,4 @@
+import io
 import json
 import os
 import shutil
@@ -96,8 +97,8 @@ class CollectionCreatorDialog(WIDGET, BASE):
         confOptions["icon"] = self.copyFile(self.lineEdit_icon.text())
         confOptions["css"] = self.copyFile(self.lineEdit_css.text())
         confOptions["aboutHTML"] = self.textEdit_about.toPlainText()
-        with open(self.confFile, 'w') as f1:
-            json.dump(confOptions, f1, indent=4, separators=(',', ':'))
+        with io.open(self.confFile, 'w', encoding="utf-8") as fp:
+            fp.write(json.dumps(confOptions, indent=4, separators=(',', ':'), ensure_ascii=False))
         for provider in algList.providers:
             try:
                 if provider.descriptionFile == self.confFile:

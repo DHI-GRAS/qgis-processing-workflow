@@ -1,3 +1,4 @@
+import io
 import json
 import os
 import glob
@@ -21,6 +22,8 @@ class WorkflowCollection(WorkflowProviderBase):
         # proper initialization
         if iface:
             WorkflowProviderBase.__init__(self, activate)
+        else:
+            self.css = ""
 
         # Read properties from configuration file
         self.descriptionFile = descriptionFile
@@ -55,9 +58,9 @@ class WorkflowCollection(WorkflowProviderBase):
 
     # Read the JSON description file
     def processDescriptionFile(self):
-        with open(self.descriptionFile) as f:
+        with io.open(self.descriptionFile, "r", encoding="utf-8-sig") as f:
             try:
-                settings = json.load(f)
+                settings = json.loads(f.read())
                 self.description = settings["description"]
                 self.name = settings["name"]
                 self.icon = os.path.join(self.baseDir, settings["icon"])

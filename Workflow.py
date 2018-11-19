@@ -25,7 +25,7 @@
 * with this program.  If not, see <http://www.gnu.org/licenses/>.         *
 ***************************************************************************
 """
-
+from io import open
 import os
 import fileinput
 import json
@@ -167,7 +167,7 @@ class Workflow(GeoAlgorithm):
         stepDialog.setMode(step['mode'])
         stepDialog.setInstructions(step['instructions'])
         stepDialog.setWindowTitle(
-            "Workflow {self.name}, Step {stepno} of {nsteps}: {algname}"
+            u"Workflow {self.name}, Step {stepno} of {nsteps}: {algname}"
             .format(
                 self=self,
                 stepno=(self._steps.index(step) + 1),
@@ -214,70 +214,68 @@ class Workflow(GeoAlgorithm):
         self._steps = list()
         self.descriptionFile = filename
         instructions = False
-        try:
-            for line in fileinput.input(filename, openhook=fileinput.hook_encoded("utf-8")):
+        lineNumber = 0
+        with open(filename, 'r', encoding="utf-8-sig") as fileinput:
+            for line in fileinput:
+                lineNumber += 1
                 line = line.rstrip()
-
-                # comment line
-                if line.startswith("#"):
-                    pass
-
-                if line.startswith(".NAME:"):
-                    self.name = line[len(".NAME:"):]
-
-                elif line.startswith(".GROUP:"):
-                    self.group = line[len(".GROUP:"):]
-
-                elif line.startswith(".ALGORITHM:"):
-                    alg = Processing.getAlgorithm(line[len(".ALGORITHM:"):])
-                    if alg:
-                        alg = alg.getCopy()
-                        self.addStep(alg, NORMAL_MODE, '')
-                    else:
-                        raise(WrongWorkflowException())
-
-                elif line.startswith(".MODE:"):
-                    if line[len(".MODE:"):] == NORMAL_MODE:
-                        self._steps[-1]['mode'] = NORMAL_MODE
-                    elif line[len(".MODE:"):] == BATCH_MODE:
-                        self._steps[-1]['mode'] = BATCH_MODE
-                    else:
-                        raise(WrongWorkflowException())
-
-                elif line.startswith(".PARAMETERS:"):
-                    try:
-                        params = json.loads(line[len(".PARAMETERS:"):])
-                    except:
+                try:
+                    # comment line
+                    if line.startswith("#"):
                         pass
-                    else:
-                        if type(params) == dict:
-                            self._steps[-1]['parameters'] = params
-                            self.setStepParameters(self._steps[-1])
+
+                    if line.startswith(".NAME:"):
+                        self.name = line[len(".NAME:"):]
+
+                    elif line.startswith(".GROUP:"):
+                        self.group = line[len(".GROUP:"):]
+
+                    elif line.startswith(".ALGORITHM:"):
+                        alg = Processing.getAlgorithm(line[len(".ALGORITHM:"):])
+                        if alg:
+                            alg = alg.getCopy()
+                            self.addStep(alg, NORMAL_MODE, '')
                         else:
                             raise(WrongWorkflowException())
 
-                elif line.startswith(".INSTRUCTIONS"):
-                    instructions = line[len(".INSTRUCTIONS:"):]+"\n"
-                    self._steps[-1]['instructions'] = instructions
-                    instructions = True
+                    elif line.startswith(".MODE:"):
+                        if line[len(".MODE:"):] == NORMAL_MODE:
+                            self._steps[-1]['mode'] = NORMAL_MODE
+                        elif line[len(".MODE:"):] == BATCH_MODE:
+                            self._steps[-1]['mode'] = BATCH_MODE
+                        else:
+                            raise(WrongWorkflowException())
 
-                elif instructions:
-                    if line == "!INSTRUCTIONS":
-                        instructions = False
-                    elif line == "":
-                        self._steps[-1]['instructions'] += "\n"
-                    else:
-                        self._steps[-1]['instructions'] += line+"\n"
+                    elif line.startswith(".PARAMETERS:"):
+                        try:
+                            params = json.loads(line[len(".PARAMETERS:"):])
+                        except:
+                            pass
+                        else:
+                            if type(params) == dict:
+                                self._steps[-1]['parameters'] = params
+                                self.setStepParameters(self._steps[-1])
+                            else:
+                                raise(WrongWorkflowException())
 
-        except WrongWorkflowException:
-            msg = "Error on line number "+unicode(fileinput.filelineno())+": "+line+"\n"
-            fileinput.close()
-            raise WrongWorkflowException(msg)
-        except Exception, e:
-            fileinput.close()
-            raise e
+                    elif line.startswith(".INSTRUCTIONS"):
+                        instructions = line[len(".INSTRUCTIONS:"):]+"\n"
+                        self._steps[-1]['instructions'] = instructions
+                        instructions = True
 
-        fileinput.close()
+                    elif instructions:
+                        if line == "!INSTRUCTIONS":
+                            instructions = False
+                        elif line == "":
+                            self._steps[-1]['instructions'] += "\n"
+                        else:
+                            self._steps[-1]['instructions'] += line+"\n"
+
+                except WrongWorkflowException:
+                    msg = "Error on line number "+str(lineNumber)+": "+line+"\n"
+                    raise WrongWorkflowException(msg)
+                except Exception, e:
+                    raise e
 
     def processAlgorithm(self, progress):
         self.run()

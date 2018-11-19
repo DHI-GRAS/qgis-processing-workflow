@@ -26,6 +26,7 @@
 ***************************************************************************
 """
 
+import io
 import os
 import json
 from qgis.utils import iface
@@ -84,7 +85,7 @@ class WorkflowProvider(WorkflowProviderBase):
             if os.path.isfile(os.path.join(root, "collection.conf")):
                 try:
                     try:
-                        with open(os.path.join(root, "collection.conf")) as f:
+                        with io.open(os.path.join(root, "collection.conf"), encoding="utf-8-sig") as f:
                             workflowCollectionSettings = json.load(f)
                         workflowCollectionName = workflowCollectionSettings["name"]
                     except:
