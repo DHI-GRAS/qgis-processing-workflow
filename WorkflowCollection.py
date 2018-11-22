@@ -44,7 +44,8 @@ class WorkflowCollection(WorkflowProviderBase):
         # The activate collection setting is in the Workflow provider settings group
         name = self.getActivateSetting()
         activateSetting = Setting(self.workflowProvider.getDescription(), name,
-                                  self.tr('Activate '+self.getName())+' collection', self.activate)
+                                  self.tr('Activate %s collection') % self.getName(),
+                                  self.activate)
         ProcessingConfig.addSetting(activateSetting)
         # If activate is True (default is False) then save the setting properly, otherwise it will
         # be set to false when QGIS is restarted.
