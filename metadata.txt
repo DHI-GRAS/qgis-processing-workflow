@@ -17,12 +17,15 @@ about=
 The plugin contains Python markdown package. See https://github.com/Python-Markdown/markdown for license and details.
 
 
-version=1.3.1
+version=1.3.2
 qgisMinimumVersion=2.16
 
 # Optional items:
 
-changelog=1.3.1
+changelog=1.3.2
+    - Improve handling of UTF characters
+    - Fix collection activation bug when QGIS is used with language other than English
+    1.3.1
     - fix an exception when an existing collection does not have the css field
     1.3.0
     - add possibility to use Markdown to set workflow instructions
