@@ -26,8 +26,7 @@
 ***************************************************************************
 """
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from PyQt4.QtGui import QAction, QIcon
 from qgis.utils import iface
 from processing.core.ProcessingConfig import ProcessingConfig
 from processing.core.AlgorithmProvider import AlgorithmProvider
