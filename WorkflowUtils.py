@@ -26,13 +26,14 @@
 ***************************************************************************
 """
 
+from builtins import object
 import os
-from PyQt4 import QtGui
+from qgis.PyQt import QtGui
 from processing.core.ProcessingConfig import ProcessingConfig
 from processing.tools.system import mkdir
 
 
-class WorkflowUtils:
+class WorkflowUtils(object):
 
     WORKFLOW_FOLDER = "WORKFLOW_FOLDER"
     workflowCollectionNames = []

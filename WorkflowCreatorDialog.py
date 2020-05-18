@@ -26,7 +26,9 @@
 ***************************************************************************
 """
 
-from PyQt4 import QtCore, QtGui
+from builtins import str
+from builtins import range
+from qgis.PyQt import QtCore, QtGui
 import codecs
 import os
 from processing.core.Processing import Processing
@@ -210,13 +212,13 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
 
     # Save workflow to text file
     def saveWorkflow(self):
-        if unicode(self.textGroup.text()).strip() == "" or\
-           unicode(self.textName.text()).strip() == "":
+        if str(self.textGroup.text()).strip() == "" or\
+           str(self.textName.text()).strip() == "":
             QtGui.QMessageBox.warning(self, "Warning",
                                       "Please enter group and model names before saving")
             return
-        self.workflow.name = unicode(self.textName.text())
-        self.workflow.group = unicode(self.textGroup.text())
+        self.workflow.name = str(self.textName.text())
+        self.workflow.group = str(self.textGroup.text())
 
         # save the instructions for all the steps in the workflow
         for i in range(0, self.canvasTabWidget.count()):
@@ -225,7 +227,7 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
         if self.workflow.descriptionFile:
             filename = self.workflow.descriptionFile
         else:
-            filename = unicode(QtGui.QFileDialog.getSaveFileName(self, "Save Workflow",
+            filename = str(QtGui.QFileDialog.getSaveFileName(self, "Save Workflow",
                                                                  WorkflowUtils.workflowPath(),
                                                                  "QGIS Processing workflows (*.workflow)"))
             if filename:
@@ -264,7 +266,7 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
                 self.textGroup.setText(self.workflow.group)
                 self.textName.setText(self.workflow.name)
 
-            except WrongWorkflowException, e:
+            except WrongWorkflowException as e:
                 QtGui.QMessageBox.critical(self, "Could not open workflow",
                                            "The selected workflow could not be loaded\nWrong line:" + e.msg)
 
@@ -293,7 +295,7 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
     # List all the available algorithms in Processing
     def fillAlgorithmTree(self):
         self.algorithmTree.clear()
-        text = unicode(self.searchBox.text())
+        text = str(self.searchBox.text())
         try:
             # QGIS 2.16 (and up?) Processing implementation
             from processing.core.alglist import algList
@@ -304,14 +306,14 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
         providers = {}
         for provider in Processing.providers:
             providers[provider.getName()] = provider
-        for providerName in allAlgs.keys():
+        for providerName in list(allAlgs.keys()):
             # don't show workflows in available algorithms
             if providerName == "workflow" or providerName == "modelertools" or\
                WorkflowUtils.checkIfCollectionName(providerName):
                 continue
             groups = {}
             provider = allAlgs[providerName]
-            algs = provider.values()
+            algs = list(provider.values())
             # add algorithms
             for alg in algs:
                 if text == "" or text.lower() in alg.name.lower():
@@ -328,11 +330,11 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
                 providerItem = QtGui.QTreeWidgetItem()
                 providerItem.setText(0, providers[providerName].getDescription())
                 providerItem.setIcon(0, providers[providerName].getIcon())
-                for groupItem in groups.values():
+                for groupItem in list(groups.values()):
                     providerItem.addChild(groupItem)
                 self.algorithmTree.addTopLevelItem(providerItem)
                 providerItem.setExpanded(True)
-                for groupItem in groups.values():
+                for groupItem in list(groups.values()):
                     if text != "":
                         groupItem.setExpanded(True)
 

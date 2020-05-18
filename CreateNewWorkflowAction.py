@@ -29,7 +29,7 @@
 from processing.gui.ToolboxAction import ToolboxAction
 from processing_workflow.WorkflowCreatorDialog import WorkflowCreatorDialog
 import os
-from PyQt4 import QtGui
+from qgis.PyQt import QtGui
 
 
 # Class for an action to be added to the Processing toolbar

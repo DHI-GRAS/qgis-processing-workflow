@@ -28,7 +28,8 @@
 ***************************************************************************
 """
 
-from PyQt4 import QtCore, QtGui
+from builtins import str
+from qgis.PyQt import QtCore, QtGui
 from qgis.utils import iface
 from processing.core.Processing import Processing
 from processing.gui.AlgorithmDialog import AlgorithmDialog
@@ -196,7 +197,7 @@ class WorkflowListDialog(QtGui.QDialog):
     # List all the available workflows
     def fillAlgorithmTree(self):
         self.algorithmTree.clear()
-        text = unicode(self.searchBox.text())
+        text = str(self.searchBox.text())
         try:
             # QGIS 2.16 (and up?) Processing implementation
             from processing.core.alglist import algList
@@ -210,7 +211,7 @@ class WorkflowListDialog(QtGui.QDialog):
         for providerName in [self.workflowProvider.getName()]:
             groups = {}
             provider = allAlgs[providerName]
-            algs = provider.values()
+            algs = list(provider.values())
             # add algorithms
             for alg in algs:
                 if text == "" or text.lower() in alg.name.lower():
@@ -227,11 +228,11 @@ class WorkflowListDialog(QtGui.QDialog):
                 providerItem = QtGui.QTreeWidgetItem()
                 providerItem.setText(0, providers[providerName].getDescription())
                 providerItem.setIcon(0, providers[providerName].getIcon())
-                for groupItem in groups.values():
+                for groupItem in list(groups.values()):
                     providerItem.addChild(groupItem)
                 self.algorithmTree.addTopLevelItem(providerItem)
                 providerItem.setExpanded(True)
-                for groupItem in groups.values():
+                for groupItem in list(groups.values()):
                     if text != "":
                         groupItem.setExpanded(True)
 

@@ -2,8 +2,9 @@ import io
 import json
 import os
 import glob
-from PyQt4.QtGui import QIcon, QAction
-from PyQt4.QtCore import QObject, SIGNAL
+from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtWidgets import QAction
+from qgis.PyQt.QtCore import QObject
 from qgis.gui import QgsMessageBar
 from processing.core.ProcessingLog import ProcessingLog
 from processing.core.ProcessingConfig import ProcessingConfig, Setting
@@ -75,7 +76,7 @@ class WorkflowCollection(WorkflowProviderBase):
                                                         QgsMessageBar.WARNING, 3)
                 ProcessingLog.addToLog(ProcessingLog.LOG_ERROR, msg)
                 raise WrongWorkflowException
-            except KeyError, e:
+            except KeyError as e:
                 msg = self.tr("Workflow collection %s could not be fully loaded " % self.baseDir +
                               "due to missing %s field in JSON collection.conf file" % e)
                 if self.iface:

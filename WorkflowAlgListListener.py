@@ -1,7 +1,8 @@
+from builtins import object
 from processing.core.Processing import Processing
 
 
-class WorkflowAlgListListener():
+class WorkflowAlgListListener(object):
     def __init__(self, workflowProvider):
         self.workflowProvider = workflowProvider
         self.recursiveCall = False

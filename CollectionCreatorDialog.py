@@ -2,8 +2,8 @@ import io
 import json
 import os
 import shutil
-from PyQt4 import uic
-from PyQt4.QtGui import QFileDialog
+from qgis.PyQt import uic
+from qgis.PyQt.QtWidgets import QFileDialog
 from qgis.utils import iface
 from processing.core.alglist import algList
 from processing_workflow.WorkflowCollection import WorkflowCollection

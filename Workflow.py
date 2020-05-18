@@ -25,11 +25,12 @@
 * with this program.  If not, see <http://www.gnu.org/licenses/>.         *
 ***************************************************************************
 """
+from builtins import str
 from io import open
 import os
 import fileinput
 import json
-from PyQt4 import QtGui, QtCore
+from qgis.PyQt import QtGui, QtCore
 from processing.core.Processing import Processing
 from processing.core.parameters import ParameterString
 from processing.core.parameters import ParameterBoolean
@@ -147,7 +148,7 @@ class Workflow(GeoAlgorithm):
     def setStepParameters(self, step):
         parameters = step['parameters']
         alg = step['algorithm']
-        for paramName in parameters.iterkeys():
+        for paramName in parameters.keys():
             param = alg.getParameterFromName(paramName)
             if param and (isinstance(param, ParameterBoolean) or
                           isinstance(param, ParameterNumber) or
@@ -194,15 +195,15 @@ class Workflow(GeoAlgorithm):
             return (self._steps[0])
 
     def serialize(self):
-        s = ".NAME:" + unicode(self.name) + "\n"
-        s += ".GROUP:" + unicode(self.group) + "\n"
+        s = ".NAME:" + str(self.name) + "\n"
+        s += ".GROUP:" + str(self.group) + "\n"
 
         for step in self._steps:
             s += ".ALGORITHM:" + step['algorithm'].commandLineName() + "\n"
             s += ".PARAMETERS:" + json.dumps(step['parameters']) + "\n"
             s += ".MODE:" + step['mode'] + "\n"
             s += ".INSTRUCTIONS:" + step['instructions']
-            if not unicode(s).endswith("\n"):
+            if not str(s).endswith("\n"):
                 s += "\n"
             s += "!INSTRUCTIONS" + "\n"
 
@@ -236,7 +237,7 @@ class Workflow(GeoAlgorithm):
                             alg = alg.getCopy()
                             self.addStep(alg, NORMAL_MODE, '')
                         else:
-                            raise(WrongWorkflowException())
+                            raise WrongWorkflowException
 
                     elif line.startswith(".MODE:"):
                         if line[len(".MODE:"):] == NORMAL_MODE:
@@ -244,7 +245,7 @@ class Workflow(GeoAlgorithm):
                         elif line[len(".MODE:"):] == BATCH_MODE:
                             self._steps[-1]['mode'] = BATCH_MODE
                         else:
-                            raise(WrongWorkflowException())
+                            raise WrongWorkflowException
 
                     elif line.startswith(".PARAMETERS:"):
                         try:
@@ -256,7 +257,7 @@ class Workflow(GeoAlgorithm):
                                 self._steps[-1]['parameters'] = params
                                 self.setStepParameters(self._steps[-1])
                             else:
-                                raise(WrongWorkflowException())
+                                raise WrongWorkflowException
 
                     elif line.startswith(".INSTRUCTIONS"):
                         instructions = line[len(".INSTRUCTIONS:"):]+"\n"
@@ -274,7 +275,7 @@ class Workflow(GeoAlgorithm):
                 except WrongWorkflowException:
                     msg = "Error on line number "+str(lineNumber)+": "+line+"\n"
                     raise WrongWorkflowException(msg)
-                except Exception, e:
+                except Exception as e:
                     raise e
 
     def processAlgorithm(self, progress):

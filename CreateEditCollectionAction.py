@@ -3,7 +3,7 @@ from processing.gui.ToolboxAction import ToolboxAction
 from processing_workflow.WorkflowCollection import WorkflowCollection
 from processing_workflow.CollectionCreatorDialog import CollectionCreatorDialog
 import os
-from PyQt4 import QtGui
+from qgis.PyQt import QtGui
 
 
 class CreateEditCollectionAction(ToolboxAction):

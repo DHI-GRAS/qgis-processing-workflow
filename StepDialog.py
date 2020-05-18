@@ -25,13 +25,14 @@
 * with this program.  If not, see <http://www.gnu.org/licenses/>.         *
 ***************************************************************************
 """
+from __future__ import absolute_import
 
 import os
-from PyQt4 import QtCore, QtGui
+from qgis.PyQt import QtCore, QtGui
 from processing.gui.AlgorithmDialog import AlgorithmDialog
 from processing.gui.BatchAlgorithmDialog import BatchAlgorithmDialog
 from processing.gui.InputLayerSelectorPanel import InputLayerSelectorPanel
-import markdown
+from . import markdown
 
 NORMAL_MODE = "Normal"
 BATCH_MODE = "Batch"

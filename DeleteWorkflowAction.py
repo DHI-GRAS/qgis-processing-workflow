@@ -29,7 +29,7 @@
 from processing_workflow.Workflow import Workflow
 from processing.gui.ContextAction import ContextAction
 import os
-from PyQt4 import QtGui
+from qgis.PyQt import QtGui
 
 
 class DeleteWorkflowAction(ContextAction):

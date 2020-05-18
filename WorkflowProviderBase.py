@@ -26,7 +26,9 @@
 ***************************************************************************
 """
 
-from PyQt4.QtGui import QAction, QIcon
+from builtins import str
+from qgis.PyQt.QtWidgets import QAction
+from qgis.PyQt.QtGui import QIcon
 from qgis.utils import iface
 from processing.core.ProcessingConfig import ProcessingConfig
 from processing.core.AlgorithmProvider import AlgorithmProvider
@@ -86,14 +88,14 @@ class WorkflowProviderBase(AlgorithmProvider):
             else:
                 ProcessingLog.addToLog(ProcessingLog.LOG_ERROR,
                                        "Could not open Workflow algorithm: " + workflowFilePath)
-        except WrongWorkflowException,e:
+        except WrongWorkflowException as e:
             ProcessingLog.addToLog(ProcessingLog.LOG_ERROR,
                                    "Could not open Workflow algorithm " + workflowFilePath +
                                    ". " + e.msg)
-        except Exception,e:
+        except Exception as e:
             ProcessingLog.addToLog(ProcessingLog.LOG_ERROR,
                                    "Could not open Workflow algorithm: " + workflowFilePath +
-                                   ". Unknown exception: "+unicode(e)+"\n")
+                                   ". Unknown exception: "+str(e)+"\n")
 
     def getDescription(self):
         return self.description
