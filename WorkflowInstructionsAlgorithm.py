@@ -1,11 +1,11 @@
-from processing.core.GeoAlgorithm import GeoAlgorithm
+from qgis.core import QgsProcessingAlgorithm
 from processing.gui.AlgorithmDialog import AlgorithmDialog
 
 # An empty GeoAlgorithm to be used as a dummy when wanting to
 # display an purely instruction step in a workflow.
 
 
-class WorkflowInstructionsAlgorithm(GeoAlgorithm):
+class WorkflowInstructionsAlgorithm(QgsProcessingAlgorithm):
 
     def defineCharacteristics(self):
         self.showInModeler = False
@@ -17,7 +17,7 @@ class WorkflowInstructionsAlgorithm(GeoAlgorithm):
         pass
 
     def getCustomParametersDialog(self):
-            return WorkflowInstructionsAlgorithmParametersDialog(self)
+        return WorkflowInstructionsAlgorithmParametersDialog(self)
 
 
 class WorkflowInstructionsAlgorithmParametersDialog(AlgorithmDialog):

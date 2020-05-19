@@ -28,18 +28,17 @@
 from builtins import str
 from io import open
 import os
-import fileinput
 import json
-from qgis.PyQt import QtGui, QtCore
+from qgis.PyQt.QtWidgets import QDialog
+from qgis.core import (QgsProcessingAlgorithm,
+                       QgsProcessingParameterString,
+                       QgsProcessingParameterBoolean,
+                       QgsProcessingParameterEnum,
+                       QgsProcessingParameterNumber,
+                       QgsProcessingParameterExtent)
 from processing.core.Processing import Processing
-from processing.core.parameters import ParameterString
-from processing.core.parameters import ParameterBoolean
-from processing.core.parameters import ParameterSelection
-from processing.core.parameters import ParameterNumber
-from processing.core.parameters import ParameterExtent
-from processing.core.GeoAlgorithm import GeoAlgorithm
-from processing.algs.grass.GrassAlgorithm import GrassAlgorithm
-from processing.algs.grass.GrassUtils import GrassUtils
+from processing.algs.grass7.Grass7Algorithm import Grass7Algorithm
+from processing.algs.grass7.Grass7Utils import Grass7Utils
 from processing_workflow.StepDialog import StepDialog, NORMAL_MODE, BATCH_MODE
 from processing_workflow.WrongWorkflowException import WrongWorkflowException
 from processing_workflow.WorkflowUtils import WorkflowUtils
@@ -49,10 +48,10 @@ DIRNAME = os.path.dirname(__file__)
 
 # Class containing the list of steps (algorithms) in the workflow together with the mode
 # and instructions for each step
-class Workflow(GeoAlgorithm):
+class Workflow(QgsProcessingAlgorithm):
 
     def __init__(self, provider):
-        GeoAlgorithm.__init__(self)
+        QgsProcessingAlgorithm.__init__(self)
         # holds the algorithm object, the mode (normal or batch) and instructions
         self.provider = provider
         self._steps = list()
@@ -60,10 +59,12 @@ class Workflow(GeoAlgorithm):
         self.group = ''
         self.descriptionFile = ''
         self.style = None
-        self.parameters = [ParameterString("Info", "Workflow can not be run as a batch process." +
-                                                   "Please close this dialog and execute as a " +
-                                                   "normal process.",
-                                           "", False)]
+        self.parameters = [QgsProcessingParameterString("Info",
+                                                        "Workflow can not be run as a batch " +
+                                                        "process. Please close this dialog and " +
+                                                        "execute as a normal process.",
+                                                        "",
+                                                        False)]
         self.showInModeler = False
 
     def addStep(self, algorithm, mode, instructions, algParameters={}):
@@ -74,9 +75,11 @@ class Workflow(GeoAlgorithm):
     def changeStep(self, index, algorithm, mode, instructions, algParameters={}):
         algParameters = {}
         for param in algorithm.parameters:
-            if isinstance(param, ParameterBoolean) or isinstance(param, ParameterNumber) or\
-               isinstance(param, ParameterString) or isinstance(param, ParameterSelection) or\
-               isinstance(param, ParameterExtent):
+            if isinstance(param, QgsProcessingParameterBoolean) or\
+               isinstance(param, QgsProcessingParameterNumber) or\
+               isinstance(param, QgsProcessingParameterString) or\
+               isinstance(param, QgsProcessingParameterEnum) or\
+               isinstance(param, QgsProcessingParameterExtent):
                 algParameters[param.name] = param.value
         self._steps[index] = {'algorithm': algorithm, 'mode': mode, 'instructions': instructions,
                               'parameters': algParameters}
@@ -101,7 +104,7 @@ class Workflow(GeoAlgorithm):
 
     def getIcon(self):
         try:
-            return self.provider.getIcon()
+            return self.provider.icon()
         except:
             return WorkflowUtils.workflowIcon()
 
@@ -140,7 +143,7 @@ class Workflow(GeoAlgorithm):
 
             # finish the workflow or execute the next step
             if step is None:
-                GrassUtils.endGrassSession()
+                Grass7Utils.endGrassSession()
                 return stepDialog.executed
             else:
                 stepDialog = self.executeStep(step)
@@ -150,18 +153,18 @@ class Workflow(GeoAlgorithm):
         alg = step['algorithm']
         for paramName in parameters.keys():
             param = alg.getParameterFromName(paramName)
-            if param and (isinstance(param, ParameterBoolean) or
-                          isinstance(param, ParameterNumber) or
-                          isinstance(param, ParameterString) or
-                          isinstance(param, ParameterSelection) or
-                          isinstance(param, ParameterExtent)):
+            if param and (isinstance(param, QgsProcessingParameterBoolean) or
+                          isinstance(param, QgsProcessingParameterNumber) or
+                          isinstance(param, QgsProcessingParameterString) or
+                          isinstance(param, QgsProcessingParameterEnum) or
+                          isinstance(param, QgsProcessingParameterExtent)):
                 param.default = parameters[paramName]
 
     def executeStep(self, step):
-        if isinstance(step['algorithm'], GrassAlgorithm):
-            GrassUtils.startGrassSession()
+        if isinstance(step['algorithm'], Grass7Algorithm):
+            Grass7Utils.startGrassSession()
         else:
-            GrassUtils.endGrassSession()
+            Grass7Utils.endGrassSession()
         self.setStepParameters(step)
         stepDialog = StepDialog(step['algorithm'], None, os.path.dirname(self.descriptionFile),
                                 False, style=self.style)
@@ -283,7 +286,7 @@ class Workflow(GeoAlgorithm):
 
 
 # Just a "wrapper" dialog to satisfy executeAlgorithm in ProcessingToolbox
-class WorkflowDialog(QtGui.QDialog):
+class WorkflowDialog(QDialog):
 
     def __init__(self, workflow):
         self.executed = workflow.run()

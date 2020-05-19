@@ -30,11 +30,10 @@ from builtins import object
 import os
 import sys
 import inspect
-from processing.core.Processing import Processing
+from qgis.core import QgsApplication
 from processing_workflow.WorkflowProvider import WorkflowProvider
 from processing_workflow.WorkflowAlgListListener import WorkflowAlgListListener
 from processing_workflow.WorkflowOnlyAlgorithmProvider import WorkflowOnlyAlgorithmProvider
-from processing.core.alglist import algList
 
 
 cmd_folder = os.path.split(inspect.getfile(inspect.currentframe()))[0]
@@ -51,26 +50,20 @@ class ProcessingWorkflowPlugin(object):
         self.iface = iface
 
     def initGui(self):
-        self.algListener = WorkflowAlgListListener(self.provider)
-        if algList:
-            # QGIS 2.16 (and up?) Processing implementation
-            algList.providerAdded.connect(self.algListener.algsListHasChanged)
-            algList.providerRemoved.connect(self.algListener.algsListHasChanged)
-        else:
-            # QGIS 2.14 Processing implementation
-            Processing.addAlgListListener(self.algListener)
-
-        Processing.addProvider(self.provider, updateList=True)
-        Processing.addProvider(self.workflowOnlyAlgorithmProvider, updateList=True)
+        self.algListener = WorkflowAlgListListener(self.provider,
+                                                   self.workflowOnlyAlgorithmProvider)
+        QgsApplication.processingRegistry().providerAdded.connect(
+                self.algListener.algsListHasChanged)
+        QgsApplication.processingRegistry().providerRemoved.connect(
+                self.algListener.algsListHasChanged)
+        QgsApplication.processingRegistry().addProvider(self.provider)
+        QgsApplication.processingRegistry().addProvider(self.workflowOnlyAlgorithmProvider)
 
     def unload(self):
-        if algList:
-            # QGIS 2.16 (and up?) Processing implementation
-            algList.providerAdded.disconnect(self.algListener.algsListHasChanged)
-            algList.providerRemoved.disconnect(self.algListener.algsListHasChanged)
-        else:
-            # QGIS 2.14 Processing implementation
-            Processing.removeAlgListListener(self.algListener)
+        QgsApplication.processingRegistry().providerAdded.disconnect(
+                self.algListener.algsListHasChanged)
+        QgsApplication.processingRegistry().providerRemoved.disconnect(
+                self.algListener.algsListHasChanged)
 
-        Processing.removeProvider(self.provider)
-        Processing.removeProvider(self.workflowOnlyAlgorithmProvider)
+        QgsApplication.processingRegistry().removeProvider(self.provider)
+        QgsApplication.processingRegistry().removeProvider(self.workflowOnlyAlgorithmProvider)

@@ -45,7 +45,7 @@ class WorkflowCollection(WorkflowProviderBase):
         # The activate collection setting is in the Workflow provider settings group
         name = self.getActivateSetting()
         activateSetting = Setting(self.workflowProvider.getDescription(), name,
-                                  self.tr('Activate %s collection') % self.getName(),
+                                  self.tr('Activate %s collection') % self.name(),
                                   self.activate)
         ProcessingConfig.addSetting(activateSetting)
         # If activate is True (default is False) then save the setting properly, otherwise it will
@@ -55,7 +55,7 @@ class WorkflowCollection(WorkflowProviderBase):
             activateSetting.save()
         ProcessingConfig.addSetting(Setting(self.workflowProvider.getDescription(),
                                             self.getTaskbarButtonSetting(),
-                                            "Show "+self.getName()+" collection icon on taskbar",
+                                            "Show "+self.name()+" collection icon on taskbar",
                                             True))
 
     # Read the JSON description file
@@ -64,8 +64,8 @@ class WorkflowCollection(WorkflowProviderBase):
             try:
                 settings = json.loads(f.read())
                 self.description = settings["description"]
-                self.name = settings["name"]
-                self.icon = os.path.join(self.baseDir, settings["icon"])
+                self._name = settings["name"]
+                self.iconPath = os.path.join(self.baseDir, settings["icon"])
                 self.aboutHTML = "".join(settings["aboutHTML"])
                 self.css = os.path.join(self.baseDir, settings["css"])
             except ValueError:
@@ -83,13 +83,20 @@ class WorkflowCollection(WorkflowProviderBase):
                     self.iface.messageBar().pushMessage(self.tr("Warning"), msg,
                                                         QgsMessageBar.WARNING, 3)
                 ProcessingLog.addToLog(ProcessingLog.LOG_ERROR, msg)
+                return False
+
+    def id(self):
+        return WorkflowProviderBase.id()+"_"+self.name()
 
     # Load all the workflows saved in the workflow folder
     def createAlgsList(self):
         self.preloadedAlgs = []
         for descriptionFile in glob.glob(os.path.join(self.baseDir, "*.workflow")):
             self.loadWorkflow(descriptionFile)
+        return self.preloadedAlgs
 
-    def loadAlgorithms(self):
-        self.processDescriptionFile()
-        super(WorkflowCollection, self).loadAlgorithms()
+    def load(self):
+        if self.processDescriptionFile():
+            return super(WorkflowCollection, self).load()
+        else:
+            return False

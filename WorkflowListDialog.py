@@ -29,7 +29,12 @@
 """
 
 from builtins import str
-from qgis.PyQt import QtCore, QtGui
+from qgis.PyQt.QtWidgets import (QApplication, QDialog, QTabWidget, QVBoxLayout, QGridLayout,
+                                 QLineEdit, QTreeWidget, QScrollArea, QWidget, QLabel, QSizePolicy,
+                                 QFrame, QMessageBox, QTreeWidgetItem, QDialogButtonBox,
+                                 QPushButton)
+from qgis.PyQt.QtGui import QCursor
+from qgis.PyQt import QtCore
 from qgis.utils import iface
 from processing.core.Processing import Processing
 from processing.gui.AlgorithmDialog import AlgorithmDialog
@@ -41,20 +46,20 @@ except AttributeError:
         return s
 
 try:
-    _encoding = QtGui.QApplication.UnicodeUTF8
+    _encoding = QApplication.UnicodeUTF8
 
     def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+        return QApplication.translate(context, text, disambig, _encoding)
 
 except AttributeError:
     def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig)
+        return QApplication.translate(context, text, disambig)
 
 
 # Dialog for listing the existing workflows
-class WorkflowListDialog(QtGui.QDialog):
+class WorkflowListDialog(QDialog):
     def __init__(self, workflowProvider):
-        QtGui.QDialog.__init__(self)
+        QDialog.__init__(self)
         self.workflowProvider = workflowProvider
         self.setupUi()
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowSystemMenuHint |
@@ -67,51 +72,51 @@ class WorkflowListDialog(QtGui.QDialog):
         self.resize(400, 500)
         self.setWindowTitle(self.workflowProvider.getDescription())
         self.setWindowIcon(self.workflowProvider.getIcon())
-        self.tabWidget = QtGui.QTabWidget()
+        self.tabWidget = QTabWidget()
         self.tabWidget.setMinimumWidth(300)
 
         # workflow tree
         # ==================================
-        self.verticalLayout = QtGui.QVBoxLayout()
+        self.verticalLayout = QVBoxLayout()
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
-        self.searchBox = QtGui.QLineEdit()
+        self.searchBox = QLineEdit()
         self.searchBox.textChanged.connect(self.fillAlgorithmTree)
         self.verticalLayout.addWidget(self.searchBox)
-        self.algorithmTree = QtGui.QTreeWidget()
+        self.algorithmTree = QTreeWidget()
         self.algorithmTree.setHeaderHidden(True)
         self.fillAlgorithmTree()
         self.verticalLayout.addWidget(self.algorithmTree)
         self.algorithmTree.doubleClicked.connect(self.runWorkflow)
 
-        self.algorithmsTab = QtGui.QWidget()
+        self.algorithmsTab = QWidget()
         self.algorithmsTab.setLayout(self.verticalLayout)
         self.tabWidget.addTab(self.algorithmsTab, "Workflows")
 
         # About tab
         ###################
-        self.aboutTab = QtGui.QWidget()
-        self.gridLayout = QtGui.QGridLayout(self.aboutTab)
+        self.aboutTab = QWidget()
+        self.gridLayout = QGridLayout(self.aboutTab)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
-        self.scrollArea = QtGui.QScrollArea(self.aboutTab)
+        self.scrollArea = QScrollArea(self.aboutTab)
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName(_fromUtf8("scrollArea"))
-        self.scrollAreaWidgetContents = QtGui.QWidget()
+        self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 535, 271))
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
         self.scrollAreaWidgetContents.setStyleSheet("QWidget { background-color : white}")
-        self.aboutVerticalLayout = QtGui.QVBoxLayout(self.scrollAreaWidgetContents)
+        self.aboutVerticalLayout = QVBoxLayout(self.scrollAreaWidgetContents)
         self.aboutVerticalLayout.setObjectName(_fromUtf8("aboutVerticalLayout"))
-        self.aboutLabel = QtGui.QLabel(self.scrollAreaWidgetContents)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+        self.aboutLabel = QLabel(self.scrollAreaWidgetContents)
+        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.aboutLabel.sizePolicy().hasHeightForWidth())
         self.aboutLabel.setSizePolicy(sizePolicy)
         self.aboutLabel.setMinimumSize(QtCore.QSize(10, 10))
-        self.aboutLabel.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.aboutLabel.setCursor(QCursor(QtCore.Qt.ArrowCursor))
         self.aboutLabel.setFocusPolicy(QtCore.Qt.NoFocus)
-        self.aboutLabel.setFrameShape(QtGui.QFrame.NoFrame)
+        self.aboutLabel.setFrameShape(QFrame.NoFrame)
         self.aboutLabel.setTextFormat(QtCore.Qt.AutoText)
         self.aboutLabel.setScaledContents(False)
         self.aboutLabel.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
@@ -128,14 +133,14 @@ class WorkflowListDialog(QtGui.QDialog):
         # And the whole layout
         # ==========================
 
-        self.buttonBox = QtGui.QDialogButtonBox()
+        self.buttonBox = QDialogButtonBox()
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.closeButton = QtGui.QPushButton()
+        self.closeButton = QPushButton()
         self.closeButton.setText("Close")
-        self.buttonBox.addButton(self.closeButton, QtGui.QDialogButtonBox.ActionRole)
+        self.buttonBox.addButton(self.closeButton, QDialogButtonBox.ActionRole)
         QtCore.QObject.connect(self.closeButton, QtCore.SIGNAL("clicked()"), self.closeWindow)
 
-        self.globalLayout = QtGui.QVBoxLayout()
+        self.globalLayout = QVBoxLayout()
         self.globalLayout.setSpacing(2)
         self.globalLayout.setMargin(0)
         self.globalLayout.addWidget(self.tabWidget)
@@ -177,7 +182,7 @@ class WorkflowListDialog(QtGui.QDialog):
             alg = Processing.getAlgorithm(item.alg.commandLineName())
             message = alg.checkBeforeOpeningParametersDialog()
             if message:
-                QtGui.QMessageBox.warning(self, self.tr("Warning"), message)
+                QMessageBox.warning(self, self.tr("Warning"), message)
                 return
             alg = alg.getCopy()
             dlg = alg.getCustomParametersDialog()
@@ -207,8 +212,8 @@ class WorkflowListDialog(QtGui.QDialog):
             allAlgs = Processing.algs
         providers = {}
         for provider in Processing.providers:
-            providers[provider.getName()] = provider
-        for providerName in [self.workflowProvider.getName()]:
+            providers[provider.name()] = provider
+        for providerName in [self.workflowProvider.name()]:
             groups = {}
             provider = allAlgs[providerName]
             algs = list(provider.values())
@@ -218,14 +223,14 @@ class WorkflowListDialog(QtGui.QDialog):
                     if alg.group in groups:
                         groupItem = groups[alg.group]
                     else:
-                        groupItem = QtGui.QTreeWidgetItem()
+                        groupItem = QTreeWidgetItem()
                         groupItem.setText(0, alg.group)
                         groups[alg.group] = groupItem
                     algItem = TreeAlgorithmItem(alg)
                     groupItem.addChild(algItem)
 
             if len(groups) > 0:
-                providerItem = QtGui.QTreeWidgetItem()
+                providerItem = QTreeWidgetItem()
                 providerItem.setText(0, providers[providerName].getDescription())
                 providerItem.setIcon(0, providers[providerName].getIcon())
                 for groupItem in list(groups.values()):
@@ -239,10 +244,10 @@ class WorkflowListDialog(QtGui.QDialog):
         self.algorithmTree.sortItems(0, QtCore.Qt.AscendingOrder)
 
 
-class TreeAlgorithmItem(QtGui.QTreeWidgetItem):
+class TreeAlgorithmItem(QTreeWidgetItem):
 
     def __init__(self, alg):
-        QtGui.QTreeWidgetItem.__init__(self)
+        QTreeWidgetItem.__init__(self)
         self.alg = alg
         self.setText(0, alg.name)
         self.setIcon(0, alg.getIcon())

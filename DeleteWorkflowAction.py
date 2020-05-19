@@ -57,7 +57,7 @@ class DeleteWorkflowAction(ContextAction):
             try:
                 # QGIS 2.16 (and up?) Processing implementation
                 from processing.core.alglist import algList
-                algList.reloadProvider(self.alg.provider.getName())
+                algList.reloadProvider(self.alg.provider.name())
             except ImportError:
                 # QGIS 2.14 Processing implementation
-                self.toolbox.updateProvider(self.alg.provider.getName())
+                self.toolbox.updateProvider(self.alg.provider.name())

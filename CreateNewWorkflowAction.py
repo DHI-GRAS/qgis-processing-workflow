@@ -53,13 +53,13 @@ class CreateNewWorkflowAction(ToolboxAction):
             try:
                 # QGIS 2.16 (and up?) Processing implementation
                 from processing.core.alglist import algList
-                algList.reloadProvider(self.workflowProvider.getName())
+                algList.reloadProvider(self.workflowProvider.name())
                 is2_16 = True
             except ImportError:
                 # QGIS 2.14 Processing implementation
-                self.toolbox.updateProvider(self.workflowProvider.getName())
+                self.toolbox.updateProvider(self.workflowProvider.name())
             for collection in self.workflowProvider.collections:
                 if is2_16:
-                    algList.reloadProvider(collection.getName())
+                    algList.reloadProvider(collection.name())
                 else:
-                    self.toolbox.updateProvider(collection.getName())
+                    self.toolbox.updateProvider(collection.name())

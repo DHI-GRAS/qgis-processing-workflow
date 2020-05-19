@@ -31,12 +31,12 @@ from builtins import range
 from qgis.PyQt import QtCore, QtGui
 import codecs
 import os
+from qgis.core import (QgsProcessingParameterString,
+                       QgsProcessingParameterBoolean,
+                       QgsProcessingParameterEnum,
+                       QgsProcessingParameterNumber,
+                       QgsProcessingParameterExtent)
 from processing.core.Processing import Processing
-from processing.core.parameters import ParameterString
-from processing.core.parameters import ParameterBoolean
-from processing.core.parameters import ParameterSelection
-from processing.core.parameters import ParameterNumber
-from processing.core.parameters import ParameterExtent
 from processing.gui.AlgorithmDialogBase import AlgorithmDialogBase
 from processing.gui.AlgorithmDialog import AlgorithmDialog
 from processing_workflow.Workflow import Workflow
@@ -183,11 +183,11 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
         if stepDialog.getMode() == NORMAL_MODE:
             if isinstance(stepDialog.normalModeDialog, AlgorithmDialog):
                 for param in stepDialog.alg.parameters:
-                    if isinstance(param, ParameterBoolean) or\
-                       isinstance(param, ParameterNumber) or\
-                       isinstance(param, ParameterString) or\
-                       isinstance(param, ParameterSelection) or\
-                       isinstance(param, ParameterExtent):
+                    if isinstance(param, QgsProcessingParameterBoolean) or\
+                       isinstance(param, QgsProcessingParameterNumber) or\
+                       isinstance(param, QgsProcessingParameterString) or\
+                       isinstance(param, QgsProcessingParameterEnum) or\
+                       isinstance(param, QgsProcessingParameterExtent):
                         # this is not very nice going so deep into step dialog but there seems to
                         # be no other way right now
                         stepDialog.normalModeDialog.setParamValue(
@@ -196,11 +196,11 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
         elif stepDialog.getMode() == BATCH_MODE:
             col = 0
             for param in stepDialog.alg.parameters:
-                    if isinstance(param, ParameterBoolean) or\
-                       isinstance(param, ParameterNumber) or\
-                       isinstance(param, ParameterString) or\
-                       isinstance(param, ParameterSelection) or\
-                       isinstance(param, ParameterExtent):
+                    if isinstance(param, QgsProcessingParameterBoolean) or\
+                       isinstance(param, QgsProcessingParameterNumber) or\
+                       isinstance(param, QgsProcessingParameterString) or\
+                       isinstance(param, QgsProcessingParameterEnum) or\
+                       isinstance(param, QgsProcessingParameterExtent):
                         stepDialog.batchModeDialog.setParamValue(
                                 param,
                                 stepDialog.batchModeDialog.mainWidget.tblParameters.cellWidget(0, col))
@@ -305,7 +305,7 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
             allAlgs = Processing.algs
         providers = {}
         for provider in Processing.providers:
-            providers[provider.getName()] = provider
+            providers[provider.name()] = provider
         for providerName in list(allAlgs.keys()):
             # don't show workflows in available algorithms
             if providerName == "workflow" or providerName == "modelertools" or\

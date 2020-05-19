@@ -30,14 +30,14 @@ import io
 import os
 import json
 from qgis.utils import iface
+from qgis.core import QgsProcessingProvider, QgsApplication
 from processing.core.ProcessingConfig import ProcessingConfig, Setting
-from processing.core.AlgorithmProvider import AlgorithmProvider
 from processing.core.Processing import Processing
 from processing_workflow.WorkflowProviderBase import WorkflowProviderBase
 from processing_workflow.WorkflowCollection import WorkflowCollection
 from processing_workflow.WorkflowUtils import WorkflowUtils
-from processing_workflow.CreateNewWorkflowAction import CreateNewWorkflowAction
-from processing_workflow.CreateEditCollectionAction import CreateEditCollectionAction
+#from processing_workflow.CreateNewWorkflowAction import CreateNewWorkflowAction
+#from processing_workflow.CreateEditCollectionAction import CreateEditCollectionAction
 from processing_workflow.WrongWorkflowException import WrongWorkflowException
 
 
@@ -49,25 +49,30 @@ class WorkflowProvider(WorkflowProviderBase):
 
         # Set constant properties
         self.description = "Processing Workflows (Step by step guidance)"
-        self.icon = WorkflowUtils.workflowIcon()
-        self.name = "workflow"
+        self.iconPath = WorkflowUtils.workflowIcon()
+        self._name = "workflow"
 
-        self.actions += [CreateNewWorkflowAction(self), CreateEditCollectionAction(self)]
+        #self.actions += [CreateNewWorkflowAction(self), CreateEditCollectionAction(self)]
         self.collections = []
         self.collectionListeners = []
   
         self._addToolbarIcon()
 
-    def initializeSettings(self):
-        AlgorithmProvider.initializeSettings(self)
-        ProcessingConfig.addSetting(Setting(self.getDescription(), WorkflowUtils.WORKFLOW_FOLDER,
-                                            "Workflows' folder", WorkflowUtils.workflowPath()))
-        ProcessingConfig.addSetting(Setting(self.getDescription(), self.getTaskbarButtonSetting(),
-                                            "Show workflow button on taskbar", True))
+    def load(self):
+        ProcessingConfig.settingIcons[self.name()] = self.icon()
+        ProcessingConfig.addSetting(Setting(self.name(), 
+                                            WorkflowUtils.WORKFLOW_FOLDER,
+                                            self.tr("Workflows' folder"),
+                                            WorkflowUtils.workflowPath()))
+        ProcessingConfig.addSetting(Setting(self.name(), 
+                                            self.getTaskbarButtonSetting(),
+                                            self.tr("Show workflow button on taskbar"),
+                                            True))
+        return True
 
     def unload(self):
         for collection in self.collections:
-            Processing.removeProvider(collection)
+            QgsApplication.processingRegistry().removeProvider(collection)
         self.collections = []
         self.collectionListeners = []
         WorkflowProviderBase.unload(self)
@@ -92,13 +97,13 @@ class WorkflowProvider(WorkflowProviderBase):
                         continue
                     collectionAlreadyExists = False
                     for collection in self.collections:
-                        if collection.getName() == workflowCollectionName:
+                        if collection.name() == workflowCollectionName:
                             collectionAlreadyExists = True
                             break
                     if not collectionAlreadyExists:
                             workflowCollection = WorkflowCollection(
                                     iface, os.path.join(root, "collection.conf"), self)
-                            self.addCollection(workflowCollection, False)
+                            self.addCollection(workflowCollection)
                 except WrongWorkflowException:
                     # A warning message was already printed in WorkflowCollection constructor so
                     # nothing to do here
@@ -110,7 +115,9 @@ class WorkflowProvider(WorkflowProviderBase):
                     if descriptionFile.endswith(".workflow"):
                         self.loadWorkflow(os.path.join(root, descriptionFile))
 
-    def addCollection(self, workflowCollection, updateToolbox):
+        return self.preloadedAlgs
+
+    def addCollection(self, workflowCollection):
         self.collections.append(workflowCollection)
-        Processing.addProvider(workflowCollection, updateToolbox)
-        WorkflowUtils.addWorkflowCollectionName(workflowCollection.getName())
+        QgsApplication.processingRegistry().addProvider(workflowCollection)
+        WorkflowUtils.addWorkflowCollectionName(workflowCollection.name())

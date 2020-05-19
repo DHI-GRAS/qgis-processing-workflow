@@ -102,7 +102,7 @@ class CollectionCreatorDialog(WIDGET, BASE):
         for provider in algList.providers:
             try:
                 if provider.descriptionFile == self.confFile:
-                    algList.reloadProvider(provider.getName())
+                    algList.reloadProvider(provider.name())
             except AttributeError:
                 pass
         self.closeWindow()
