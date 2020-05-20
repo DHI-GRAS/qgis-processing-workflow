@@ -29,7 +29,6 @@ class WorkflowCollection(WorkflowProviderBase):
         # Read properties from configuration file
         self.descriptionFile = descriptionFile
         self.baseDir = os.path.dirname(descriptionFile)
-        self.processDescriptionFile()
 
         if iface:
             self._addToolbarIcon()
@@ -84,6 +83,7 @@ class WorkflowCollection(WorkflowProviderBase):
                                                         QgsMessageBar.WARNING, 3)
                 ProcessingLog.addToLog(ProcessingLog.LOG_ERROR, msg)
                 return False
+        return True
 
     def id(self):
         return WorkflowProviderBase.id(self)+"_"+self.name()

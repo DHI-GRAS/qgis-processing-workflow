@@ -44,8 +44,8 @@ if cmd_folder not in sys.path:
 class ProcessingWorkflowPlugin(object):
 
     def __init__(self, iface):
-        self.provider = WorkflowProvider()
         self.workflowOnlyAlgorithmProvider = WorkflowOnlyAlgorithmProvider()
+        self.provider = WorkflowProvider()
         # Save reference to the QGIS interface
         self.iface = iface
 
@@ -56,8 +56,8 @@ class ProcessingWorkflowPlugin(object):
                 self.algListener.algsListHasChanged)
         QgsApplication.processingRegistry().providerRemoved.connect(
                 self.algListener.algsListHasChanged)
-        QgsApplication.processingRegistry().addProvider(self.provider)
         QgsApplication.processingRegistry().addProvider(self.workflowOnlyAlgorithmProvider)
+        QgsApplication.processingRegistry().addProvider(self.provider)
 
     def unload(self):
         QgsApplication.processingRegistry().providerAdded.disconnect(

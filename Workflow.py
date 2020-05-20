@@ -31,13 +31,13 @@ import os
 import json
 from qgis.PyQt.QtWidgets import QDialog
 from qgis.PyQt.QtCore import QCoreApplication
-from qgis.core import (QgsProcessingAlgorithm,
+from qgis.core import (QgsApplication,
+                       QgsProcessingAlgorithm,
                        QgsProcessingParameterString,
                        QgsProcessingParameterBoolean,
                        QgsProcessingParameterEnum,
                        QgsProcessingParameterNumber,
                        QgsProcessingParameterExtent)
-from processing.core.Processing import Processing
 from processing.algs.grass7.Grass7Algorithm import Grass7Algorithm
 from processing.algs.grass7.Grass7Utils import Grass7Utils
 from processing_workflow.StepDialog import StepDialog, NORMAL_MODE, BATCH_MODE
@@ -116,7 +116,7 @@ class Workflow(QgsProcessingAlgorithm):
         with open(styleFile, 'r') as fi:
             self.style = fi.read()
 
-    def getCopy(self):
+    def createInstance(self):
         newone = Workflow(self.provider)
         newone.openWorkflow(self.descriptionFile)
         return newone
@@ -153,13 +153,13 @@ class Workflow(QgsProcessingAlgorithm):
         parameters = step['parameters']
         alg = step['algorithm']
         for paramName in parameters.keys():
-            param = alg.getParameterFromName(paramName)
+            param = alg.parameterDefinition(paramName)
             if param and (isinstance(param, QgsProcessingParameterBoolean) or
                           isinstance(param, QgsProcessingParameterNumber) or
                           isinstance(param, QgsProcessingParameterString) or
                           isinstance(param, QgsProcessingParameterEnum) or
                           isinstance(param, QgsProcessingParameterExtent)):
-                param.default = parameters[paramName]
+                param.setDefaultValue(parameters[paramName])
 
     def executeStep(self, step):
         if isinstance(step['algorithm'], Grass7Algorithm):
@@ -234,12 +234,13 @@ class Workflow(QgsProcessingAlgorithm):
 
                     elif line.startswith(".GROUP:"):
                         self._group = self.tr(line[len(".GROUP:"):])
-                        self._groupId = self.groupIdRegex.search(line[len(".GROUP:"):]).group(0).lower().replace(" ", "_")
+                        self._groupId = line[len(".GROUP:"):].lower().replace(" ", "_")
 
                     elif line.startswith(".ALGORITHM:"):
-                        alg = Processing.getAlgorithm(line[len(".ALGORITHM:"):])
+                        alg = QgsApplication.processingRegistry().algorithmById(
+                                line[len(".ALGORITHM:"):])
                         if alg:
-                            alg = alg.getCopy()
+                            alg = alg.createInstance()
                             self.addStep(alg, NORMAL_MODE, '')
                         else:
                             raise WrongWorkflowException
@@ -283,7 +284,7 @@ class Workflow(QgsProcessingAlgorithm):
                 except Exception as e:
                     raise e
 
-    def processAlgorithm(self, progress):
+    def processAlgorithm(self, parameters, context, progress):
         self.run()
 
     def name(self):
@@ -303,7 +304,9 @@ class Workflow(QgsProcessingAlgorithm):
 
     def flags(self):
         # TODO - maybe it's safe to background thread this?
-        return super().flags() | QgsProcessingAlgorithm.FlagNoThreading | QgsProcessingAlgorithm.FlagDisplayNameIsLiteral
+        return super().flags() | (QgsProcessingAlgorithm.FlagNoThreading |
+                                  QgsProcessingAlgorithm.FlagDisplayNameIsLiteral |
+                                  QgsProcessingAlgorithm.FlagHideFromModeler)
 
     def helpUrl(self, key):
         return None
@@ -315,6 +318,9 @@ class Workflow(QgsProcessingAlgorithm):
         if context == '':
             context = self.__class__.__name__
         return QCoreApplication.translate(context, string)
+
+    def initAlgorithm(self, config=None):
+        pass
 
 # Just a "wrapper" dialog to satisfy executeAlgorithm in ProcessingToolbox
 class WorkflowDialog(QDialog):

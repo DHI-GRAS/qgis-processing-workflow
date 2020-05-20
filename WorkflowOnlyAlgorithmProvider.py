@@ -22,12 +22,13 @@ class WorkflowOnlyAlgorithmProvider(QgsProcessingProvider):
         return WorkflowUtils.workflowIcon()
 
     def id(self):
-        return "processing_workflow_tools"
+        return "workflowtools"
 
     def helpId(self):
-        return "processing_workflow_tools"
+        return "workflowtools"
 
     def load(self):
+        self.loadAlgorithms()
         return True
 
     def unload(self):

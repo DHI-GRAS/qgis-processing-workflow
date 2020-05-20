@@ -82,7 +82,7 @@ class WorkflowProviderBase(QgsProcessingProvider):
         try:
             workflow = Workflow(self)
             workflow.openWorkflow(workflowFilePath)
-            if workflow.name.strip() != "":
+            if workflow.name().strip() != "":
                 workflow.provider = self
                 self.preloadedAlgs.append(workflow)
             else:
@@ -136,6 +136,7 @@ class WorkflowProviderBase(QgsProcessingProvider):
     def load(self):
         QgsProcessingProvider.load(self)
         self.addRemoveTaskbarButton()
+        self.loadAlgorithms()
         return True
 
     def loadAlgorithms(self):

@@ -55,24 +55,25 @@ class WorkflowProvider(WorkflowProviderBase):
         #self.actions += [CreateNewWorkflowAction(self), CreateEditCollectionAction(self)]
         self.collections = []
         self.collectionListeners = []
-  
+
         self._addToolbarIcon()
 
     def load(self):
         ProcessingConfig.settingIcons[self.name()] = self.icon()
-        ProcessingConfig.addSetting(Setting(self.name(), 
+        ProcessingConfig.addSetting(Setting(self.name(),
                                             WorkflowUtils.WORKFLOW_FOLDER,
                                             self.tr("Workflows' folder"),
                                             WorkflowUtils.workflowPath()))
-        ProcessingConfig.addSetting(Setting(self.name(), 
+        ProcessingConfig.addSetting(Setting(self.name(),
                                             self.getTaskbarButtonSetting(),
                                             self.tr("Show workflow button on taskbar"),
                                             True))
+        self.loadAlgorithms()
         return True
 
     def unload(self):
         for collection in self.collections:
-            QgsApplication.processingRegistry().removeProvider(collection)
+            QgsApplication.processingRegistry().removeProvider(collection.id())
         self.collections = []
         self.collectionListeners = []
         WorkflowProviderBase.unload(self)
@@ -101,9 +102,9 @@ class WorkflowProvider(WorkflowProviderBase):
                             collectionAlreadyExists = True
                             break
                     if not collectionAlreadyExists:
-                            workflowCollection = WorkflowCollection(
-                                    iface, os.path.join(root, "collection.conf"), self)
-                            self.addCollection(workflowCollection)
+                        workflowCollection = WorkflowCollection(
+                                iface, os.path.join(root, "collection.conf"), self)
+                        self.addCollection(workflowCollection)
                 except WrongWorkflowException:
                     # A warning message was already printed in WorkflowCollection constructor so
                     # nothing to do here
