@@ -30,6 +30,7 @@ from io import open
 import os
 import json
 from qgis.PyQt.QtWidgets import QDialog
+from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import (QgsProcessingAlgorithm,
                        QgsProcessingParameterString,
                        QgsProcessingParameterBoolean,
@@ -55,8 +56,8 @@ class Workflow(QgsProcessingAlgorithm):
         # holds the algorithm object, the mode (normal or batch) and instructions
         self.provider = provider
         self._steps = list()
-        self.name = ''
-        self.group = ''
+        self._name = ''
+        self._group = ''
         self.descriptionFile = ''
         self.style = None
         self.parameters = [QgsProcessingParameterString("Info",
@@ -102,7 +103,7 @@ class Workflow(QgsProcessingAlgorithm):
     def getInstructions(self, index):
         return self._steps[index]['instructions']
 
-    def getIcon(self):
+    def icon(self):
         try:
             return self.provider.icon()
         except:
@@ -229,10 +230,11 @@ class Workflow(QgsProcessingAlgorithm):
                         pass
 
                     if line.startswith(".NAME:"):
-                        self.name = line[len(".NAME:"):]
+                        self._name = self.tr(line[len(".NAME:"):])
 
                     elif line.startswith(".GROUP:"):
-                        self.group = line[len(".GROUP:"):]
+                        self._group = self.tr(line[len(".GROUP:"):])
+                        self._groupId = self.groupIdRegex.search(line[len(".GROUP:"):]).group(0).lower().replace(" ", "_")
 
                     elif line.startswith(".ALGORITHM:"):
                         alg = Processing.getAlgorithm(line[len(".ALGORITHM:"):])
@@ -284,6 +286,35 @@ class Workflow(QgsProcessingAlgorithm):
     def processAlgorithm(self, progress):
         self.run()
 
+    def name(self):
+        return self._name
+
+    def displayName(self):
+        return self._name
+
+    def shortDescription(self):
+        return self._name
+
+    def group(self):
+        return self._group
+
+    def groupId(self):
+        return self._groupId
+
+    def flags(self):
+        # TODO - maybe it's safe to background thread this?
+        return super().flags() | QgsProcessingAlgorithm.FlagNoThreading | QgsProcessingAlgorithm.FlagDisplayNameIsLiteral
+
+    def helpUrl(self, key):
+        return None
+
+    def svgIconPath(self):
+        return ""
+
+    def tr(self, string, context=''):
+        if context == '':
+            context = self.__class__.__name__
+        return QCoreApplication.translate(context, string)
 
 # Just a "wrapper" dialog to satisfy executeAlgorithm in ProcessingToolbox
 class WorkflowDialog(QDialog):

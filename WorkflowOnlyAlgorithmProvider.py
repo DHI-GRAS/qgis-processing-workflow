@@ -37,4 +37,4 @@ class WorkflowOnlyAlgorithmProvider(QgsProcessingProvider):
         self.algs = [WorkflowInstructionsAlgorithm()]
         for alg in self.algs:
             alg.provider = self
-            self.addAlgorithms(alg)
+            self.addAlgorithm(alg)

@@ -86,7 +86,7 @@ class WorkflowCollection(WorkflowProviderBase):
                 return False
 
     def id(self):
-        return WorkflowProviderBase.id()+"_"+self.name()
+        return WorkflowProviderBase.id(self)+"_"+self.name()
 
     # Load all the workflows saved in the workflow folder
     def createAlgsList(self):
