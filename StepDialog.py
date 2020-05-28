@@ -147,6 +147,12 @@ class StepDialog(QDialog):
         except AttributeError:
             # Not all dialogs might have buttonBox
             pass
+        try:
+            self.batchModeDialog.btnRunSingle.hide()
+            self.normalModeDialog.runAsBatchButton.hide()
+        except AttributeError:
+            # Not all dialogs might have those buttons
+            pass
         if canEdit:
             try:
                 self.normalModeDialog.progressBar.hide()
@@ -156,7 +162,7 @@ class StepDialog(QDialog):
                 else:
                     self.normalModeDialog.buttonBox.hide()
                 self.batchModeDialog.buttonBox.hide()
-            except:
+            except AttributeError:
                 # Not all dialogs might have buttonBox
                 pass
 
