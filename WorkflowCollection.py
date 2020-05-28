@@ -2,9 +2,6 @@ import io
 import json
 import os
 import glob
-from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction
-from qgis.PyQt.QtCore import QObject
 from qgis.gui import QgsMessageBar
 from processing.core.ProcessingLog import ProcessingLog
 from processing.core.ProcessingConfig import ProcessingConfig, Setting
@@ -17,6 +14,7 @@ class WorkflowCollection(WorkflowProviderBase):
     def __init__(self, iface, descriptionFile, workflowProvider, activate=False):
 
         self.iface = iface
+        self.workflowProvider = workflowProvider
 
         # If we just want to parse the description file (e.g. when creating
         # new collection) then iface is not provided and we don't want to do
@@ -30,11 +28,10 @@ class WorkflowCollection(WorkflowProviderBase):
         self.descriptionFile = descriptionFile
         self.baseDir = os.path.dirname(descriptionFile)
         self.configured = self.processDescriptionFile()
+        self.initializeSettings()
 
         if self.configured and iface:
             self._addToolbarIcon()
-
-        self.workflowProvider = workflowProvider
 
     def unload(self):
         WorkflowProviderBase.unload(self)
@@ -44,7 +41,7 @@ class WorkflowCollection(WorkflowProviderBase):
     def initializeSettings(self):
         # The activate collection setting is in the Workflow provider settings group
         name = self.getActivateSetting()
-        activateSetting = Setting(self.workflowProvider.getDescription(), name,
+        activateSetting = Setting(self.workflowProvider.longName(), name,
                                   self.tr('Activate %s collection') % self.name(),
                                   self.activate)
         ProcessingConfig.addSetting(activateSetting)
@@ -53,7 +50,7 @@ class WorkflowCollection(WorkflowProviderBase):
         if self.activate:
             activateSetting.setValue(self.activate)
             activateSetting.save()
-        ProcessingConfig.addSetting(Setting(self.workflowProvider.getDescription(),
+        ProcessingConfig.addSetting(Setting(self.workflowProvider.longName(),
                                             self.getTaskbarButtonSetting(),
                                             "Show "+self.name()+" collection icon on taskbar",
                                             True))
@@ -87,7 +84,7 @@ class WorkflowCollection(WorkflowProviderBase):
         return True
 
     def id(self):
-        return WorkflowProviderBase.id(self)+"_"+self.name().replace(' ','_')
+        return WorkflowProviderBase.id(self)+"_"+self.name().replace(' ', '_')
 
     # Load all the workflows saved in the workflow folder
     def createAlgsList(self):
@@ -98,6 +95,6 @@ class WorkflowCollection(WorkflowProviderBase):
 
     def load(self):
         if self.configured:
-            return super(WorkflowCollection, self).load()
+            return WorkflowProviderBase.load(self)
         else:
             return False

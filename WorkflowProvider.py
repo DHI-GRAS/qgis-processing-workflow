@@ -59,12 +59,12 @@ class WorkflowProvider(WorkflowProviderBase):
         self._addToolbarIcon()
 
     def load(self):
-        ProcessingConfig.settingIcons[self.name()] = self.icon()
-        ProcessingConfig.addSetting(Setting(self.name(),
+        ProcessingConfig.settingIcons[self.longName()] = self.icon()
+        ProcessingConfig.addSetting(Setting(self.longName(),
                                             WorkflowUtils.WORKFLOW_FOLDER,
                                             self.tr("Workflows' folder"),
                                             WorkflowUtils.workflowPath()))
-        ProcessingConfig.addSetting(Setting(self.name(),
+        ProcessingConfig.addSetting(Setting(self.longName(),
                                             self.getTaskbarButtonSetting(),
                                             self.tr("Show workflow button on taskbar"),
                                             True))
