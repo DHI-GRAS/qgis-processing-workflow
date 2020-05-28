@@ -51,10 +51,9 @@ DIRNAME = os.path.dirname(__file__)
 # and instructions for each step
 class Workflow(QgsProcessingAlgorithm):
 
-    def __init__(self, provider):
+    def __init__(self):
         QgsProcessingAlgorithm.__init__(self)
         # holds the algorithm object, the mode (normal or batch) and instructions
-        self.provider = provider
         self._steps = list()
         self._name = ''
         self._group = ''
@@ -105,29 +104,31 @@ class Workflow(QgsProcessingAlgorithm):
 
     def icon(self):
         try:
-            return self.provider.icon()
+            return self.provider().icon()
         except:
             return WorkflowUtils.workflowIcon()
 
     def getStyle(self):
-        styleFile = os.path.join(self.provider.baseDir, self.provider.css)
+        styleFile = os.path.join(self.provider().baseDir, self.provider().css)
         if not os.path.isfile(styleFile):
             styleFile = os.path.join(DIRNAME, "style.css")
         with open(styleFile, 'r') as fi:
             self.style = fi.read()
 
     def createInstance(self):
-        newone = Workflow(self.provider)
+        newone = Workflow()
+        newone.setProvider(self.provider())
         newone.openWorkflow(self.descriptionFile)
+        newone.getStyle()
         return newone
 
-    def getCustomParametersDialog(self):
+    def createCustomParametersWidget(self, parent):
         return WorkflowDialog(self)
 
     def removeStep(self, index):
         self._steps.pop(index)
 
-    def run(self):
+    def processAlgorithm(self, parameters, context, progress):
         # execute the first step
         step = self._steps[0]
         stepDialog = self.executeStep(step)
@@ -145,7 +146,8 @@ class Workflow(QgsProcessingAlgorithm):
             # finish the workflow or execute the next step
             if step is None:
                 Grass7Utils.endGrassSession()
-                return stepDialog.executed
+                #return stepDialog.executed()
+                return {}
             else:
                 stepDialog = self.executeStep(step)
 
@@ -172,13 +174,13 @@ class Workflow(QgsProcessingAlgorithm):
         stepDialog.setMode(step['mode'])
         stepDialog.setInstructions(step['instructions'])
         stepDialog.setWindowTitle(
-            u"Workflow {self.name}, Step {stepno} of {nsteps}: {algname}"
+            u"Workflow {workflowname}, Step {stepno} of {nsteps}: {algname}"
             .format(
-                self=self,
+                workflowname=self.name(),
                 stepno=(self._steps.index(step) + 1),
                 nsteps=len(self._steps),
-                algname=step['algorithm'].name))
-        stepDialog.setWindowIcon(self.getIcon())
+                algname=step['algorithm'].name()))
+        stepDialog.setWindowIcon(self.icon())
         # set as window modal to allow access to QGIS functions
         stepDialog.setWindowModality(1)
         stepDialog.exec_()
@@ -215,7 +217,6 @@ class Workflow(QgsProcessingAlgorithm):
 
     # Read workflow from text file
     def openWorkflow(self, filename):
-        self.getStyle()
         self._steps = list()
         self.descriptionFile = filename
         instructions = False
@@ -240,7 +241,6 @@ class Workflow(QgsProcessingAlgorithm):
                         alg = QgsApplication.processingRegistry().algorithmById(
                                 line[len(".ALGORITHM:"):])
                         if alg:
-                            alg = alg.createInstance()
                             self.addStep(alg, NORMAL_MODE, '')
                         else:
                             raise WrongWorkflowException
@@ -284,9 +284,6 @@ class Workflow(QgsProcessingAlgorithm):
                 except Exception as e:
                     raise e
 
-    def processAlgorithm(self, parameters, context, progress):
-        self.run()
-
     def name(self):
         return self._name
 
@@ -303,13 +300,15 @@ class Workflow(QgsProcessingAlgorithm):
         return self._groupId
 
     def flags(self):
-        # TODO - maybe it's safe to background thread this?
         return super().flags() | (QgsProcessingAlgorithm.FlagNoThreading |
-                                  QgsProcessingAlgorithm.FlagDisplayNameIsLiteral |
-                                  QgsProcessingAlgorithm.FlagHideFromModeler)
+                                  QgsProcessingAlgorithm.FlagHideFromModeler &
+                                  ~QgsProcessingAlgorithm.FlagSupportsBatch)
 
-    def helpUrl(self, key):
-        return None
+    def helpUrl(self):
+        return ""
+
+    def helpId(self):
+        return ""
 
     def svgIconPath(self):
         return ""
@@ -321,6 +320,10 @@ class Workflow(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, config=None):
         pass
+
+    def validateInputCRS(self):
+        return True
+
 
 # Just a "wrapper" dialog to satisfy executeAlgorithm in ProcessingToolbox
 class WorkflowDialog(QDialog):

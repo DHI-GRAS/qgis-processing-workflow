@@ -80,10 +80,9 @@ class WorkflowProviderBase(QgsProcessingProvider):
 
     def loadWorkflow(self, workflowFilePath):
         try:
-            workflow = Workflow(self)
+            workflow = Workflow()
             workflow.openWorkflow(workflowFilePath)
             if workflow.name().strip() != "":
-                workflow.provider = self
                 self.preloadedAlgs.append(workflow)
             else:
                 QgsMessageLog.logMessage(

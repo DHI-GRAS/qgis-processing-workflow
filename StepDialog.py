@@ -32,6 +32,7 @@ from qgis.PyQt import QtCore
 from qgis.PyQt.QtWidgets import (QDialog, QGridLayout, QWidget, QTextBrowser, QTextEdit, QToolBar,
                                  QAction, QDialogButtonBox, QPushButton, QComboBox)
 from qgis.PyQt.QtGui import QIcon, QTextDocument
+from processing.tools import general
 from processing.gui.AlgorithmDialog import AlgorithmDialog
 from processing.gui.BatchAlgorithmDialog import BatchAlgorithmDialog
 from processing_workflow import markdown
@@ -46,8 +47,7 @@ DIRNAME = os.path.dirname(__file__)
 class StepDialog(QDialog):
 
     def __init__(self, alg, mainDialog, workflowBaseDir, canEdit=True, style=None):
-
-        self.alg = alg
+        self.alg = alg.create()
         self.mainDialog = mainDialog
         self.workflowBaseDir = workflowBaseDir
         self.canEdit = canEdit
@@ -124,28 +124,27 @@ class StepDialog(QDialog):
         self.algInstructionsText.setAcceptRichText(False)
         self.setDefaultInstructionsText()
 
-        self.normalModeDialog = alg.getCustomParametersDialog()
+        self.normalModeDialog = self.alg.createCustomParametersWidget(None)
         if not self.normalModeDialog:
-            self.normalModeDialog = AlgorithmDialog(alg)
-        # Do not show the "Run as batch process" button in workflows
+            self.normalModeDialog = general.createAlgorithmDialog(self.alg)
         try:
             self.normalModeDialog.tabWidget.setCornerWidget(None)
         except:
             pass
-        self.batchModeDialog = BatchAlgorithmDialog(alg)
+        self.batchModeDialog = BatchAlgorithmDialog(self.alg)
         self.batchModeDialog.setHidden(True)
         # forwardButton does the job of cancel/close button
         try:
-            if self.alg.name == "Field calculator":
-                self.normalModeDialog.mButtonBox.removeButton(
-                        self.normalModeDialog.mButtonBox.button(QDialogButtonBox.Cancel))
+            if self.alg.name() == "Field calculator":
+                self.normalModeDialog.mButtonBox().removeButton(
+                        self.normalModeDialog.mButtonBox().button(QDialogButtonBox.Cancel))
             else:
-                self.normalModeDialog.buttonBox.removeButton(
-                        self.normalModeDialog.buttonBox.button(QDialogButtonBox.Close))
+                self.normalModeDialog.buttonBox().removeButton(
+                        self.normalModeDialog.buttonBox().button(QDialogButtonBox.Close))
             # forwardButton does this job
-            self.batchModeDialog.buttonBox.removeButton(
-                    self.batchModeDialog.buttonBox.button(QDialogButtonBox.Close))
-        except:
+            self.batchModeDialog.buttonBox().removeButton(
+                    self.batchModeDialog.buttonBox().button(QDialogButtonBox.Close))
+        except AttributeError:
             # Not all dialogs might have buttonBox
             pass
         if canEdit:
@@ -160,16 +159,17 @@ class StepDialog(QDialog):
             except:
                 # Not all dialogs might have buttonBox
                 pass
-        self.normalModeDialog.connect(self.normalModeDialog, QtCore.SIGNAL("finished(int)"),
-                                      self.forward)
-        self.batchModeDialog.connect(self.batchModeDialog, QtCore.SIGNAL("finished(int)"),
-                                     self.forward)
+
+        self.normalModeDialog.accepted.connect(self.forward)
+        self.batchModeDialog.accepted.connect(self.forward)
+        self.normalModeDialog.rejected.connect(self.forward)
+        self.batchModeDialog.rejected.connect(self.forward)
 
         self.resize(1120, 790)
         self.algInstructionsText.setMinimumWidth(350)
         self.tabLayout.addWidget(self.algInstructionsWidget, 0, 0)
-        if self.alg.provider.name() == "workflowtools" and\
-           self.alg.name == "Workflow instructions":
+        if self.alg.provider().name() == "workflowtools" and\
+           self.alg.name() == "workflowinstructions":
             cols = 0
         else:
             cols = 1
@@ -189,19 +189,19 @@ class StepDialog(QDialog):
             self.backwardButton = QPushButton()
             self.backwardButton.setText("< Previous step")
             self.buttonBox.addButton(self.backwardButton, QDialogButtonBox.ActionRole)
-            QtCore.QObject.connect(self.backwardButton, QtCore.SIGNAL("clicked()"), self.backward)
+            self.backwardButton.clicked.connect(self.backward)
             self.forwardButton = QPushButton()
             self.forwardButton.setText("Skip step >")
             self.buttonBox.addButton(self.forwardButton, QDialogButtonBox.ActionRole)
-            QtCore.QObject.connect(self.forwardButton, QtCore.SIGNAL("clicked()"), self.forward)
+            self.forwardButton.clicked.connect(self.forward)
             self.closeButton = QPushButton()
             self.closeButton.setText("Finish Workflow")
             self.buttonBox.addButton(self.closeButton, QDialogButtonBox.ActionRole)
-            QtCore.QObject.connect(self.closeButton, QtCore.SIGNAL("clicked()"), self.close)
+            self.closeButton.clicked.connect(self.close)
             self.tabLayout.addWidget(self.buttonBox, 1, cols)
         self.setLayout(self.tabLayout)
 
-        self.executed = self.normalModeDialog.executed
+        self.executed = self.normalModeDialog.wasExecuted
 
     def textBold(self):
         cursor = self.algInstructionsText.textCursor()
@@ -248,8 +248,8 @@ class StepDialog(QDialog):
         return self.algMode.currentText()
 
     def setMode(self, mode):
-        if not (self.alg.provider.name() == "workflowtools" and
-                self.alg.name == "Workflow instructions"):
+        if not (self.alg.provider().name() == "workflowtools" and
+                self.alg.name() == "Workflow instructions"):
             if mode == NORMAL_MODE and not self.normalModeDialog.isVisible():
                 self.batchModeDialog.setHidden(True)
                 self.normalModeDialog.setVisible(True)
@@ -302,20 +302,23 @@ class StepDialog(QDialog):
     # Disconnect all the signals from nomalModeDialog and batchModeDialog when
     # StepDialog is being closed
     def closeEvent(self, evt):
-        self.normalModeDialog.disconnect(self.normalModeDialog, QtCore.SIGNAL("finished(int)"),
-                                         self.forward)
-        self.batchModeDialog.disconnect(self.batchModeDialog, QtCore.SIGNAL("finished(int)"),
-                                        self.forward)
+        self.normalModeDialog.accepted.disconnect(self.forward)
+        self.batchModeDialog.accepted.disconnect(self.forward)
+        self.normalModeDialog.rejected.disconnect(self.forward)
+        self.batchModeDialog.rejected.disconnect(self.forward)
+        
         # batchModeDialog could be already closed if the algorithm was executed
         # in batch mode
         try:
+            self.batchModeDialog.close()
             self.batchModeDialog.closeEvent(evt)
         except TypeError:
             pass
         # normalModeDialog could be already closed if the algorithm was executed
         # in normal mode
         try:
+            self.normalModeDialog.close()
             self.normalModeDialog.closeEvent(evt)
         except TypeError:
             pass
-        QDialog.closeEvent(self, evt)
+        self.close()
