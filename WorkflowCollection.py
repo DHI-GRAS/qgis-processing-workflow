@@ -35,6 +35,7 @@ class WorkflowCollection(WorkflowProviderBase):
 
     def unload(self):
         WorkflowProviderBase.unload(self)
+        ProcessingConfig.removeSetting(self.getActivateSetting())
         ProcessingConfig.removeSetting(self.getTaskbarButtonSetting())
         self.iface.removeToolBarIcon(self.action)
 
@@ -45,15 +46,16 @@ class WorkflowCollection(WorkflowProviderBase):
                                   self.tr('Activate %s collection') % self.name(),
                                   self.activate)
         ProcessingConfig.addSetting(activateSetting)
-        # If activate is True (default is False) then save the setting properly, otherwise it will
-        # be set to false when QGIS is restarted.
-        if self.activate:
-            activateSetting.setValue(self.activate)
-            activateSetting.save()
         ProcessingConfig.addSetting(Setting(self.workflowProvider.longName(),
                                             self.getTaskbarButtonSetting(),
                                             "Show "+self.name()+" collection icon on taskbar",
                                             True))
+
+    def isActive(self):
+        return ProcessingConfig.getSetting(self.getActivateSetting())
+
+    def setActive(self, active):
+        ProcessingConfig.setSettingValue(self.getActivateSetting(), active)
 
     # Read the JSON description file
     def processDescriptionFile(self):
