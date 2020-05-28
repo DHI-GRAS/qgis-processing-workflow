@@ -151,9 +151,9 @@ class Workflow(QgsProcessingAlgorithm):
             else:
                 stepDialog = self.executeStep(step)
 
-    def setStepParameters(self, step):
+    def prepareStepAlgorithm(self, step):
         parameters = step['parameters']
-        alg = step['algorithm']
+        alg = step['algorithm'].create()
         for paramName in parameters.keys():
             param = alg.parameterDefinition(paramName)
             if param and (isinstance(param, QgsProcessingParameterBoolean) or
@@ -162,15 +162,15 @@ class Workflow(QgsProcessingAlgorithm):
                           isinstance(param, QgsProcessingParameterEnum) or
                           isinstance(param, QgsProcessingParameterExtent)):
                 param.setDefaultValue(parameters[paramName])
+        return alg
 
     def executeStep(self, step):
         if isinstance(step['algorithm'], Grass7Algorithm):
             Grass7Utils.startGrassSession()
         else:
             Grass7Utils.endGrassSession()
-        self.setStepParameters(step)
-        stepDialog = StepDialog(step['algorithm'], None, os.path.dirname(self.descriptionFile),
-                                False, style=self.style)
+        stepDialog = StepDialog(self.prepareStepAlgorithm(step), None,
+                                os.path.dirname(self.descriptionFile), False, style=self.style)
         stepDialog.setMode(step['mode'])
         stepDialog.setInstructions(step['instructions'])
         stepDialog.setWindowTitle(
@@ -256,14 +256,12 @@ class Workflow(QgsProcessingAlgorithm):
                     elif line.startswith(".PARAMETERS:"):
                         try:
                             params = json.loads(line[len(".PARAMETERS:"):])
-                        except:
-                            pass
+                        except json.JSONDecodeError:
+                            params = None
+                        if type(params) == dict:
+                            self._steps[-1]['parameters'] = params
                         else:
-                            if type(params) == dict:
-                                self._steps[-1]['parameters'] = params
-                                self.setStepParameters(self._steps[-1])
-                            else:
-                                raise WrongWorkflowException
+                            raise WrongWorkflowException
 
                     elif line.startswith(".INSTRUCTIONS"):
                         instructions = line[len(".INSTRUCTIONS:"):]+"\n"

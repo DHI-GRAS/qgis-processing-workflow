@@ -47,7 +47,7 @@ DIRNAME = os.path.dirname(__file__)
 class StepDialog(QDialog):
 
     def __init__(self, alg, mainDialog, workflowBaseDir, canEdit=True, style=None):
-        self.alg = alg.create()
+        self.alg = alg
         self.mainDialog = mainDialog
         self.workflowBaseDir = workflowBaseDir
         self.canEdit = canEdit
