@@ -120,5 +120,6 @@ class WorkflowProvider(WorkflowProviderBase):
 
     def addCollection(self, workflowCollection):
         self.collections.append(workflowCollection)
+        WorkflowUtils.addWorkflowCollectionName(workflowCollection.id())
         QgsApplication.processingRegistry().addProvider(workflowCollection)
-        WorkflowUtils.addWorkflowCollectionName(workflowCollection.name())
+        

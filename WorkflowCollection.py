@@ -29,8 +29,9 @@ class WorkflowCollection(WorkflowProviderBase):
         # Read properties from configuration file
         self.descriptionFile = descriptionFile
         self.baseDir = os.path.dirname(descriptionFile)
+        self.configured = self.processDescriptionFile()
 
-        if iface:
+        if self.configured and iface:
             self._addToolbarIcon()
 
         self.workflowProvider = workflowProvider
@@ -86,7 +87,7 @@ class WorkflowCollection(WorkflowProviderBase):
         return True
 
     def id(self):
-        return WorkflowProviderBase.id(self)+"_"+self.name()
+        return WorkflowProviderBase.id(self)+"_"+self.name().replace(' ','_')
 
     # Load all the workflows saved in the workflow folder
     def createAlgsList(self):
@@ -96,7 +97,7 @@ class WorkflowCollection(WorkflowProviderBase):
         return self.preloadedAlgs
 
     def load(self):
-        if self.processDescriptionFile():
+        if self.configured:
             return super(WorkflowCollection, self).load()
         else:
             return False

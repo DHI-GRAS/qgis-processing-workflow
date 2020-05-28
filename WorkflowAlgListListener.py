@@ -1,4 +1,7 @@
 from builtins import object
+from qgis.core import QgsApplication
+from processing_workflow.WorkflowUtils import WorkflowUtils
+
 
 class WorkflowAlgListListener(object):
     def __init__(self, workflowProvider, workflowOnlyAlgorithmProvider):
@@ -8,5 +11,8 @@ class WorkflowAlgListListener(object):
 
     def algsListHasChanged(self, providerId):
         selfIds = [self.workflowProvider.id(), self.workflowOnlyAlgorithmProvider.id()]
+        selfIds.extend(WorkflowUtils.workflowCollectionNames)
         if providerId not in selfIds:
-            self.workflowProvider.refreshAlgorithms()
+            for selfId in selfIds:
+                selfProvider = QgsApplication.processingRegistry().providerById(selfId)
+                selfProvider.refreshAlgorithms()
