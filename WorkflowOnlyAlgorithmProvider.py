@@ -25,7 +25,7 @@ class WorkflowOnlyAlgorithmProvider(QgsProcessingProvider):
         return "workflowtools"
 
     def helpId(self):
-        return "workflowtools"
+        return ""
 
     def load(self):
         self.loadAlgorithms()
@@ -37,5 +37,4 @@ class WorkflowOnlyAlgorithmProvider(QgsProcessingProvider):
     def loadAlgorithms(self):
         self.algs = [WorkflowInstructionsAlgorithm()]
         for alg in self.algs:
-            alg.provider = self
             self.addAlgorithm(alg)

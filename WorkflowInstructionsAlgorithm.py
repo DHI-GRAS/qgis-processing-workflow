@@ -10,8 +10,6 @@ class WorkflowInstructionsAlgorithm(QgsProcessingAlgorithm):
 
     def __init__(self):
         QgsProcessingAlgorithm.__init__(self)
-        self.showInModeler = False
-        self.showInToolbox = False
         self._name = "workflowinstructions"
         self._displayName = self.tr("Workflow instructions")
         self._group = self.tr("Workflow-only tools")
@@ -51,8 +49,8 @@ class WorkflowInstructionsAlgorithm(QgsProcessingAlgorithm):
                                   QgsProcessingAlgorithm.FlagHideFromToolbox |
                                   QgsProcessingAlgorithm.FlagHideFromModeler)
 
-    def helpUrl(self, key):
-        return None
+    def helpUrl(self):
+        return ""
 
     def svgIconPath(self):
         return ""
