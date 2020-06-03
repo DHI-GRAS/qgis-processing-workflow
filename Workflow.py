@@ -29,7 +29,6 @@ from builtins import str
 from io import open
 import os
 import json
-from qgis.PyQt.QtWidgets import QDialog
 from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import (QgsApplication,
                        QgsProcessingAlgorithm,
@@ -121,9 +120,6 @@ class Workflow(QgsProcessingAlgorithm):
         newone.openWorkflow(self.descriptionFile)
         newone.getStyle()
         return newone
-
-    def createCustomParametersWidget(self, parent):
-        return WorkflowDialog(self)
 
     def removeStep(self, index):
         self._steps.pop(index)
@@ -321,16 +317,3 @@ class Workflow(QgsProcessingAlgorithm):
 
     def validateInputCRS(self):
         return True
-
-
-# Just a "wrapper" dialog to satisfy executeAlgorithm in ProcessingToolbox
-class WorkflowDialog(QDialog):
-
-    def __init__(self, workflow):
-        self.executed = workflow.run()
-
-    def exec_(self):
-        None
-
-    def show(self):
-        None

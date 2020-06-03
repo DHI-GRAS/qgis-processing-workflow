@@ -29,31 +29,23 @@
 """
 
 from builtins import str
-from qgis.PyQt.QtWidgets import (QApplication, QDialog, QTabWidget, QVBoxLayout, QGridLayout,
+from qgis.PyQt.QtWidgets import (QDialog, QTabWidget, QVBoxLayout, QGridLayout,
                                  QLineEdit, QTreeWidget, QScrollArea, QWidget, QLabel, QSizePolicy,
-                                 QFrame, QMessageBox, QTreeWidgetItem, QDialogButtonBox,
-                                 QPushButton)
+                                 QFrame, QTreeWidgetItem, QDialogButtonBox, QPushButton)
 from qgis.PyQt.QtGui import QCursor
 from qgis.PyQt import QtCore
-from qgis.utils import iface
-from processing.core.Processing import Processing
-from processing.gui.AlgorithmDialog import AlgorithmDialog
+from qgis.core import QgsApplication
+from processing.gui.MessageDialog import MessageDialog
+from processing.gui.Postprocessing import handleAlgorithmResults
+from processing.gui.AlgorithmExecutor import execute
+from processing.gui.MessageBarProgress import MessageBarProgress
+from processing.tools import dataobjects
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
     def _fromUtf8(s):
         return s
-
-try:
-    _encoding = QApplication.UnicodeUTF8
-
-    def _translate(context, text, disambig):
-        return QApplication.translate(context, text, disambig, _encoding)
-
-except AttributeError:
-    def _translate(context, text, disambig):
-        return QApplication.translate(context, text, disambig)
 
 
 # Dialog for listing the existing workflows
@@ -70,8 +62,8 @@ class WorkflowListDialog(QDialog):
 
     def setupUi(self):
         self.resize(400, 500)
-        self.setWindowTitle(self.workflowProvider.getDescription())
-        self.setWindowIcon(self.workflowProvider.getIcon())
+        self.setWindowTitle(self.workflowProvider.longName())
+        self.setWindowIcon(self.workflowProvider.icon())
         self.tabWidget = QTabWidget()
         self.tabWidget.setMinimumWidth(300)
 
@@ -138,7 +130,8 @@ class WorkflowListDialog(QDialog):
         self.closeButton = QPushButton()
         self.closeButton.setText("Close")
         self.buttonBox.addButton(self.closeButton, QDialogButtonBox.ActionRole)
-        QtCore.QObject.connect(self.closeButton, QtCore.SIGNAL("clicked()"), self.closeWindow)
+        #QtCore.QObject.connect(self.closeButton, QtCore.SIGNAL("clicked()"), self.closeWindow)
+        self.closeButton.clicked.connect(self.closeWindow)
 
         self.globalLayout = QVBoxLayout()
         self.globalLayout.setSpacing(2)
@@ -152,9 +145,9 @@ class WorkflowListDialog(QDialog):
 
     def retranslateUi(self):
         try:
-            self.aboutLabel.setText(_translate("", self.workflowProvider.aboutHTML, None))
+            self.aboutLabel.setText(self.tr(self.workflowProvider.aboutHTML))
         except:
-            self.aboutLabel.setText(_translate("", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+            self.aboutLabel.setText(self.tr("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
     "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
     "p, li { white-space: pre-wrap; }\n"
     "</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:8pt; font-weight:400; font-style:normal;\">\n"
@@ -169,8 +162,7 @@ class WorkflowListDialog(QDialog):
     "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Sans Serif\'; font-size:9pt;\">You should have received a copy of the GNU General Public License along with this program.  If not, see http://www.gnu.org/licenses/.</span></p>\n"
     "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'Sans Serif\'; font-size:9pt;\"><br /></p>\n"
     "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Sans Serif\'; font-size:9pt;\">Copyright (C) 2014 TIGER-NET (<a href=\"www.tiger-net.org\">www.tiger-net.org</a>)</span></p>\n"
-    "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'Sans Serif\'; font-size:9pt;\"><br /></p>\n"
-    , None))
+    "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'Sans Serif\'; font-size:9pt;\"><br /></p>\n"))
 
     def closeWindow(self):
         self.close()
@@ -179,69 +171,64 @@ class WorkflowListDialog(QDialog):
     def runWorkflow(self):
         item = self.algorithmTree.currentItem()
         if isinstance(item, TreeAlgorithmItem):
-            alg = Processing.getAlgorithm(item.alg.commandLineName())
-            message = alg.checkBeforeOpeningParametersDialog()
-            if message:
-                QMessageBox.warning(self, self.tr("Warning"), message)
+            alg = item.alg.create()
+        else:
+            alg = None
+        if alg is not None:
+            ok, message = alg.canExecute()
+            if not ok:
+                dlg = MessageDialog()
+                dlg.setTitle(self.tr('Error executing algorithm'))
+                dlg.setMessage(
+                    self.tr('<h3>This algorithm cannot '
+                            'be run :-( </h3>\n{0}').format(message))
+                dlg.exec_()
                 return
-            alg = alg.getCopy()
-            dlg = alg.getCustomParametersDialog()
-            if not dlg:
-                dlg = AlgorithmDialog(alg)
-            canvas = iface.mapCanvas()
-            prevMapTool = canvas.mapTool()
-            dlg.show()
-            dlg.exec_()
-            if canvas.mapTool() != prevMapTool:
-                try:
-                    canvas.mapTool().reset()
-                except:
-                    pass
-                canvas.setMapTool(prevMapTool)
+                       
+            feedback = MessageBarProgress(algname=alg.displayName())
+            context = dataobjects.createContext(feedback)
+            parameters = {}
+            ret, results = execute(alg, parameters, context, feedback)
+            handleAlgorithmResults(alg, context, feedback)
+            feedback.close()
 
     # List all the available workflows
     def fillAlgorithmTree(self):
         self.algorithmTree.clear()
         text = str(self.searchBox.text())
-        try:
-            # QGIS 2.16 (and up?) Processing implementation
-            from processing.core.alglist import algList
-            allAlgs = algList.algs
-        except ImportError:
-            # QGIS 2.14 Processing implementation
-            allAlgs = Processing.algs
-        providers = {}
-        for provider in Processing.providers:
-            providers[provider.name()] = provider
-        for providerName in [self.workflowProvider.name()]:
-            groups = {}
-            provider = allAlgs[providerName]
-            algs = list(provider.values())
-            # add algorithms
-            for alg in algs:
-                if text == "" or text.lower() in alg.name.lower():
-                    if alg.group in groups:
-                        groupItem = groups[alg.group]
-                    else:
-                        groupItem = QTreeWidgetItem()
-                        groupItem.setText(0, alg.group)
-                        groups[alg.group] = groupItem
-                    algItem = TreeAlgorithmItem(alg)
-                    groupItem.addChild(algItem)
+        providerId = self.workflowProvider.id()
+        algs = QgsApplication.processingRegistry().providerById(providerId).algorithms()
+        groups = {}
+        # add algorithms
+        for alg in algs:
+            if text == "" or text.lower() in alg.name.lower():
+                if alg.group in groups:
+                    groupItem = groups[alg.group]
+                else:
+                    groupItem = QTreeWidgetItem()
+                    groupItem.setText(0, alg.group())
+                    groups[alg.group] = groupItem
+                algItem = TreeAlgorithmItem(alg)
+                groupItem.addChild(algItem)
 
-            if len(groups) > 0:
-                providerItem = QTreeWidgetItem()
-                providerItem.setText(0, providers[providerName].getDescription())
-                providerItem.setIcon(0, providers[providerName].getIcon())
-                for groupItem in list(groups.values()):
-                    providerItem.addChild(groupItem)
-                self.algorithmTree.addTopLevelItem(providerItem)
-                providerItem.setExpanded(True)
-                for groupItem in list(groups.values()):
-                    if text != "":
-                        groupItem.setExpanded(True)
+        if len(groups) > 0:
+            providerItem = QTreeWidgetItem()
+            providerItem.setText(0, self.workflowProvider.longName())
+            providerItem.setIcon(0, self.workflowProvider.icon())
+            for groupItem in list(groups.values()):
+                providerItem.addChild(groupItem)
+            self.algorithmTree.addTopLevelItem(providerItem)
+            providerItem.setExpanded(True)
+            for groupItem in list(groups.values()):
+                if text != "":
+                    groupItem.setExpanded(True)
 
         self.algorithmTree.sortItems(0, QtCore.Qt.AscendingOrder)
+
+    def tr(self, string, context=''):
+        if context == '':
+            context = self.__class__.__name__
+        return QtCore.QCoreApplication.translate(context, string)
 
 
 class TreeAlgorithmItem(QTreeWidgetItem):
@@ -249,5 +236,5 @@ class TreeAlgorithmItem(QTreeWidgetItem):
     def __init__(self, alg):
         QTreeWidgetItem.__init__(self)
         self.alg = alg
-        self.setText(0, alg.name)
-        self.setIcon(0, alg.getIcon())
+        self.setText(0, alg.name())
+        self.setIcon(0, alg.icon())
