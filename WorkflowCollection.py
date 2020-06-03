@@ -28,18 +28,7 @@ class WorkflowCollection(WorkflowProviderBase):
         self.descriptionFile = descriptionFile
         self.baseDir = os.path.dirname(descriptionFile)
         self.configured = self.processDescriptionFile()
-        self.initializeSettings()
 
-        if self.configured and iface:
-            self._addToolbarIcon()
-
-    def unload(self):
-        WorkflowProviderBase.unload(self)
-        ProcessingConfig.removeSetting(self.getActivateSetting())
-        ProcessingConfig.removeSetting(self.getTaskbarButtonSetting())
-        self.iface.removeToolBarIcon(self.action)
-
-    def initializeSettings(self):
         # The activate collection setting is in the Workflow provider settings group
         name = self.getActivateSetting()
         activateSetting = Setting(self.workflowProvider.longName(), name,
@@ -50,6 +39,15 @@ class WorkflowCollection(WorkflowProviderBase):
                                             self.getTaskbarButtonSetting(),
                                             "Show "+self.name()+" collection icon on taskbar",
                                             True))
+
+        if self.configured and iface:
+            self._addToolbarIcon()
+
+    def unload(self):
+        WorkflowProviderBase.unload(self)
+        ProcessingConfig.removeSetting(self.getActivateSetting())
+        ProcessingConfig.removeSetting(self.getTaskbarButtonSetting())
+        self.iface.removeToolBarIcon(self.action)
 
     def isActive(self):
         return ProcessingConfig.getSetting(self.getActivateSetting())

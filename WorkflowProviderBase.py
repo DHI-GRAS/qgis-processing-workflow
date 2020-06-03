@@ -32,7 +32,7 @@ from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtCore import QCoreApplication
 from qgis.utils import iface
 from qgis.core import QgsProcessingProvider, QgsMessageLog, Qgis
-from processing.core.ProcessingConfig import ProcessingConfig
+from processing.core.ProcessingConfig import ProcessingConfig, settingsWatcher
 #from processing_workflow.EditWorkflowAction import EditWorkflowAction
 from processing_workflow.DeleteWorkflowAction import DeleteWorkflowAction
 from processing_workflow.Workflow import Workflow
@@ -59,12 +59,7 @@ class WorkflowProviderBase(QgsProcessingProvider):
         # Right click button actions
         #self.contextMenuActions = [EditWorkflowAction(self), DeleteWorkflowAction(self)]
 
-        try:
-            # QGIS 2.16 (and up?) Processing implementation
-            from processing.core.ProcessingConfig import settingsWatcher
-            settingsWatcher.settingsChanged.connect(self.addRemoveTaskbarButton)
-        except ImportError:
-            pass
+        settingsWatcher.settingsChanged.connect(self.addRemoveTaskbarButton)
 
     def unload(self):
         QgsProcessingProvider.unload(self)
@@ -125,15 +120,16 @@ class WorkflowProviderBase(QgsProcessingProvider):
     def addRemoveTaskbarButton(self):
         name = self.getActivateSetting()
         taskbar = self.getTaskbarButtonSetting()
-        if not (ProcessingConfig.getSetting(name) and ProcessingConfig.getSetting(taskbar)):
-            # Remove toolbar button
-            iface.removeToolBarIcon(self.action)
-        else:
+        if self.isActive() and ProcessingConfig.getSetting(taskbar):
             # Add toolbar button
             iface.addToolBarIcon(self.action)
+        else:
+            # Remove toolbar button
+            iface.removeToolBarIcon(self.action)
 
     def load(self):
         QgsProcessingProvider.load(self)
+        ProcessingConfig.readSettings()
         self.addRemoveTaskbarButton()
         self.loadAlgorithms()
         return True

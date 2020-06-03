@@ -30,9 +30,8 @@ import io
 import os
 import json
 from qgis.utils import iface
-from qgis.core import QgsProcessingProvider, QgsApplication
+from qgis.core import QgsApplication
 from processing.core.ProcessingConfig import ProcessingConfig, Setting
-from processing.core.Processing import Processing
 from processing_workflow.WorkflowProviderBase import WorkflowProviderBase
 from processing_workflow.WorkflowCollection import WorkflowCollection
 from processing_workflow.WorkflowUtils import WorkflowUtils
@@ -56,9 +55,7 @@ class WorkflowProvider(WorkflowProviderBase):
         self.collections = []
         self.collectionListeners = []
 
-        self._addToolbarIcon()
-
-    def load(self):
+        # The activate workflow provider settings
         ProcessingConfig.settingIcons[self.longName()] = self.icon()
         ProcessingConfig.addSetting(Setting(self.longName(),
                                             WorkflowUtils.WORKFLOW_FOLDER,
@@ -68,8 +65,8 @@ class WorkflowProvider(WorkflowProviderBase):
                                             self.getTaskbarButtonSetting(),
                                             self.tr("Show workflow button on taskbar"),
                                             True))
-        self.loadAlgorithms()
-        return True
+
+        self._addToolbarIcon()
 
     def unload(self):
         for collection in self.collections:
@@ -122,4 +119,3 @@ class WorkflowProvider(WorkflowProviderBase):
         self.collections.append(workflowCollection)
         WorkflowUtils.addWorkflowCollectionName(workflowCollection.id())
         QgsApplication.processingRegistry().addProvider(workflowCollection)
-        
