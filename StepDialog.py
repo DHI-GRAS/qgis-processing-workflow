@@ -32,10 +32,12 @@ from qgis.PyQt import QtCore
 from qgis.PyQt.QtWidgets import (QDialog, QGridLayout, QWidget, QTextBrowser, QTextEdit, QToolBar,
                                  QAction, QDialogButtonBox, QPushButton, QComboBox)
 from qgis.PyQt.QtGui import QIcon, QTextDocument
-from processing.tools import general
+from qgis.core import (QgsApplication,
+                       QgsProcessingAlgorithm)
 from processing.gui.AlgorithmDialog import AlgorithmDialog
 from processing.gui.BatchAlgorithmDialog import BatchAlgorithmDialog
 from processing_workflow import markdown
+
 
 NORMAL_MODE = "Normal"
 BATCH_MODE = "Batch"
@@ -124,12 +126,10 @@ class StepDialog(QDialog):
         self.algInstructionsText.setAcceptRichText(False)
         self.setDefaultInstructionsText()
 
-        self.normalModeDialog = self.alg.createCustomParametersWidget(None)
-        if not self.normalModeDialog:
-            self.normalModeDialog = general.createAlgorithmDialog(self.alg)
+        self.normalModeDialog = self.createAlgorithmDialog(self.alg)
         try:
-            self.normalModeDialog.tabWidget.setCornerWidget(None)
-        except:
+            self.normalModeDialog.tabWidget().setCornerWidget(None)
+        except AttributeError:
             pass
         self.batchModeDialog = BatchAlgorithmDialog(self.alg)
         self.batchModeDialog.setHidden(True)
@@ -208,6 +208,26 @@ class StepDialog(QDialog):
         self.setLayout(self.tabLayout)
 
         self.executed = self.normalModeDialog.wasExecuted
+
+    # Based on processing.tools.general.createAlgorithmDialog but with parent of the dialog widgets
+    # set to None. Otherwise some buttons cannot be removed.
+    def createAlgorithmDialog(self, algOrName, parameters={}):
+        if isinstance(algOrName, QgsProcessingAlgorithm):
+            alg = algOrName.create()
+        else:
+            alg = QgsApplication.processingRegistry().createAlgorithmById(algOrName)
+
+        if alg is None:
+            return None
+
+        dlg = alg.createCustomParametersWidget(None)
+
+        if not dlg:
+            dlg = AlgorithmDialog(alg, parent=None)
+
+        dlg.setParameters(parameters)
+
+        return dlg
 
     def textBold(self):
         cursor = self.algInstructionsText.textCursor()
@@ -312,19 +332,16 @@ class StepDialog(QDialog):
         self.batchModeDialog.accepted.disconnect(self.forward)
         self.normalModeDialog.rejected.disconnect(self.forward)
         self.batchModeDialog.rejected.disconnect(self.forward)
-        
+
         # batchModeDialog could be already closed if the algorithm was executed
         # in batch mode
         try:
-            self.batchModeDialog.close()
-            self.batchModeDialog.closeEvent(evt)
+            self.batchModeDialog.finish()
         except TypeError:
             pass
         # normalModeDialog could be already closed if the algorithm was executed
         # in normal mode
         try:
-            self.normalModeDialog.close()
-            self.normalModeDialog.closeEvent(evt)
+            self.normalModeDialog.finish()
         except TypeError:
             pass
-        self.close()
