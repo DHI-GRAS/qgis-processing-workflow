@@ -136,14 +136,10 @@ class StepDialog(QDialog):
         # forwardButton does the job of cancel/close button
         try:
             if self.alg.name() == "Field calculator":
-                self.normalModeDialog.mButtonBox().removeButton(
-                        self.normalModeDialog.mButtonBox().button(QDialogButtonBox.Cancel))
+                self.normalModeDialog.mButtonBox().button(QDialogButtonBox.Cancel).hide()
             else:
-                self.normalModeDialog.buttonBox().removeButton(
-                        self.normalModeDialog.buttonBox().button(QDialogButtonBox.Close))
-            # forwardButton does this job
-            self.batchModeDialog.buttonBox().removeButton(
-                    self.batchModeDialog.buttonBox().button(QDialogButtonBox.Close))
+                self.normalModeDialog.buttonBox().button(QDialogButtonBox.Close).hide()
+            self.batchModeDialog.buttonBox().button(QDialogButtonBox.Close).hide()
         except AttributeError:
             # Not all dialogs might have buttonBox
             pass
