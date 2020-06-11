@@ -175,7 +175,7 @@ class Workflow(QgsProcessingAlgorithm):
                 workflowname=self.name(),
                 stepno=(self._steps.index(step) + 1),
                 nsteps=len(self._steps),
-                algname=step['algorithm'].name()))
+                algname=step['algorithm'].displayName()))
         stepDialog.setWindowIcon(self.icon())
         # set as window modal to allow access to QGIS functions
         stepDialog.setWindowModality(1)
