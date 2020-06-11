@@ -271,7 +271,7 @@ class StepDialog(QDialog):
 
     def setMode(self, mode):
         if not (self.alg.provider().name() == "workflowtools" and
-                self.alg.name() == "Workflow instructions"):
+                self.alg.name() == "workflowinstructions"):
             if mode == NORMAL_MODE and not self.normalModeDialog.isVisible():
                 self.batchModeDialog.setHidden(True)
                 self.normalModeDialog.setVisible(True)

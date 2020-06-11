@@ -19,19 +19,16 @@ class WorkflowInstructionsAlgorithm(QgsProcessingAlgorithm):
         pass
 
     def createInstance(self):
-        return self.__class__()
+        return WorkflowInstructionsAlgorithm()
 
     def processAlgorithm(self, parameters, context, progress):
         pass
-
-    def getCustomParametersDialog(self):
-        return WorkflowInstructionsAlgorithmParametersDialog(self)
 
     def name(self):
         return self._name
 
     def displayName(self):
-        return self._name
+        return self._displayName
 
     def shortDescription(self):
         return self._name
@@ -43,7 +40,6 @@ class WorkflowInstructionsAlgorithm(QgsProcessingAlgorithm):
         return self._groupId
 
     def flags(self):
-        # TODO - maybe it's safe to background thread this?
         return super().flags() | (QgsProcessingAlgorithm.FlagNoThreading |
                                   QgsProcessingAlgorithm.FlagDisplayNameIsLiteral |
                                   QgsProcessingAlgorithm.FlagHideFromToolbox |
@@ -59,11 +55,3 @@ class WorkflowInstructionsAlgorithm(QgsProcessingAlgorithm):
         if context == '':
             context = self.__class__.__name__
         return QCoreApplication.translate(context, string)
-
-
-class WorkflowInstructionsAlgorithmParametersDialog(AlgorithmDialog):
-
-    def setupUi(self, dialog):
-        AlgorithmDialog.setupUi(self, dialog)
-        self.resize(1, 1)
-        self.executed = True
