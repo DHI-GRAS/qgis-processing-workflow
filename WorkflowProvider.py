@@ -32,11 +32,12 @@ import json
 from qgis.utils import iface
 from qgis.core import QgsApplication
 from processing.core.ProcessingConfig import ProcessingConfig, Setting
+from processing.gui.ProviderActions import ProviderActions, ProviderContextMenuActions
 from processing_workflow.WorkflowProviderBase import WorkflowProviderBase
 from processing_workflow.WorkflowCollection import WorkflowCollection
 from processing_workflow.WorkflowUtils import WorkflowUtils
-#from processing_workflow.CreateNewWorkflowAction import CreateNewWorkflowAction
-#from processing_workflow.CreateEditCollectionAction import CreateEditCollectionAction
+from processing_workflow.CreateNewWorkflowAction import CreateNewWorkflowAction
+from processing_workflow.CreateEditCollectionAction import CreateEditCollectionAction
 from processing_workflow.WrongWorkflowException import WrongWorkflowException
 
 
@@ -51,7 +52,7 @@ class WorkflowProvider(WorkflowProviderBase):
         self.iconPath = WorkflowUtils.workflowIcon()
         self._name = "workflow"
 
-        #self.actions += [CreateNewWorkflowAction(self), CreateEditCollectionAction(self)]
+        self.actions += [CreateNewWorkflowAction(self), CreateEditCollectionAction(self)]
         self.collections = []
         self.collectionListeners = []
 
@@ -65,7 +66,8 @@ class WorkflowProvider(WorkflowProviderBase):
                                             self.getTaskbarButtonSetting(),
                                             self.tr("Show workflow button on taskbar"),
                                             True))
-
+        ProviderActions.registerProviderActions(self, self.actions)
+        ProviderContextMenuActions.registerProviderContextMenuActions(self.contextMenuActions)
         self._addToolbarIcon()
 
     def unload(self):

@@ -33,7 +33,7 @@ from qgis.PyQt.QtCore import QCoreApplication
 from qgis.utils import iface
 from qgis.core import QgsProcessingProvider, QgsMessageLog, Qgis
 from processing.core.ProcessingConfig import ProcessingConfig, settingsWatcher
-#from processing_workflow.EditWorkflowAction import EditWorkflowAction
+from processing_workflow.EditWorkflowAction import EditWorkflowAction
 from processing_workflow.DeleteWorkflowAction import DeleteWorkflowAction
 from processing_workflow.Workflow import Workflow
 from processing_workflow.WorkflowListDialog import WorkflowListDialog
@@ -47,6 +47,7 @@ class WorkflowProviderBase(QgsProcessingProvider):
 
         self.activate = activate
         self.algs = []
+        self.actions = []
 
         self.descriptionFile = ""
         self.baseDir = ""
@@ -57,7 +58,7 @@ class WorkflowProviderBase(QgsProcessingProvider):
         self.css = ""
 
         # Right click button actions
-        #self.contextMenuActions = [EditWorkflowAction(self), DeleteWorkflowAction(self)]
+        self.contextMenuActions = [EditWorkflowAction(), DeleteWorkflowAction()]
 
         settingsWatcher.settingsChanged.connect(self.addRemoveTaskbarButton)
 

@@ -61,7 +61,7 @@
     <string>Add image for icon</string>
    </property>
   </widget>
-  <widget class="QToolButton" name="toolButton_css">
+  <widget class="QPushButton" name="pushButton_css">
    <property name="geometry">
     <rect>
      <x>387</x>
@@ -73,8 +73,11 @@
    <property name="text">
     <string>...</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>255</x>
@@ -116,7 +119,7 @@
     <string>About collection</string>
    </property>
   </widget>
-  <widget class="QToolButton" name="toolButton_icon">
+  <widget class="QPushButton" name="pushButton_icon">
    <property name="geometry">
     <rect>
      <x>387</x>
@@ -128,8 +131,11 @@
    <property name="text">
     <string>...</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
-  <widget class="QToolButton" name="toolButton_folder">
+  <widget class="QPushButton" name="pushButton_folder">
    <property name="geometry">
     <rect>
      <x>387</x>
@@ -140,6 +146,9 @@
    </property>
    <property name="text">
     <string>...</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QLineEdit" name="lineEdit_folder">

@@ -30,18 +30,16 @@ class WorkflowCollection(WorkflowProviderBase):
         self.configured = self.processDescriptionFile()
 
         # The activate collection setting is in the Workflow provider settings group
-        name = self.getActivateSetting()
-        activateSetting = Setting(self.workflowProvider.longName(), name,
-                                  self.tr('Activate %s collection') % self.name(),
-                                  self.activate)
-        ProcessingConfig.addSetting(activateSetting)
-        ProcessingConfig.addSetting(Setting(self.workflowProvider.longName(),
-                                            self.getTaskbarButtonSetting(),
-                                            "Show "+self.name()+" collection icon on taskbar",
-                                            True))
-
         if self.configured and iface:
-            self._addToolbarIcon()
+            name = self.getActivateSetting()
+            activateSetting = Setting(self.workflowProvider.longName(), name,
+                                      self.tr('Activate %s collection') % self.name(),
+                                      self.activate)
+            ProcessingConfig.addSetting(activateSetting)
+            ProcessingConfig.addSetting(Setting(self.workflowProvider.longName(),
+                                                self.getTaskbarButtonSetting(),
+                                                "Show "+self.name()+" collection icon on taskbar",
+                                                True))
 
     def unload(self):
         WorkflowProviderBase.unload(self)
@@ -50,7 +48,10 @@ class WorkflowCollection(WorkflowProviderBase):
         self.iface.removeToolBarIcon(self.action)
 
     def isActive(self):
-        return ProcessingConfig.getSetting(self.getActivateSetting())
+        active = ProcessingConfig.getSetting(self.getActivateSetting())
+        if active is None:
+            active = False
+        return active
 
     def setActive(self, active):
         ProcessingConfig.setSettingValue(self.getActivateSetting(), active)
@@ -95,6 +96,7 @@ class WorkflowCollection(WorkflowProviderBase):
 
     def load(self):
         if self.configured:
+            self._addToolbarIcon()
             return WorkflowProviderBase.load(self)
         else:
             return False
