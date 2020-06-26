@@ -73,13 +73,13 @@ class Workflow(QgsProcessingAlgorithm):
 
     def changeStep(self, index, algorithm, mode, instructions, algParameters={}):
         algParameters = {}
-        for param in algorithm.parameters:
+        for param in algorithm.parameterDefinitions():
             if isinstance(param, QgsProcessingParameterBoolean) or\
                isinstance(param, QgsProcessingParameterNumber) or\
                isinstance(param, QgsProcessingParameterString) or\
                isinstance(param, QgsProcessingParameterEnum) or\
                isinstance(param, QgsProcessingParameterExtent):
-                algParameters[param.name] = param.value
+                algParameters[param.name()] = param.defaultValue()
         self._steps[index] = {'algorithm': algorithm, 'mode': mode, 'instructions': instructions,
                               'parameters': algParameters}
 
@@ -147,25 +147,12 @@ class Workflow(QgsProcessingAlgorithm):
             else:
                 stepDialog = self.executeStep(step)
 
-    def prepareStepAlgorithm(self, step):
-        parameters = step['parameters']
-        alg = step['algorithm'].create()
-        for paramName in parameters.keys():
-            param = alg.parameterDefinition(paramName)
-            if param and (isinstance(param, QgsProcessingParameterBoolean) or
-                          isinstance(param, QgsProcessingParameterNumber) or
-                          isinstance(param, QgsProcessingParameterString) or
-                          isinstance(param, QgsProcessingParameterEnum) or
-                          isinstance(param, QgsProcessingParameterExtent)):
-                param.setDefaultValue(parameters[paramName])
-        return alg
-
     def executeStep(self, step):
         if isinstance(step['algorithm'], Grass7Algorithm):
             Grass7Utils.startGrassSession()
         else:
             Grass7Utils.endGrassSession()
-        stepDialog = StepDialog(self.prepareStepAlgorithm(step), None,
+        stepDialog = StepDialog(step['algorithm'], step['parameters'], None,
                                 os.path.dirname(self.descriptionFile), False, style=self.style)
         stepDialog.setMode(step['mode'])
         stepDialog.setInstructions(step['instructions'])

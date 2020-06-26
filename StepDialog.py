@@ -33,7 +33,12 @@ from qgis.PyQt.QtWidgets import (QDialog, QGridLayout, QWidget, QTextBrowser, QT
                                  QAction, QDialogButtonBox, QPushButton, QComboBox)
 from qgis.PyQt.QtGui import QIcon, QTextDocument
 from qgis.core import (QgsApplication,
-                       QgsProcessingAlgorithm)
+                       QgsProcessingAlgorithm,
+                       QgsProcessingParameterString,
+                       QgsProcessingParameterBoolean,
+                       QgsProcessingParameterEnum,
+                       QgsProcessingParameterNumber,
+                       QgsProcessingParameterExtent)
 from processing.gui.AlgorithmDialog import AlgorithmDialog
 from processing.gui.BatchAlgorithmDialog import BatchAlgorithmDialog
 from processing_workflow import markdown
@@ -48,8 +53,9 @@ DIRNAME = os.path.dirname(__file__)
 # box and option to change from normal to batch mode if the dialog is editable.
 class StepDialog(QDialog):
 
-    def __init__(self, alg, mainDialog, workflowBaseDir, canEdit=True, style=None):
-        self.alg = alg
+    def __init__(self, alg, defaultParameters, mainDialog, workflowBaseDir, canEdit=True,
+                 style=None):
+        self.alg = alg.create()
         self.mainDialog = mainDialog
         self.workflowBaseDir = workflowBaseDir
         self.canEdit = canEdit
@@ -86,34 +92,31 @@ class StepDialog(QDialog):
             self.actionTextBold = QAction(
                     QIcon.fromTheme("format-text-bold",
                                     QIcon(os.path.join(iconDir, "boldA.png"))),
-                                    "&Bold", self)
+                    "&Bold", self)
             self.actionTextBold.setShortcut("Ctrl+B")
-            QtCore.QObject.connect(self.actionTextBold, QtCore.SIGNAL("triggered()"),
-                                   self.textBold)
+            self.actionTextBold.triggered.connect(self.textBold)
             self.algInstructionsEditBar.addAction(self.actionTextBold)
             # Italic
             self.actionTextItalic = QAction(
                     QIcon.fromTheme("format-text-italic",
                                     QIcon(os.path.join(iconDir, "italicA.png"))),
-                                    "&Italic", self)
+                    "&Italic", self)
             self.actionTextItalic.setShortcut("Ctrl+I")
-            QtCore.QObject.connect(self.actionTextItalic, QtCore.SIGNAL("triggered()"),
-                                   self.textItalic)
+            self.actionTextItalic.triggered.connect(self.textItalic)
             self.algInstructionsEditBar.addAction(self.actionTextItalic)
             # Underline
             self.actionTextUnderline = QAction(
                     QIcon.fromTheme("format-text-underline",
                                     QIcon(os.path.join(iconDir, "underlineA.png"))),
-                                    "&Underline", self)
+                    "&Underline", self)
             self.actionTextUnderline.setShortcut("Ctrl+U")
-            QtCore.QObject.connect(self.actionTextUnderline, QtCore.SIGNAL("triggered()"),
-                                   self.textUnderline)
+            self.actionTextUnderline.triggered.connect(self.textUnderline)
             self.algInstructionsEditBar.addAction(self.actionTextUnderline)
             # Toggle preview
             self.actionTogglePreview = QAction(
                     QIcon.fromTheme("document-print-preview",
                                     QIcon(os.path.join(iconDir, "eye.png"))),
-                                    "&Preview", self)
+                    "&Preview", self)
             # self.actionTogglePreview.setShortcut("Ctrl-P")
             self.actionTogglePreview.triggered.connect(self.textTogglePreview)
             self.algInstructionsEditBar.addAction(self.actionTogglePreview)
@@ -126,7 +129,7 @@ class StepDialog(QDialog):
         self.algInstructionsText.setAcceptRichText(False)
         self.setDefaultInstructionsText()
 
-        self.normalModeDialog = self.createAlgorithmDialog(self.alg)
+        self.normalModeDialog = self.createAlgorithmDialog(self.alg, defaultParameters)
         try:
             self.normalModeDialog.tabWidget().setCornerWidget(None)
         except AttributeError:
@@ -182,8 +185,7 @@ class StepDialog(QDialog):
         self.algMode = QComboBox()
         self.algMode.addItems([NORMAL_MODE, BATCH_MODE])
         if canEdit:
-            self.algMode.connect(self.algMode, QtCore.SIGNAL("currentIndexChanged(QString)"),
-                                 self.mainDialog.changeAlgMode)
+            self.algMode.currentIndexChanged.connect(self.mainDialog.changeAlgMode)
             self.tabLayout.addWidget(self.algMode, 1, cols)
         else:
             self.buttonBox = QDialogButtonBox()
@@ -216,12 +218,19 @@ class StepDialog(QDialog):
         if alg is None:
             return None
 
+        for paramName in parameters.keys():
+            param = alg.parameterDefinition(paramName)
+            if param and (isinstance(param, QgsProcessingParameterBoolean) or
+                          isinstance(param, QgsProcessingParameterNumber) or
+                          isinstance(param, QgsProcessingParameterString) or
+                          isinstance(param, QgsProcessingParameterEnum) or
+                          isinstance(param, QgsProcessingParameterExtent)):
+                param.setDefaultValue(parameters[paramName])
+
         dlg = alg.createCustomParametersWidget(None)
 
         if not dlg:
             dlg = AlgorithmDialog(alg, parent=None)
-
-        dlg.setParameters(parameters)
 
         return dlg
 
