@@ -52,7 +52,7 @@ class WorkflowProvider(WorkflowProviderBase):
         self.iconPath = WorkflowUtils.workflowIcon()
         self._name = "workflow"
 
-        self.actions += [CreateNewWorkflowAction(self), CreateEditCollectionAction(self)]
+        self.actions += [CreateNewWorkflowAction(), CreateEditCollectionAction(self)]
         self.collections = []
         self.collectionListeners = []
 

@@ -33,7 +33,8 @@ import os
 
 from qgis.PyQt import uic
 from qgis.PyQt.QtCore import (Qt,
-                              QByteArray)
+                              QByteArray,
+                              pyqtSignal)
 from qgis.PyQt.QtWidgets import (QLineEdit,
                                  QWidget,
                                  QVBoxLayout,
@@ -70,6 +71,25 @@ WIDGET, BASE = uic.loadUiType(os.path.join(pluginPath, 'ui', 'DlgWorkflowCreator
 
 # Dialog for creating new workflows from all the available Processing algorithms
 class WorkflowCreatorDialog(WIDGET, BASE):
+
+    update_workflow = pyqtSignal()
+
+    dlgs = []
+
+    @staticmethod
+    def create(workflow=None):
+        """
+        Based on ModelerDialog.py
+        Workaround crappy sip handling of QMainWindow. It doesn't know that we are using the
+        deleteonclose flag, so happily just deletes dialogs as soon as they go out of scope. The
+        only workaround possible while we still have to drag around this Python code is to store a
+        reference to the sip wrapper so that sip doesn't get confused. The underlying object will
+        still be deleted by the deleteonclose flag though!
+        """
+        dlg = WorkflowCreatorDialog(workflow)
+        WorkflowCreatorDialog.dlgs.append(dlg)
+        return dlg
+
     def __init__(self, workflow):
         super().__init__(None)
         self.setAttribute(Qt.WA_DeleteOnClose)
@@ -83,9 +103,6 @@ class WorkflowCreatorDialog(WIDGET, BASE):
         self.setWindowModality(1)
 
         self.help = None
-        # indicates whether to update or not the toolbox after closing this dialog
-        self.update = False
-        self.executed = False
 
         if workflow:
             self.workflow = workflow
@@ -292,9 +309,9 @@ class WorkflowCreatorDialog(WIDGET, BASE):
         if self.workflow.descriptionFile:
             filename = self.workflow.descriptionFile
         else:
-            filename = str(QFileDialog.getSaveFileName(self, "Save Workflow",
-                                                       WorkflowUtils.workflowPath(),
-                                                       "QGIS Processing workflows (*.workflow)"))
+            filename = QFileDialog.getSaveFileName(self, "Save Workflow",
+                                                   WorkflowUtils.workflowPath(),
+                                                   "QGIS Processing workflows (*.workflow)")[0]
             if filename:
                 if not filename.endswith(".workflow"):
                     filename += ".workflow"
@@ -305,7 +322,7 @@ class WorkflowCreatorDialog(WIDGET, BASE):
             fout = codecs.open(filename, 'w', encoding='utf-8')
             fout.write(text)
             fout.close()
-            self.update = True
+            self.update_workflow.emit()
             QMessageBox.information(self, "Workflow saving", "Workflow was correctly saved.")
             self.hasChanged = False
 
