@@ -95,6 +95,9 @@ class Workflow(QgsProcessingAlgorithm):
     def getAlgorithm(self, index):
         return self._steps[index]['algorithm']
 
+    def getParameters(self, index):
+        return self._steps[index]['parameters']
+
     def getMode(self, index):
         return self._steps[index]['mode']
 
@@ -104,7 +107,7 @@ class Workflow(QgsProcessingAlgorithm):
     def icon(self):
         try:
             return self.provider().icon()
-        except:
+        except AttributeError:
             return WorkflowUtils.workflowIcon()
 
     def getStyle(self):
@@ -142,7 +145,6 @@ class Workflow(QgsProcessingAlgorithm):
             # finish the workflow or execute the next step
             if step is None:
                 Grass7Utils.endGrassSession()
-                #return stepDialog.executed()
                 return {}
             else:
                 stepDialog = self.executeStep(step)
@@ -184,14 +186,14 @@ class Workflow(QgsProcessingAlgorithm):
             return (self._steps[0])
 
     def serialize(self):
-        s = ".NAME:" + str(self.name) + "\n"
-        s += ".GROUP:" + str(self.group) + "\n"
+        s = ".NAME:" + str(self.name()) + "\n"
+        s += ".GROUP:" + str(self.group()) + "\n"
 
         for step in self._steps:
-            s += ".ALGORITHM:" + step['algorithm'].commandLineName() + "\n"
-            s += ".PARAMETERS:" + json.dumps(step['parameters']) + "\n"
-            s += ".MODE:" + step['mode'] + "\n"
-            s += ".INSTRUCTIONS:" + step['instructions']
+            s += ".ALGORITHM:%s:%s\n" % (step['algorithm'].provider().id(), step['algorithm'].name())
+            s += ".PARAMETERS:%s\n" % json.dumps(step['parameters'])
+            s += ".MODE:%s\n" % step['mode']
+            s += ".INSTRUCTIONS:%s\n" % step['instructions']
             if not str(s).endswith("\n"):
                 s += "\n"
             s += "!INSTRUCTIONS" + "\n"
@@ -268,6 +270,9 @@ class Workflow(QgsProcessingAlgorithm):
     def name(self):
         return self._name
 
+    def setName(self, name):
+        self._name = name
+
     def displayName(self):
         return self._name
 
@@ -276,6 +281,9 @@ class Workflow(QgsProcessingAlgorithm):
 
     def group(self):
         return self._group
+
+    def setGroup(self, group):
+        self._group = group
 
     def groupId(self):
         return self._groupId

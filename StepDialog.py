@@ -129,12 +129,16 @@ class StepDialog(QDialog):
         self.algInstructionsText.setAcceptRichText(False)
         self.setDefaultInstructionsText()
 
-        self.normalModeDialog = self.createAlgorithmDialog(self.alg, defaultParameters)
+        self.normalModeDialog = self.createAlgorithmDialog(self.alg,
+                                                           defaultParameters,
+                                                           NORMAL_MODE)
         try:
             self.normalModeDialog.tabWidget().setCornerWidget(None)
         except AttributeError:
             pass
-        self.batchModeDialog = BatchAlgorithmDialog(self.alg)
+        self.batchModeDialog = self.createAlgorithmDialog(self.alg,
+                                                          defaultParameters,
+                                                          BATCH_MODE)
         self.batchModeDialog.setHidden(True)
         # forwardButton does the job of cancel/close button
         try:
@@ -154,13 +158,16 @@ class StepDialog(QDialog):
             pass
         if canEdit:
             try:
-                self.normalModeDialog.progressBar.hide()
-                self.batchModeDialog.progressBar.hide()
+                # TODO: hide progress bar
+                #self.normalModeDialog.progressBar.hide()
+                #self.batchModeDialog.progressBar.hide()
+                self.normalModeDialog.cancelButton().hide()
+                self.batchModeDialog.cancelButton().hide()
                 if self.alg.name == "Field calculator":
-                    self.normalModeDialog.mButtonBox.hide()
+                    self.normalModeDialog.mButtonBox().hide()
                 else:
-                    self.normalModeDialog.buttonBox.hide()
-                self.batchModeDialog.buttonBox.hide()
+                    self.normalModeDialog.buttonBox().hide()
+                self.batchModeDialog.buttonBox().hide()
             except AttributeError:
                 # Not all dialogs might have buttonBox
                 pass
@@ -185,7 +192,7 @@ class StepDialog(QDialog):
         self.algMode = QComboBox()
         self.algMode.addItems([NORMAL_MODE, BATCH_MODE])
         if canEdit:
-            self.algMode.currentIndexChanged.connect(self.mainDialog.changeAlgMode)
+            self.algMode.currentTextChanged.connect(self.mainDialog.changeAlgMode)
             self.tabLayout.addWidget(self.algMode, 1, cols)
         else:
             self.buttonBox = QDialogButtonBox()
@@ -209,7 +216,7 @@ class StepDialog(QDialog):
 
     # Based on processing.tools.general.createAlgorithmDialog but with parent of the dialog widgets
     # set to None. Otherwise some buttons cannot be removed.
-    def createAlgorithmDialog(self, algOrName, parameters={}):
+    def createAlgorithmDialog(self, algOrName, parameters={}, mode=NORMAL_MODE):
         if isinstance(algOrName, QgsProcessingAlgorithm):
             alg = algOrName.create()
         else:
@@ -227,10 +234,13 @@ class StepDialog(QDialog):
                           isinstance(param, QgsProcessingParameterExtent)):
                 param.setDefaultValue(parameters[paramName])
 
-        dlg = alg.createCustomParametersWidget(None)
-
-        if not dlg:
-            dlg = AlgorithmDialog(alg, parent=None)
+        dlg = None
+        if mode == NORMAL_MODE:
+            dlg = alg.createCustomParametersWidget(None)
+            if not dlg:
+                dlg = AlgorithmDialog(alg, parent=None)
+        elif mode == BATCH_MODE:
+            dlg = BatchAlgorithmDialog(alg)
 
         return dlg
 

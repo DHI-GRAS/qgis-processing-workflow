@@ -28,30 +28,56 @@
 
 from builtins import str
 from builtins import range
-from qgis.PyQt import QtCore, QtGui
 import codecs
 import os
+
+from qgis.PyQt import uic
+from qgis.PyQt.QtCore import (Qt,
+                              QByteArray)
+from qgis.PyQt.QtWidgets import (QLineEdit,
+                                 QWidget,
+                                 QVBoxLayout,
+                                 QFileDialog,
+                                 QMessageBox,
+                                 QMainWindow,
+                                 QDockWidget,
+                                 QGridLayout,
+                                 QLabel,
+                                 QSizePolicy,
+                                 QFrame)
 from qgis.core import (QgsProcessingParameterString,
                        QgsProcessingParameterBoolean,
                        QgsProcessingParameterEnum,
                        QgsProcessingParameterNumber,
-                       QgsProcessingParameterExtent)
-from processing.core.Processing import Processing
-from processing.gui.AlgorithmDialogBase import AlgorithmDialogBase
+                       QgsProcessingParameterExtent,
+                       QgsApplication,
+                       QgsSettings)
+from qgis.gui import (QgsMessageBar,
+                      QgsDockWidget,
+                      QgsScrollArea,
+                      QgsFilterLineEdit,
+                      QgsProcessingToolboxTreeView)
+from qgis.utils import iface
 from processing.gui.AlgorithmDialog import AlgorithmDialog
 from processing_workflow.Workflow import Workflow
 from processing_workflow.StepDialog import StepDialog, NORMAL_MODE, BATCH_MODE
 from processing_workflow.WorkflowUtils import WorkflowUtils
 from processing_workflow.WrongWorkflowException import WrongWorkflowException
 
+pluginPath = os.path.dirname(__file__)
+WIDGET, BASE = uic.loadUiType(os.path.join(pluginPath, 'ui', 'DlgWorkflowCreator.ui'))
 
-# Dialog for creating new workflows from all the available SEXTANTE algorithms
-class WorkflowCreatorDialog(AlgorithmDialogBase):
-    def __init__(self, workflow, provider=None):
-        QtGui.QDialog.__init__(self)
+
+# Dialog for creating new workflows from all the available Processing algorithms
+class WorkflowCreatorDialog(WIDGET, BASE):
+    def __init__(self, workflow):
+        super().__init__(None)
+        self.setAttribute(Qt.WA_DeleteOnClose)
+
         self.setupUi()
-        self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowSystemMenuHint |
-                            QtCore.Qt.WindowMinMaxButtonsHint)
+
+        self.setWindowFlags(self.windowFlags() | Qt.WindowSystemMenuHint |
+                            Qt.WindowMinMaxButtonsHint)
 
         # set as window modal
         self.setWindowModality(1)
@@ -64,125 +90,166 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
         if workflow:
             self.workflow = workflow
             self.openWorkflow(workflow.descriptionFile)
-            self.setWindowIcon = workflow.getIcon()
+            self.setWindowIcon = workflow.icon()
         else:
-            self.workflow = Workflow(provider)
+            self.workflow = Workflow()
+
+        self.hasChanged = False
+        self.help = None
 
     def setupUi(self):
-        self.resize(1200, 600)
-        self.setWindowTitle("Processing Workflow Creator")
-        self.setWindowIcon(WorkflowUtils.workflowIcon())
-        self.tabWidget = QtGui.QTabWidget()
-        self.tabWidget.setMaximumSize(QtCore.QSize(350, 10000))
-        self.tabWidget.setMinimumWidth(300)
 
-        # left hand side part
-        # ==================================
-        self.verticalLayout = QtGui.QVBoxLayout()
-        self.verticalLayout.setSpacing(2)
-        self.verticalLayout.setMargin(0)
-        self.searchBox = QtGui.QLineEdit()
-        self.searchBox.textChanged.connect(self.fillAlgorithmTree)
-        self.verticalLayout.addWidget(self.searchBox)
-        self.algorithmTree = QtGui.QTreeWidget()
-        self.algorithmTree.setHeaderHidden(True)
-        self.fillAlgorithmTree()
-        self.verticalLayout.addWidget(self.algorithmTree)
-        self.algorithmTree.doubleClicked.connect(self.addAlgorithm)
+        super().setupUi(self)
 
-        self.algorithmsTab = QtGui.QWidget()
-        self.algorithmsTab.setLayout(self.verticalLayout)
-        self.tabWidget.addTab(self.algorithmsTab, "Algorithms")
+        self.propertiesDock = QgsDockWidget(self)
+        self.propertiesDock.setFeatures(
+            QDockWidget.DockWidgetFloatable | QDockWidget.DockWidgetMovable)
+        self.propertiesDock.setObjectName("propertiesDock")
+        propertiesDockContents = QWidget()
+        self.verticalDockLayout_1 = QVBoxLayout(propertiesDockContents)
+        self.verticalDockLayout_1.setContentsMargins(0, 0, 0, 0)
+        self.verticalDockLayout_1.setSpacing(0)
+        self.scrollArea_1 = QgsScrollArea(propertiesDockContents)
+        sizePolicy = QSizePolicy(QSizePolicy.MinimumExpanding,
+                                 QSizePolicy.MinimumExpanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.scrollArea_1.sizePolicy().hasHeightForWidth())
+        self.scrollArea_1.setSizePolicy(sizePolicy)
+        self.scrollArea_1.setFocusPolicy(Qt.WheelFocus)
+        self.scrollArea_1.setFrameShape(QFrame.NoFrame)
+        self.scrollArea_1.setFrameShadow(QFrame.Plain)
+        self.scrollArea_1.setWidgetResizable(True)
+        self.scrollAreaWidgetContents_1 = QWidget()
+        self.gridLayout = QGridLayout(self.scrollAreaWidgetContents_1)
+        self.gridLayout.setContentsMargins(6, 6, 6, 6)
+        self.gridLayout.setSpacing(4)
+        self.label_1 = QLabel(self.scrollAreaWidgetContents_1)
+        self.gridLayout.addWidget(self.label_1, 0, 0, 1, 1)
+        self.textName = QLineEdit(self.scrollAreaWidgetContents_1)
+        self.gridLayout.addWidget(self.textName, 0, 1, 1, 1)
+        self.label_2 = QLabel(self.scrollAreaWidgetContents_1)
+        self.gridLayout.addWidget(self.label_2, 1, 0, 1, 1)
+        self.textGroup = QLineEdit(self.scrollAreaWidgetContents_1)
+        self.gridLayout.addWidget(self.textGroup, 1, 1, 1, 1)
+        self.label_1.setText(self.tr("Name"))
+        self.textName.setToolTip(self.tr("Enter workflow name here"))
+        self.label_2.setText(self.tr("Group"))
+        self.textGroup.setToolTip(self.tr("Enter group name here"))
+        self.scrollArea_1.setWidget(self.scrollAreaWidgetContents_1)
+        self.verticalDockLayout_1.addWidget(self.scrollArea_1)
+        self.propertiesDock.setWidget(propertiesDockContents)
+        self.propertiesDock.setWindowTitle(self.tr("Workflow Properties"))
 
-        # right hand side part
-        # ==================================
-        self.textName = QtGui.QLineEdit()
-        if hasattr(self.textName, 'setPlaceholderText'):
-            self.textName.setPlaceholderText("[Enter workflow name here]")
-        self.textGroup = QtGui.QLineEdit()
-        if hasattr(self.textGroup, 'setPlaceholderText'):
-            self.textGroup.setPlaceholderText("[Enter group name here]")
-        self.horizontalLayoutNames = QtGui.QHBoxLayout()
-        self.horizontalLayoutNames.setSpacing(2)
-        self.horizontalLayoutNames.setMargin(0)
-        self.horizontalLayoutNames.addWidget(self.textName)
-        self.horizontalLayoutNames.addWidget(self.textGroup)
+        self.algorithmsDock = QgsDockWidget(self)
+        self.algorithmsDock.setFeatures(QDockWidget.DockWidgetFloatable | QDockWidget.DockWidgetMovable)
+        self.algorithmsDock.setObjectName("algorithmsDock")
+        self.algorithmsDockContents = QWidget()
+        self.verticalLayout_4 = QVBoxLayout(self.algorithmsDockContents)
+        self.verticalLayout_4.setContentsMargins(0, 0, 0, 0)
+        self.scrollArea_3 = QgsScrollArea(self.algorithmsDockContents)
+        sizePolicy.setHeightForWidth(self.scrollArea_3.sizePolicy().hasHeightForWidth())
+        self.scrollArea_3.setSizePolicy(sizePolicy)
+        self.scrollArea_3.setFocusPolicy(Qt.WheelFocus)
+        self.scrollArea_3.setFrameShape(QFrame.NoFrame)
+        self.scrollArea_3.setFrameShadow(QFrame.Plain)
+        self.scrollArea_3.setWidgetResizable(True)
+        self.scrollAreaWidgetContents_3 = QWidget()
+        self.verticalLayout_2 = QVBoxLayout(self.scrollAreaWidgetContents_3)
+        self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_2.setSpacing(4)
+        self.searchBox = QgsFilterLineEdit(self.scrollAreaWidgetContents_3)
+        self.verticalLayout_2.addWidget(self.searchBox)
+        self.algorithmTree = QgsProcessingToolboxTreeView(None,
+                                                          QgsApplication.processingRegistry())
+        self.algorithmTree.setAlternatingRowColors(True)
+        self.algorithmTree.header().setVisible(False)
+        self.verticalLayout_2.addWidget(self.algorithmTree)
+        self.scrollArea_3.setWidget(self.scrollAreaWidgetContents_3)
+        self.verticalLayout_4.addWidget(self.scrollArea_3)
+        self.algorithmsDock.setWidget(self.algorithmsDockContents)
+        self.addDockWidget(Qt.DockWidgetArea(1), self.algorithmsDock)
+        self.algorithmsDock.setWindowTitle(self.tr("Algorithms"))
+        self.searchBox.setToolTip(self.tr("Enter algorithm name to filter list"))
+        self.searchBox.setShowSearchIcon(True)
 
-        self.canvasTabWidget = QtGui.QTabWidget()
+        self.bar = QgsMessageBar()
+        self.bar.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+        self.centralWidget().layout().insertWidget(0, self.bar)
+        self.setDockOptions(self.dockOptions() | QMainWindow.GroupedDragging)
+
+        if iface is not None:
+            self.mToolbar.setIconSize(iface.iconSize())
+            self.setStyleSheet(iface.mainWindow().styleSheet())
+
+        self.mActionOpen.setIcon(
+            QgsApplication.getThemeIcon('/mActionFileOpen.svg'))
+        self.mActionSave.setIcon(
+            QgsApplication.getThemeIcon('/mActionFileSave.svg'))
+        self.mActionRemoveStep.setIcon(
+            QgsApplication.getThemeIcon('/mActionDeleteSelected.svg'))
+        self.mActionRun.setIcon(
+            QgsApplication.getThemeIcon('/mActionStart.svg'))
+
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.propertiesDock)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.algorithmsDock)
+
+        self.setWindowFlags(Qt.WindowMinimizeButtonHint |
+                            Qt.WindowMaximizeButtonHint |
+                            Qt.WindowCloseButtonHint)
+
+        settings = QgsSettings()
+        self.restoreState(settings.value("/Processing/stateWorkflowCreator", QByteArray()))
+        self.restoreGeometry(settings.value("/Processing/geometryWorkflowCreator", QByteArray()))
+
         self.canvasTabWidget.setMinimumWidth(300)
         self.canvasTabWidget.setMovable(True)
 
-        self.canvasLayout = QtGui.QVBoxLayout()
-        self.canvasLayout.setSpacing(2)
-        self.canvasLayout.setMargin(0)
-        self.canvasLayout.addLayout(self.horizontalLayoutNames)
-        self.canvasLayout.addWidget(self.canvasTabWidget)
-
-        # upper part, putting the two previous parts together
-        # ===================================================
-        self.horizontalLayout = QtGui.QHBoxLayout()
-        self.horizontalLayout.setSpacing(2)
-        self.horizontalLayout.setMargin(0)
-        self.horizontalLayout.addWidget(self.tabWidget)
-        self.horizontalLayout.addLayout(self.canvasLayout)
-
-        # And the whole layout
-        # ==========================
-
-        self.buttonBox = QtGui.QDialogButtonBox()
-        self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.runButton = QtGui.QPushButton()
-        self.runButton.setText("Test")
-        self.buttonBox.addButton(self.runButton, QtGui.QDialogButtonBox.ActionRole)
-        self.removeButton = QtGui.QPushButton()
-        self.removeButton.setText("Remove step")
-        self.buttonBox.addButton(self.removeButton, QtGui.QDialogButtonBox.ActionRole)
-        self.openButton = QtGui.QPushButton()
-        self.openButton.setText("Open")
-        self.buttonBox.addButton(self.openButton, QtGui.QDialogButtonBox.ActionRole)
-        self.saveButton = QtGui.QPushButton()
-        self.saveButton.setText("Save")
-        self.buttonBox.addButton(self.saveButton, QtGui.QDialogButtonBox.ActionRole)
-        self.closeButton = QtGui.QPushButton()
-        self.closeButton.setText("Close")
-        self.buttonBox.addButton(self.closeButton, QtGui.QDialogButtonBox.ActionRole)
-        QtCore.QObject.connect(self.openButton, QtCore.SIGNAL("clicked()"), self.openWorkflow)
-        QtCore.QObject.connect(self.saveButton, QtCore.SIGNAL("clicked()"), self.saveWorkflow)
-        QtCore.QObject.connect(self.closeButton, QtCore.SIGNAL("clicked()"), self.closeWindow)
-        QtCore.QObject.connect(self.runButton, QtCore.SIGNAL("clicked()"), self.runWorkflow)
-        QtCore.QObject.connect(self.removeButton, QtCore.SIGNAL("clicked()"), self.removeStep)
-
-        self.globalLayout = QtGui.QVBoxLayout()
-        self.globalLayout.setSpacing(2)
-        self.globalLayout.setMargin(0)
-        self.globalLayout.addLayout(self.horizontalLayout)
-        self.globalLayout.addWidget(self.buttonBox)
-        self.setLayout(self.globalLayout)
-        QtCore.QMetaObject.connectSlotsByName(self)
-
-    def closeWindow(self):
-        self.close()
+        self.mActionOpen.triggered.connect(self.openWorkflow)
+        self.mActionSave.triggered.connect(self.saveWorkflow)
+        self.mActionRemoveStep.triggered.connect(self.removeStep)
+        self.mActionRun.triggered.connect(self.runWorkflow)
+        self.algorithmTree.doubleClicked.connect(self.addAlgorithm)
 
     def closeEvent(self, evt):
-        pass
+        settings = QgsSettings()
+        settings.setValue("/Processing/stateWorkflowCreator", self.saveState())
+        settings.setValue("/Processing/geometryWorkflowCreator", self.saveGeometry())
+
+        if self.hasChanged:
+            ret = QMessageBox.question(
+                self, self.tr('Save Workflow?'),
+                self.tr('There are unsaved changes in this workflow. Do you want to keep those?'),
+                QMessageBox.Save | QMessageBox.Cancel | QMessageBox.Discard, QMessageBox.Cancel)
+
+            if ret == QMessageBox.Save:
+                self.saveWorkflow(False)
+                evt.accept()
+            elif ret == QMessageBox.Discard:
+                evt.accept()
+            else:
+                evt.ignore()
+        else:
+            evt.accept()
 
     # For running (testing) the workflow without saving it and closing the creator window
     def runWorkflow(self):
         for i in range(0, self.canvasTabWidget.count()):
             self.updateStep(i)
-        self.workflow.run()
+        self.workflow.processAlgorithm(None, None, None)
 
     def removeStep(self):
         removeIndex = self.canvasTabWidget.currentIndex()
         self.canvasTabWidget.removeTab(removeIndex)
         self.workflow.removeStep(removeIndex)
+        self.hasChanged = True
 
     def updateStep(self, stepNumber):
         stepDialog = self.canvasTabWidget.widget(stepNumber)
         # get customised default values for some parameter types
         if stepDialog.getMode() == NORMAL_MODE:
             if isinstance(stepDialog.normalModeDialog, AlgorithmDialog):
-                for param in stepDialog.alg.parameters:
+                for param in stepDialog.alg.parameterDefinitions():
                     if isinstance(param, QgsProcessingParameterBoolean) or\
                        isinstance(param, QgsProcessingParameterNumber) or\
                        isinstance(param, QgsProcessingParameterString) or\
@@ -190,21 +257,19 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
                        isinstance(param, QgsProcessingParameterExtent):
                         # this is not very nice going so deep into step dialog but there seems to
                         # be no other way right now
-                        stepDialog.normalModeDialog.setParamValue(
-                                param,
-                                stepDialog.normalModeDialog.mainWidget.valueItems[param.name])
+                        param.setDefaultValue(
+                                stepDialog.normalModeDialog.mainWidget().wrappers[param.name()].parameterValue())
         elif stepDialog.getMode() == BATCH_MODE:
             col = 0
-            for param in stepDialog.alg.parameters:
-                    if isinstance(param, QgsProcessingParameterBoolean) or\
-                       isinstance(param, QgsProcessingParameterNumber) or\
-                       isinstance(param, QgsProcessingParameterString) or\
-                       isinstance(param, QgsProcessingParameterEnum) or\
-                       isinstance(param, QgsProcessingParameterExtent):
-                        stepDialog.batchModeDialog.setParamValue(
-                                param,
-                                stepDialog.batchModeDialog.mainWidget.tblParameters.cellWidget(0, col))
-                    col += 1
+            for param in stepDialog.alg.parameterDefinitions():
+                if isinstance(param, QgsProcessingParameterBoolean) or\
+                   isinstance(param, QgsProcessingParameterNumber) or\
+                   isinstance(param, QgsProcessingParameterString) or\
+                   isinstance(param, QgsProcessingParameterEnum) or\
+                   isinstance(param, QgsProcessingParameterExtent):
+                    param.setDefaultValue(
+                            stepDialog.batchModeDialog.mainWidget().wrappers[0][col].parameterValue())
+                col += 1
 
         # update the step in the workflow
         self.workflow.changeStep(stepNumber, stepDialog.alg, stepDialog.getMode(),
@@ -214,11 +279,11 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
     def saveWorkflow(self):
         if str(self.textGroup.text()).strip() == "" or\
            str(self.textName.text()).strip() == "":
-            QtGui.QMessageBox.warning(self, "Warning",
+            QMessageBox.warning(self, "Warning",
                                       "Please enter group and model names before saving")
             return
-        self.workflow.name = str(self.textName.text())
-        self.workflow.group = str(self.textGroup.text())
+        self.workflow.setName(str(self.textName.text()))
+        self.workflow.setGroup(str(self.textGroup.text()))
 
         # save the instructions for all the steps in the workflow
         for i in range(0, self.canvasTabWidget.count()):
@@ -227,9 +292,9 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
         if self.workflow.descriptionFile:
             filename = self.workflow.descriptionFile
         else:
-            filename = str(QtGui.QFileDialog.getSaveFileName(self, "Save Workflow",
-                                                                 WorkflowUtils.workflowPath(),
-                                                                 "QGIS Processing workflows (*.workflow)"))
+            filename = str(QFileDialog.getSaveFileName(self, "Save Workflow",
+                                                       WorkflowUtils.workflowPath(),
+                                                       "QGIS Processing workflows (*.workflow)"))
             if filename:
                 if not filename.endswith(".workflow"):
                     filename += ".workflow"
@@ -241,14 +306,15 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
             fout.write(text)
             fout.close()
             self.update = True
-            QtGui.QMessageBox.information(self, "Workflow saving", "Workflow was correctly saved.")
+            QMessageBox.information(self, "Workflow saving", "Workflow was correctly saved.")
+            self.hasChanged = False
 
     # Open workflow from text file
     def openWorkflow(self, filename=None):
         if not filename:
-            filename = QtGui.QFileDialog.getOpenFileName(self, "Open Workflow",
-                                                         WorkflowUtils.workflowPath(),
-                                                         "Processing workflows (*.workflow)")
+            filename = QFileDialog.getOpenFileName(self, "Open Workflow",
+                                                   WorkflowUtils.workflowPath(),
+                                                   "Processing workflows (*.workflow)")[0]
         if filename:
             try:
                 self.workflow.openWorkflow(filename)
@@ -256,95 +322,45 @@ class WorkflowCreatorDialog(AlgorithmDialogBase):
                 self.canvasTabWidget.clear()
                 for i in range(0, self.workflow.getLength()):
                     # create a dialog for this algorithm
-                    stepDialog = StepDialog(self.workflow.getAlgorithm(i), self,
-                                            os.path.dirname(filename), style=self.workflow.style)
+                    stepDialog = StepDialog(self.workflow.getAlgorithm(i),
+                                            self.workflow.getParameters(i),
+                                            self,
+                                            os.path.dirname(filename),
+                                            style=self.workflow.style)
                     stepDialog.setMode(self.workflow.getMode(i))
                     stepDialog.setInstructions(self.workflow.getInstructions(i))
                     # create new tab for it
-                    self.canvasTabWidget.addTab(stepDialog, self.workflow.getAlgorithm(i).name)
+                    self.canvasTabWidget.addTab(stepDialog,
+                                                self.workflow.getAlgorithm(i).displayName())
 
-                self.textGroup.setText(self.workflow.group)
-                self.textName.setText(self.workflow.name)
+                self.textGroup.setText(self.workflow.group())
+                self.textName.setText(self.workflow.displayName())
+                self.hasChanged = False
 
             except WrongWorkflowException as e:
-                QtGui.QMessageBox.critical(self, "Could not open workflow",
-                                           "The selected workflow could not be loaded\nWrong line:" + e.msg)
+                QMessageBox.critical(self, "Could not open workflow",
+                                     "The selected workflow could not be loaded\nWrong line:" + e.msg)
 
     # Change the mode (normal or batch execution) for the currently open StepDialog
     # This is a slot for a StepDialog signal
     def changeAlgMode(self, mode):
+        print(mode)
         # change the mode in the dialog
         self.canvasTabWidget.currentWidget().setMode(mode)
         # and in the step object
         self.workflow.changeMode(self.canvasTabWidget.currentIndex(), mode)
+        self.hasChanged = True
 
     # Add new step (algorithm) to the workflow
     def addAlgorithm(self):
-        item = self.algorithmTree.currentItem()
-        if isinstance(item, TreeAlgorithmItem):
-            alg = Processing.getAlgorithm(item.alg.commandLineName())
-            alg = alg.getCopy()
+        algorithm = self.algorithmTree.selectedAlgorithm()
+        if algorithm is not None:
+            alg = QgsApplication.processingRegistry().createAlgorithmById(algorithm.id())
 
             # create a tab for this algorithm
-            stepDialog = StepDialog(alg, self, "")
-            self.canvasTabWidget.addTab(stepDialog, alg.name)
+            stepDialog = StepDialog(alg, {}, self, "")
+            self.canvasTabWidget.addTab(stepDialog, alg.displayName())
 
             # add this step to the workflow
             self.workflow.addStep(alg, stepDialog.getMode(), stepDialog.getInstructions())
-
-    # List all the available algorithms in Processing
-    def fillAlgorithmTree(self):
-        self.algorithmTree.clear()
-        text = str(self.searchBox.text())
-        try:
-            # QGIS 2.16 (and up?) Processing implementation
-            from processing.core.alglist import algList
-            allAlgs = algList.algs
-        except ImportError:
-            # QGIS 2.14 Processing implementation
-            allAlgs = Processing.algs
-        providers = {}
-        for provider in Processing.providers:
-            providers[provider.name()] = provider
-        for providerName in list(allAlgs.keys()):
-            # don't show workflows in available algorithms
-            if providerName == "workflow" or providerName == "modelertools" or\
-               WorkflowUtils.checkIfCollectionName(providerName):
-                continue
-            groups = {}
-            provider = allAlgs[providerName]
-            algs = list(provider.values())
-            # add algorithms
-            for alg in algs:
-                if text == "" or text.lower() in alg.name.lower():
-                    if alg.group in groups:
-                        groupItem = groups[alg.group]
-                    else:
-                        groupItem = QtGui.QTreeWidgetItem()
-                        groupItem.setText(0, alg.group)
-                        groups[alg.group] = groupItem
-                    algItem = TreeAlgorithmItem(alg)
-                    groupItem.addChild(algItem)
-
-            if len(groups) > 0:
-                providerItem = QtGui.QTreeWidgetItem()
-                providerItem.setText(0, providers[providerName].getDescription())
-                providerItem.setIcon(0, providers[providerName].getIcon())
-                for groupItem in list(groups.values()):
-                    providerItem.addChild(groupItem)
-                self.algorithmTree.addTopLevelItem(providerItem)
-                providerItem.setExpanded(True)
-                for groupItem in list(groups.values()):
-                    if text != "":
-                        groupItem.setExpanded(True)
-
-        self.algorithmTree.sortItems(0, QtCore.Qt.AscendingOrder)
-
-
-class TreeAlgorithmItem(QtGui.QTreeWidgetItem):
-
-    def __init__(self, alg):
-        QtGui.QTreeWidgetItem.__init__(self)
-        self.alg = alg
-        self.setText(0, alg.name)
-        self.setIcon(0, alg.getIcon())
+            self.hasChanged = True
