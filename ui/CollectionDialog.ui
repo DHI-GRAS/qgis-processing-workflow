@@ -55,10 +55,10 @@
     </rect>
    </property>
    <property name="text">
-    <string>Select style sheet (CSS) file</string>
+    <string/>
    </property>
    <property name="placeholderText">
-    <string>Add image for icon</string>
+    <string>Select style sheet (CSS) file</string>
    </property>
   </widget>
   <widget class="QPushButton" name="pushButton_css">
@@ -164,7 +164,7 @@
     </rect>
    </property>
    <property name="placeholderText">
-    <string/>
+    <string>Select collection folder</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_8">
@@ -278,10 +278,10 @@ p, li { white-space: pre-wrap; }
     </rect>
    </property>
    <property name="text">
-    <string>Select icon file</string>
+    <string/>
    </property>
    <property name="placeholderText">
-    <string>Add image for icon</string>
+    <string>Select icon file</string>
    </property>
   </widget>
  </widget>
