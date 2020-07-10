@@ -1,5 +1,5 @@
 
-from processing.core.AlgorithmProvider import AlgorithmProvider
+from qgis.core import QgsProcessingProvider
 from processing_workflow.WorkflowUtils import WorkflowUtils
 from processing_workflow.WorkflowInstructionsAlgorithm import WorkflowInstructionsAlgorithm
 
@@ -7,21 +7,34 @@ from processing_workflow.WorkflowInstructionsAlgorithm import WorkflowInstructio
 # Currently it only includes the workflow instructions algorithm.
 
 
-class WorkflowOnlyAlgorithmProvider(AlgorithmProvider):
+class WorkflowOnlyAlgorithmProvider(QgsProcessingProvider):
 
     def __init__(self):
-        AlgorithmProvider.__init__(self)
+        QgsProcessingProvider.__init__(self)
 
-    def getName(self):
+    def name(self):
         return 'workflowtools'
 
-    def getDescription(self):
+    def longName(self):
         return self.tr('Workflow-only tools')
 
-    def getIcon(self):
+    def icon(self):
         return WorkflowUtils.workflowIcon()
 
-    def _loadAlgorithms(self):
+    def id(self):
+        return "workflowtools"
+
+    def helpId(self):
+        return ""
+
+    def load(self):
+        self.loadAlgorithms()
+        return True
+
+    def unload(self):
+        QgsProcessingProvider.unload(self)
+
+    def loadAlgorithms(self):
         self.algs = [WorkflowInstructionsAlgorithm()]
         for alg in self.algs:
-            alg.provider = self
+            self.addAlgorithm(alg)

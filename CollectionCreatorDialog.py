@@ -2,10 +2,9 @@ import io
 import json
 import os
 import shutil
-from PyQt4 import uic
-from PyQt4.QtGui import QFileDialog
-from qgis.utils import iface
-from processing.core.alglist import algList
+from qgis.PyQt import uic
+from qgis.PyQt.QtWidgets import QFileDialog
+from qgis.core import QgsApplication
 from processing_workflow.WorkflowCollection import WorkflowCollection
 from processing_workflow.WorkflowUtils import WorkflowUtils
 
@@ -14,37 +13,44 @@ WIDGET, BASE = uic.loadUiType(os.path.join(pluginPath, 'ui', 'CollectionDialog.u
 
 
 class CollectionCreatorDialog(WIDGET, BASE):
-    def __init__(self, alg):
+    def __init__(self):
         self.confFile = ""
         self.basedir = WorkflowUtils.workflowPath()
-        super(CollectionCreatorDialog, self).__init__(iface.mainWindow())
+        super(CollectionCreatorDialog, self).__init__()
         self.setupUi(self)
         self.folderSelected = 0
         self.iconSelected = 0
-        self.toolButton_folder.clicked.connect(self.selectFolder)
-        self.toolButton_icon.clicked.connect(self.selectIcon)
-        self.toolButton_css.clicked.connect(self.selectCss)
+        self.pushButton_folder.clicked.connect(self.selectFolder)
+        self.pushButton_icon.clicked.connect(self.selectIcon)
+        self.pushButton_css.clicked.connect(self.selectCss)
         self.lineEdit_icon.editingFinished.connect(self.checkIcon)
         self.pushButton_cancel.clicked.connect(self.closeWindow)
         self.pushButton_save.clicked.connect(self.createCollection)
 
     def selectFolder(self):
         self.lineEdit_folder.setText(QFileDialog.getExistingDirectory(self,
-                    "Select a folder", self.basedir))
+                                                                      self.tr("Select a folder"),
+                                                                      self.basedir))
         self.checkFolder()
         self.folderSelected = 1
         self.activateButton()
 
     def selectIcon(self):
-        self.lineEdit_icon.setText(QFileDialog.getOpenFileName(self,
-                    "Select image", self.basedir, 'Image Files(*.png *.jpg *.bmp)'))
+        filename = QFileDialog.getOpenFileName(self,
+                                               self.tr("Select image"),
+                                               self.basedir,
+                                               self.tr("Image Files(*.png *.jpg *.bmp)"))[0]
+        self.lineEdit_icon.setText(filename)
         self.checkIcon()
         self.iconSelected = 1
         self.activateButton()
 
     def selectCss(self):
-        self.lineEdit_css.setText(QFileDialog.getOpenFileName(self,
-                    "Select CSS file", self.basedir, 'CSS Files(*.css *.CSS)'))
+        filename = QFileDialog.getOpenFileName(self,
+                                               self.tr("Select CSS file"),
+                                               self.basedir,
+                                               self.tr("CSS Files(*.css *.CSS)"))[0]
+        self.lineEdit_css.setText(filename)
         self.activateButton()
 
     def closeWindow(self):
@@ -55,8 +61,8 @@ class CollectionCreatorDialog(WIDGET, BASE):
         if os.path.isfile(confFile):
             collection = WorkflowCollection(None, confFile, None)
             self.lineEdit_desc.setText(collection.description)
-            self.lineEdit_name.setText(collection.name)
-            self.lineEdit_icon.setText(collection.icon)
+            self.lineEdit_name.setText(collection.name())
+            self.lineEdit_icon.setText(collection.iconPath)
             self.lineEdit_css.setText(collection.css)
             self.textEdit_about.setText(collection.aboutHTML)
             self.checkIcon()
@@ -85,7 +91,7 @@ class CollectionCreatorDialog(WIDGET, BASE):
     def copyFile(self, original):
         _, tail = os.path.split(original)
         copy = os.path.join(self.lineEdit_folder.text(),  tail)
-        if not os.path.isfile(copy) and os.path.isfile(original):
+        if os.path.realpath(original) != os.path.realpath(copy) and os.path.isfile(original):
             shutil.copyfile(original, copy)
         return tail
 
@@ -99,10 +105,11 @@ class CollectionCreatorDialog(WIDGET, BASE):
         confOptions["aboutHTML"] = self.textEdit_about.toPlainText()
         with io.open(self.confFile, 'w', encoding="utf-8") as fp:
             fp.write(json.dumps(confOptions, indent=4, separators=(',', ':'), ensure_ascii=False))
-        for provider in algList.providers:
+        for provider in QgsApplication.processingRegistry().providers():
             try:
-                if provider.descriptionFile == self.confFile:
-                    algList.reloadProvider(provider.getName())
+                if os.path.realpath(provider.descriptionFile) == os.path.realpath(self.confFile):
+                    provider.unload()
+                    provider.load()
             except AttributeError:
                 pass
         self.closeWindow()

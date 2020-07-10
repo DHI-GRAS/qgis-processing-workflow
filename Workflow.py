@@ -25,20 +25,20 @@
 * with this program.  If not, see <http://www.gnu.org/licenses/>.         *
 ***************************************************************************
 """
+from builtins import str
 from io import open
 import os
-import fileinput
 import json
-from PyQt4 import QtGui, QtCore
-from processing.core.Processing import Processing
-from processing.core.parameters import ParameterString
-from processing.core.parameters import ParameterBoolean
-from processing.core.parameters import ParameterSelection
-from processing.core.parameters import ParameterNumber
-from processing.core.parameters import ParameterExtent
-from processing.core.GeoAlgorithm import GeoAlgorithm
-from processing.algs.grass.GrassAlgorithm import GrassAlgorithm
-from processing.algs.grass.GrassUtils import GrassUtils
+from qgis.PyQt.QtCore import QCoreApplication
+from qgis.core import (QgsApplication,
+                       QgsProcessingAlgorithm,
+                       QgsProcessingParameterString,
+                       QgsProcessingParameterBoolean,
+                       QgsProcessingParameterEnum,
+                       QgsProcessingParameterNumber,
+                       QgsProcessingParameterExtent)
+from processing.algs.grass7.Grass7Algorithm import Grass7Algorithm
+from processing.algs.grass7.Grass7Utils import Grass7Utils
 from processing_workflow.StepDialog import StepDialog, NORMAL_MODE, BATCH_MODE
 from processing_workflow.WrongWorkflowException import WrongWorkflowException
 from processing_workflow.WorkflowUtils import WorkflowUtils
@@ -48,21 +48,22 @@ DIRNAME = os.path.dirname(__file__)
 
 # Class containing the list of steps (algorithms) in the workflow together with the mode
 # and instructions for each step
-class Workflow(GeoAlgorithm):
+class Workflow(QgsProcessingAlgorithm):
 
-    def __init__(self, provider):
-        GeoAlgorithm.__init__(self)
+    def __init__(self):
+        QgsProcessingAlgorithm.__init__(self)
         # holds the algorithm object, the mode (normal or batch) and instructions
-        self.provider = provider
         self._steps = list()
-        self.name = ''
-        self.group = ''
+        self._name = ''
+        self._group = ''
         self.descriptionFile = ''
         self.style = None
-        self.parameters = [ParameterString("Info", "Workflow can not be run as a batch process." +
-                                                   "Please close this dialog and execute as a " +
-                                                   "normal process.",
-                                           "", False)]
+        self.parameters = [QgsProcessingParameterString("Info",
+                                                        "Workflow can not be run as a batch " +
+                                                        "process. Please close this dialog and " +
+                                                        "execute as a normal process.",
+                                                        "",
+                                                        False)]
         self.showInModeler = False
 
     def addStep(self, algorithm, mode, instructions, algParameters={}):
@@ -72,11 +73,13 @@ class Workflow(GeoAlgorithm):
 
     def changeStep(self, index, algorithm, mode, instructions, algParameters={}):
         algParameters = {}
-        for param in algorithm.parameters:
-            if isinstance(param, ParameterBoolean) or isinstance(param, ParameterNumber) or\
-               isinstance(param, ParameterString) or isinstance(param, ParameterSelection) or\
-               isinstance(param, ParameterExtent):
-                algParameters[param.name] = param.value
+        for param in algorithm.parameterDefinitions():
+            if isinstance(param, QgsProcessingParameterBoolean) or\
+               isinstance(param, QgsProcessingParameterNumber) or\
+               isinstance(param, QgsProcessingParameterString) or\
+               isinstance(param, QgsProcessingParameterEnum) or\
+               isinstance(param, QgsProcessingParameterExtent):
+                algParameters[param.name()] = param.defaultValue()
         self._steps[index] = {'algorithm': algorithm, 'mode': mode, 'instructions': instructions,
                               'parameters': algParameters}
 
@@ -92,37 +95,39 @@ class Workflow(GeoAlgorithm):
     def getAlgorithm(self, index):
         return self._steps[index]['algorithm']
 
+    def getParameters(self, index):
+        return self._steps[index]['parameters']
+
     def getMode(self, index):
         return self._steps[index]['mode']
 
     def getInstructions(self, index):
         return self._steps[index]['instructions']
 
-    def getIcon(self):
+    def icon(self):
         try:
-            return self.provider.getIcon()
-        except:
+            return self.provider().icon()
+        except AttributeError:
             return WorkflowUtils.workflowIcon()
 
     def getStyle(self):
-        styleFile = os.path.join(self.provider.baseDir, self.provider.css)
+        styleFile = os.path.join(self.provider().baseDir, self.provider().css)
         if not os.path.isfile(styleFile):
             styleFile = os.path.join(DIRNAME, "style.css")
         with open(styleFile, 'r') as fi:
             self.style = fi.read()
 
-    def getCopy(self):
-        newone = Workflow(self.provider)
+    def createInstance(self):
+        newone = Workflow()
+        newone.setProvider(self.provider())
         newone.openWorkflow(self.descriptionFile)
+        newone.getStyle()
         return newone
-
-    def getCustomParametersDialog(self):
-        return WorkflowDialog(self)
 
     def removeStep(self, index):
         self._steps.pop(index)
 
-    def run(self):
+    def processAlgorithm(self, parameters, context, progress):
         # execute the first step
         step = self._steps[0]
         stepDialog = self.executeStep(step)
@@ -139,41 +144,28 @@ class Workflow(GeoAlgorithm):
 
             # finish the workflow or execute the next step
             if step is None:
-                GrassUtils.endGrassSession()
-                return stepDialog.executed
+                Grass7Utils.endGrassSession()
+                return {}
             else:
                 stepDialog = self.executeStep(step)
 
-    def setStepParameters(self, step):
-        parameters = step['parameters']
-        alg = step['algorithm']
-        for paramName in parameters.iterkeys():
-            param = alg.getParameterFromName(paramName)
-            if param and (isinstance(param, ParameterBoolean) or
-                          isinstance(param, ParameterNumber) or
-                          isinstance(param, ParameterString) or
-                          isinstance(param, ParameterSelection) or
-                          isinstance(param, ParameterExtent)):
-                param.default = parameters[paramName]
-
     def executeStep(self, step):
-        if isinstance(step['algorithm'], GrassAlgorithm):
-            GrassUtils.startGrassSession()
+        if isinstance(step['algorithm'], Grass7Algorithm):
+            Grass7Utils.startGrassSession()
         else:
-            GrassUtils.endGrassSession()
-        self.setStepParameters(step)
-        stepDialog = StepDialog(step['algorithm'], None, os.path.dirname(self.descriptionFile),
-                                False, style=self.style)
+            Grass7Utils.endGrassSession()
+        stepDialog = StepDialog(step['algorithm'], step['parameters'], None,
+                                os.path.dirname(self.descriptionFile), False, style=self.style)
         stepDialog.setMode(step['mode'])
         stepDialog.setInstructions(step['instructions'])
         stepDialog.setWindowTitle(
-            u"Workflow {self.name}, Step {stepno} of {nsteps}: {algname}"
+            u"Workflow {workflowname}, Step {stepno} of {nsteps}: {algname}"
             .format(
-                self=self,
+                workflowname=self.name(),
                 stepno=(self._steps.index(step) + 1),
                 nsteps=len(self._steps),
-                algname=step['algorithm'].name))
-        stepDialog.setWindowIcon(self.getIcon())
+                algname=step['algorithm'].displayName()))
+        stepDialog.setWindowIcon(self.icon())
         # set as window modal to allow access to QGIS functions
         stepDialog.setWindowModality(1)
         stepDialog.exec_()
@@ -194,15 +186,15 @@ class Workflow(GeoAlgorithm):
             return (self._steps[0])
 
     def serialize(self):
-        s = ".NAME:" + unicode(self.name) + "\n"
-        s += ".GROUP:" + unicode(self.group) + "\n"
+        s = ".NAME:" + str(self.name()) + "\n"
+        s += ".GROUP:" + str(self.group()) + "\n"
 
         for step in self._steps:
-            s += ".ALGORITHM:" + step['algorithm'].commandLineName() + "\n"
-            s += ".PARAMETERS:" + json.dumps(step['parameters']) + "\n"
-            s += ".MODE:" + step['mode'] + "\n"
-            s += ".INSTRUCTIONS:" + step['instructions']
-            if not unicode(s).endswith("\n"):
+            s += ".ALGORITHM:%s:%s\n" % (step['algorithm'].provider().id(), step['algorithm'].name())
+            s += ".PARAMETERS:%s\n" % json.dumps(step['parameters'])
+            s += ".MODE:%s\n" % step['mode']
+            s += ".INSTRUCTIONS:%s\n" % step['instructions']
+            if not str(s).endswith("\n"):
                 s += "\n"
             s += "!INSTRUCTIONS" + "\n"
 
@@ -210,7 +202,6 @@ class Workflow(GeoAlgorithm):
 
     # Read workflow from text file
     def openWorkflow(self, filename):
-        self.getStyle()
         self._steps = list()
         self.descriptionFile = filename
         instructions = False
@@ -225,18 +216,19 @@ class Workflow(GeoAlgorithm):
                         pass
 
                     if line.startswith(".NAME:"):
-                        self.name = line[len(".NAME:"):]
+                        self._name = self.tr(line[len(".NAME:"):])
 
                     elif line.startswith(".GROUP:"):
-                        self.group = line[len(".GROUP:"):]
+                        self._group = self.tr(line[len(".GROUP:"):])
+                        self._groupId = line[len(".GROUP:"):].lower().replace(" ", "_")
 
                     elif line.startswith(".ALGORITHM:"):
-                        alg = Processing.getAlgorithm(line[len(".ALGORITHM:"):])
+                        alg = QgsApplication.processingRegistry().algorithmById(
+                                line[len(".ALGORITHM:"):])
                         if alg:
-                            alg = alg.getCopy()
                             self.addStep(alg, NORMAL_MODE, '')
                         else:
-                            raise(WrongWorkflowException())
+                            raise WrongWorkflowException
 
                     elif line.startswith(".MODE:"):
                         if line[len(".MODE:"):] == NORMAL_MODE:
@@ -244,19 +236,17 @@ class Workflow(GeoAlgorithm):
                         elif line[len(".MODE:"):] == BATCH_MODE:
                             self._steps[-1]['mode'] = BATCH_MODE
                         else:
-                            raise(WrongWorkflowException())
+                            raise WrongWorkflowException
 
                     elif line.startswith(".PARAMETERS:"):
                         try:
                             params = json.loads(line[len(".PARAMETERS:"):])
-                        except:
-                            pass
+                        except json.JSONDecodeError:
+                            params = None
+                        if type(params) == dict:
+                            self._steps[-1]['parameters'] = params
                         else:
-                            if type(params) == dict:
-                                self._steps[-1]['parameters'] = params
-                                self.setStepParameters(self._steps[-1])
-                            else:
-                                raise(WrongWorkflowException())
+                            raise WrongWorkflowException
 
                     elif line.startswith(".INSTRUCTIONS"):
                         instructions = line[len(".INSTRUCTIONS:"):]+"\n"
@@ -274,21 +264,51 @@ class Workflow(GeoAlgorithm):
                 except WrongWorkflowException:
                     msg = "Error on line number "+str(lineNumber)+": "+line+"\n"
                     raise WrongWorkflowException(msg)
-                except Exception, e:
+                except Exception as e:
                     raise e
 
-    def processAlgorithm(self, progress):
-        self.run()
+    def name(self):
+        return self._name
 
+    def setName(self, name):
+        self._name = name
 
-# Just a "wrapper" dialog to satisfy executeAlgorithm in ProcessingToolbox
-class WorkflowDialog(QtGui.QDialog):
+    def displayName(self):
+        return self._name
 
-    def __init__(self, workflow):
-        self.executed = workflow.run()
+    def shortDescription(self):
+        return self._name
 
-    def exec_(self):
-        None
+    def group(self):
+        return self._group
 
-    def show(self):
-        None
+    def setGroup(self, group):
+        self._group = group
+
+    def groupId(self):
+        return self._groupId
+
+    def flags(self):
+        return super().flags() | (QgsProcessingAlgorithm.FlagNoThreading |
+                                  QgsProcessingAlgorithm.FlagHideFromModeler &
+                                  ~QgsProcessingAlgorithm.FlagSupportsBatch)
+
+    def helpUrl(self):
+        return ""
+
+    def helpId(self):
+        return ""
+
+    def svgIconPath(self):
+        return ""
+
+    def tr(self, string, context=''):
+        if context == '':
+            context = self.__class__.__name__
+        return QCoreApplication.translate(context, string)
+
+    def initAlgorithm(self, config=None):
+        pass
+
+    def validateInputCRS(self):
+        return True

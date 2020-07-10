@@ -33,27 +33,15 @@ from processing_workflow.WorkflowCreatorDialog import WorkflowCreatorDialog
 
 class EditWorkflowAction(ContextAction):
 
-    def __init__(self, provider):
-        self.name = "Edit workflow"
-        self.provider = provider
-
-    # This is to make the plugin work both in QGIS 2.14 and 2.16.
-    # In 2.16 Processing self.alg was changed to self.itemData.
-    def setData(self, itemData, toolbox):
-        ContextAction.setData(self, itemData, toolbox)
-        self.alg = itemData
+    def __init__(self):
+        super().__init__()
+        self.name = self.tr("Edit workflow", "EditWorkflowAction")
 
     def isEnabled(self):
-        return isinstance(self.alg, Workflow) and self.alg.provider == self.provider
+        return (isinstance(self.itemData, Workflow) and
+                "processing_workflow" in self.itemData.provider().id())
 
     def execute(self):
-        dlg = WorkflowCreatorDialog(self.alg, self.provider)
-        dlg.exec_()
-        if dlg.update:
-            try:
-                # QGIS 2.16 (and up?) Processing implementation
-                from processing.core.alglist import algList
-                algList.reloadProvider(self.alg.provider.getName())
-            except ImportError:
-                # QGIS 2.14 Processing implementation
-                self.toolbox.updateProvider(self.alg.provider.getName())
+        alg = self.itemData
+        dlg = WorkflowCreatorDialog(alg)
+        dlg.show()

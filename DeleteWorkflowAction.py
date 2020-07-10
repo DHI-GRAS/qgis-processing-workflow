@@ -26,38 +26,31 @@
 ***************************************************************************
 """
 
+import os
+from qgis.PyQt.QtWidgets import QMessageBox
+from qgis.core import QgsApplication
 from processing_workflow.Workflow import Workflow
 from processing.gui.ContextAction import ContextAction
-import os
-from PyQt4 import QtGui
 
 
 class DeleteWorkflowAction(ContextAction):
 
-    def __init__(self, provider):
-        self.name = "Delete workflow"
-        self.provider = provider
-
-    # This is to make the plugin work both in QGIS 2.14 and 2.16.
-    # In 2.16 Processing self.alg was changed to self.itemData.
-    def setData(self, itemData, toolbox):
-        ContextAction.setData(self, itemData, toolbox)
-        self.alg = itemData
+    def __init__(self):
+        super().__init__()
+        self.name = self.tr("Delete workflow", "DeleteWorkflowAction")
 
     def isEnabled(self):
-        return isinstance(self.alg, Workflow) and self.alg.provider == self.provider
+        return (isinstance(self.itemData, Workflow) and
+                "processing_workflow" in self.itemData.provider().id())
 
     def execute(self, alg):
-        reply = QtGui.QMessageBox.question(None, 'Confirmation',
-                                           "Are you sure you want to delete this workflow?",
-                                           QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
-                                           QtGui.QMessageBox.No)
-        if reply == QtGui.QMessageBox.Yes:
-            os.remove(self.alg.descriptionFile)
-            try:
-                # QGIS 2.16 (and up?) Processing implementation
-                from processing.core.alglist import algList
-                algList.reloadProvider(self.alg.provider.getName())
-            except ImportError:
-                # QGIS 2.14 Processing implementation
-                self.toolbox.updateProvider(self.alg.provider.getName())
+        reply = QMessageBox.question(None,
+                                     self.tr("Confirmation", "DeleteWorkflowAction"),
+                                     self.tr("Are you sure you want to delete this workflow?",
+                                             "DeleteWorkflowAction"),
+                                     QMessageBox.Yes | QMessageBox.No,
+                                     QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            providerId = self.itemData.provider().id()
+            os.remove(self.itemData.descriptionFile)
+            QgsApplication.processingRegistry().providerById(providerId).refreshAlgorithms()

@@ -26,12 +26,13 @@
 ***************************************************************************
 """
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from builtins import str
+from qgis.PyQt.QtWidgets import QAction
+from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtCore import QCoreApplication
 from qgis.utils import iface
-from processing.core.ProcessingConfig import ProcessingConfig
-from processing.core.AlgorithmProvider import AlgorithmProvider
-from processing.core.ProcessingLog import ProcessingLog
+from qgis.core import QgsProcessingProvider, QgsMessageLog, Qgis
+from processing.core.ProcessingConfig import ProcessingConfig, settingsWatcher
 from processing_workflow.EditWorkflowAction import EditWorkflowAction
 from processing_workflow.DeleteWorkflowAction import DeleteWorkflowAction
 from processing_workflow.Workflow import Workflow
@@ -39,98 +40,113 @@ from processing_workflow.WorkflowListDialog import WorkflowListDialog
 from processing_workflow.WrongWorkflowException import WrongWorkflowException
 
 
-class WorkflowProviderBase(AlgorithmProvider):
+class WorkflowProviderBase(QgsProcessingProvider):
 
     def __init__(self, activate=False):
-        AlgorithmProvider.__init__(self)
+        QgsProcessingProvider.__init__(self)
 
         self.activate = activate
         self.algs = []
+        self.actions = []
 
         self.descriptionFile = ""
         self.baseDir = ""
         self.description = ""
-        self.name = ""
-        self.icon = ""
+        self._name = ""
+        self.iconPath = ""
         self.aboutHTML = ""
         self.css = ""
 
         # Right click button actions
-        self.contextMenuActions = [EditWorkflowAction(self), DeleteWorkflowAction(self)]
+        self.contextMenuActions = [EditWorkflowAction(), DeleteWorkflowAction()]
 
-        try:
-            # QGIS 2.16 (and up?) Processing implementation
-            from processing.core.ProcessingConfig import settingsWatcher
-            settingsWatcher.settingsChanged.connect(self.addRemoveTaskbarButton)
-        except ImportError:
-            pass
+        settingsWatcher.settingsChanged.connect(self.addRemoveTaskbarButton)
 
     def unload(self):
-        AlgorithmProvider.unload(self)
+        QgsProcessingProvider.unload(self)
 
     def _addToolbarIcon(self):
         # Create action that will display workflow list dialog when toolbar button is clicked
-        self.action = QAction(self.getIcon(), self.getDescription(), iface.mainWindow())
+        self.action = QAction(self.icon(), self.longName(), iface.mainWindow())
         self.action.triggered.connect(self.displayWorkflowListDialog)
-    
+
     # Load all the workflows saved in the workflow folder
     def createAlgsList(self):
-        pass
+        return []
 
     def loadWorkflow(self, workflowFilePath):
         try:
-            workflow = Workflow(self)
+            workflow = Workflow()
             workflow.openWorkflow(workflowFilePath)
-            if workflow.name.strip() != "":
-                workflow.provider = self
+            if workflow.name().strip() != "":
                 self.preloadedAlgs.append(workflow)
             else:
-                ProcessingLog.addToLog(ProcessingLog.LOG_ERROR,
-                                       "Could not open Workflow algorithm: " + workflowFilePath)
-        except WrongWorkflowException,e:
-            ProcessingLog.addToLog(ProcessingLog.LOG_ERROR,
-                                   "Could not open Workflow algorithm " + workflowFilePath +
-                                   ". " + e.msg)
-        except Exception,e:
-            ProcessingLog.addToLog(ProcessingLog.LOG_ERROR,
-                                   "Could not open Workflow algorithm: " + workflowFilePath +
-                                   ". Unknown exception: "+unicode(e)+"\n")
+                QgsMessageLog.logMessage(
+                        self.tr("Could not open Workflow algorithm: " + workflowFilePath),
+                        self.tr("Processing"),
+                        Qgis.Critical)
+        except WrongWorkflowException as e:
+            QgsMessageLog.logMessage(
+                    self.tr("Could not open Workflow algorithm "+workflowFilePath+". "+e.msg),
+                    self.tr("Processing"),
+                    Qgis.Critical)
+        except Exception as e:
+            QgsMessageLog.logMessage(
+                    self.tr("Could not open Workflow algorithm: " + workflowFilePath +
+                            ". Unknown exception: "+str(e)+"\n"),
+                    self.tr("Processing"),
+                    Qgis.Critical)
 
-    def getDescription(self):
+    def longName(self):
         return self.description
 
-    def getName(self):
-        return self.name
+    def name(self):
+        return self._name
 
-    def getIcon(self):
-        return QIcon(self.icon)
+    def id(self):
+        return "processing_workflow"
+
+    def helpId(self):
+        return "processing_workflow"
+
+    def icon(self):
+        return QIcon(self.iconPath)
 
     def getActivateSetting(self):
-        return 'ACTIVATE_' + self.getName().upper().replace(' ', '_')
+        return 'ACTIVATE_' + self.name().upper().replace(' ', '_')
 
     def getTaskbarButtonSetting(self):
-        return 'TASKBAR_BUTTON_' + self.getName().upper().replace(' ', '_')
+        return 'TASKBAR_BUTTON_' + self.name().upper().replace(' ', '_')
 
     def addRemoveTaskbarButton(self):
         name = self.getActivateSetting()
         taskbar = self.getTaskbarButtonSetting()
-        if not (ProcessingConfig.getSetting(name) and ProcessingConfig.getSetting(taskbar)):
-            # Remove toolbar button
-            iface.removeToolBarIcon(self.action)
-        else:
+        if self.isActive() and ProcessingConfig.getSetting(taskbar):
             # Add toolbar button
             iface.addToolBarIcon(self.action)
+        else:
+            # Remove toolbar button
+            iface.removeToolBarIcon(self.action)
+
+    def load(self):
+        QgsProcessingProvider.load(self)
+        ProcessingConfig.readSettings()
+        self.addRemoveTaskbarButton()
+        self.loadAlgorithms()
+        return True
 
     def loadAlgorithms(self):
-        AlgorithmProvider.loadAlgorithms(self)
-        self.addRemoveTaskbarButton()
-
-    def _loadAlgorithms(self):
-        self.createAlgsList()
-        self.algs = self.preloadedAlgs
+        algs = self.createAlgsList()
+        for a in algs:
+            self.addAlgorithm(a)
 
     # display a dialog listing all the workflows
     def displayWorkflowListDialog(self):
         dlg = WorkflowListDialog(self)
         dlg.show()
         dlg.exec_()
+
+    def tr(self, string, context=''):
+        if context == '':
+            context = 'WorkflowProvider'
+        return QCoreApplication.translate(context, string)

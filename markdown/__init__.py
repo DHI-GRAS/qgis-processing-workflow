@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Python Markdown
 
@@ -20,39 +19,43 @@ Copyright 2004 Manfred Stienstra (the original version)
 License: BSD (see LICENSE.md for details).
 """
 
-from __future__ import absolute_import
-from __future__ import unicode_literals
-from .core import Markdown, markdown, markdownFromFile
+import sys
+
+# TODO: Remove this check at some point in the future.
+# (also remove flake8's 'ignore E402' comments below)
+if sys.version_info[0] < 3:  # pragma: no cover
+    raise ImportError('A recent version of Python 3 is required.')
+
+from .core import Markdown, markdown, markdownFromFile  # noqa: E402
+from .util import PY37                                  # noqa: E402
+from .pep562 import Pep562                              # noqa: E402
+from .__meta__ import __version__, __version_info__     # noqa: E402
+import warnings                                         # noqa: E402
 
 # For backward compatibility as some extensions expect it...
 from .extensions import Extension  # noqa
 
 __all__ = ['Markdown', 'markdown', 'markdownFromFile']
 
-# version_info should conform to PEP 386
-# (major, minor, micro, alpha/beta/rc/final, #)
-# (1, 1, 2, 'alpha', 0) => "1.1.2.dev"
-# (1, 2, 0, 'beta', 2) => "1.2b2"
-__version_info__ = (3, 0, 0, 'alpha', 0)
+__deprecated__ = {
+    "version": ("__version__", __version__),
+    "version_info": ("__version_info__", __version_info__)
+}
 
 
-def _get_version():  # pragma: no cover
-    " Returns a PEP 386-compliant version number from version_info. "
-    assert len(__version_info__) == 5
-    assert __version_info__[3] in ('alpha', 'beta', 'rc', 'final')
+def __getattr__(name):
+    """Get attribute."""
 
-    parts = 2 if __version_info__[2] == 0 else 3
-    main = '.'.join(map(str, __version_info__[:parts]))
-
-    sub = ''
-    if __version_info__[3] == 'alpha' and __version_info__[4] == 0:
-        # TODO: maybe append some sort of git info here??
-        sub = '.dev'
-    elif __version_info__[3] != 'final':
-        mapping = {'alpha': 'a', 'beta': 'b', 'rc': 'c'}
-        sub = mapping[__version_info__[3]] + str(__version_info__[4])
-
-    return str(main + sub)
+    deprecated = __deprecated__.get(name)
+    if deprecated:
+        warnings.warn(
+            "'{}' is deprecated. Use '{}' instead.".format(name, deprecated[0]),
+            category=DeprecationWarning,
+            stacklevel=(3 if PY37 else 4)
+        )
+        return deprecated[1]
+    raise AttributeError("module '{}' has no attribute '{}'".format(__name__, name))
 
 
-__version__ = _get_version()
+if not PY37:
+    Pep562(__name__)

@@ -26,13 +26,15 @@
 ***************************************************************************
 """
 
+from builtins import object
 import os
-from PyQt4 import QtGui
+from qgis.PyQt import QtGui
+from qgis.core import QgsApplication
 from processing.core.ProcessingConfig import ProcessingConfig
 from processing.tools.system import mkdir
 
 
-class WorkflowUtils:
+class WorkflowUtils(object):
 
     WORKFLOW_FOLDER = "WORKFLOW_FOLDER"
     workflowCollectionNames = []
@@ -40,10 +42,10 @@ class WorkflowUtils:
     @staticmethod
     def workflowPath():
         folder = ProcessingConfig.getSetting(WorkflowUtils.WORKFLOW_FOLDER)
-        if folder is None or not os.path.isdir(folder):
-            folder = os.path.expanduser(
-                    os.path.join('~', '.qgis2', 'processing', 'workflows'))
-        mkdir(folder)
+        if folder is None:
+            folder = os.path.join(QgsApplication.qgisSettingsDirPath(), 'processing', 'workflows')
+        if not os.path.isdir(folder):
+            mkdir(folder)
 
         return folder
 

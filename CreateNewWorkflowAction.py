@@ -26,40 +26,31 @@
 ***************************************************************************
 """
 
+import os
+from qgis.PyQt.QtGui import QIcon
+from qgis.core import QgsApplication
 from processing.gui.ToolboxAction import ToolboxAction
 from processing_workflow.WorkflowCreatorDialog import WorkflowCreatorDialog
-import os
-from PyQt4 import QtGui
+from processing_workflow.WorkflowUtils import WorkflowUtils
 
 
 # Class for an action to be added to the Processing toolbar
 class CreateNewWorkflowAction(ToolboxAction):
 
-    def __init__(self, workflowProvider):
-        self.name = "Create new workflow"
-        self.i18n_name = self.tr(self.name)
-        self.group = "Tools"
-        self.i18n_group = self.tr(self.group)
-        self.workflowProvider = workflowProvider
+    def __init__(self):
+        super().__init__()
+        self.name = self.tr("Create new workflow", "CreateNewWorkflowAction")
 
     def getIcon(self):
-        return QtGui.QIcon(os.path.dirname(__file__) + "/images/icon.png")
+        return QIcon(os.path.dirname(__file__) + "/images/icon.png")
 
     def execute(self):
-        dlg = WorkflowCreatorDialog(None)
-        dlg.exec_()
-        is2_16 = False
-        if dlg.update:
-            try:
-                # QGIS 2.16 (and up?) Processing implementation
-                from processing.core.alglist import algList
-                algList.reloadProvider(self.workflowProvider.getName())
-                is2_16 = True
-            except ImportError:
-                # QGIS 2.14 Processing implementation
-                self.toolbox.updateProvider(self.workflowProvider.getName())
-            for collection in self.workflowProvider.collections:
-                if is2_16:
-                    algList.reloadProvider(collection.getName())
-                else:
-                    self.toolbox.updateProvider(collection.getName())
+        dlg = WorkflowCreatorDialog.create(None)
+        dlg.update_workflow.connect(self.updateWorkflows)
+        dlg.show()
+
+    def updateWorkflows(self):
+        ids = ["processing_workflow"]
+        ids.extend(WorkflowUtils.workflowCollectionNames)
+        for id in ids:
+            QgsApplication.processingRegistry().providerById(id).refreshAlgorithms()

@@ -25,13 +25,24 @@
 * with this program.  If not, see <http://www.gnu.org/licenses/>.         *
 ***************************************************************************
 """
+from __future__ import absolute_import
 
 import os
-from PyQt4 import QtCore, QtGui
+from qgis.PyQt import QtCore
+from qgis.PyQt.QtWidgets import (QDialog, QGridLayout, QWidget, QTextBrowser, QTextEdit, QToolBar,
+                                 QAction, QDialogButtonBox, QPushButton, QComboBox)
+from qgis.PyQt.QtGui import QIcon, QTextDocument
+from qgis.core import (QgsApplication,
+                       QgsProcessingAlgorithm,
+                       QgsProcessingParameterString,
+                       QgsProcessingParameterBoolean,
+                       QgsProcessingParameterEnum,
+                       QgsProcessingParameterNumber,
+                       QgsProcessingParameterExtent)
 from processing.gui.AlgorithmDialog import AlgorithmDialog
 from processing.gui.BatchAlgorithmDialog import BatchAlgorithmDialog
-from processing.gui.InputLayerSelectorPanel import InputLayerSelectorPanel
-import markdown
+from processing_workflow import markdown
+
 
 NORMAL_MODE = "Normal"
 BATCH_MODE = "Batch"
@@ -40,11 +51,11 @@ DIRNAME = os.path.dirname(__file__)
 
 # Dialog grouping the appropriate algorithm dialog (normal or batch mode), instructions
 # box and option to change from normal to batch mode if the dialog is editable.
-class StepDialog(QtGui.QDialog):
+class StepDialog(QDialog):
 
-    def __init__(self, alg, mainDialog, workflowBaseDir, canEdit=True, style=None):
-
-        self.alg = alg
+    def __init__(self, alg, defaultParameters, mainDialog, workflowBaseDir, canEdit=True,
+                 style=None):
+        self.alg = alg.create()
         self.mainDialog = mainDialog
         self.workflowBaseDir = workflowBaseDir
         self.canEdit = canEdit
@@ -52,62 +63,59 @@ class StepDialog(QtGui.QDialog):
         self.goBackward = False
         self.style = style
 
-        QtGui.QDialog.__init__(self)
+        QDialog.__init__(self)
 
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowSystemMenuHint |
                             QtCore.Qt.WindowMinMaxButtonsHint)
 
         # create a tab for this algorithm
-        self.tabLayout = QtGui.QGridLayout()
+        self.tabLayout = QGridLayout()
 
         # Create widget holding instructions text and instructions' editing
         # toolbar if in edit mode
-        self.algInstructionsWidget = QtGui.QWidget()
-        self.algInstructionsLayout = QtGui.QGridLayout()
+        self.algInstructionsWidget = QWidget()
+        self.algInstructionsLayout = QGridLayout()
 
         if not canEdit:
-            self.algInstructionsText = QtGui.QTextBrowser()
+            self.algInstructionsText = QTextBrowser()
             self.algInstructionsText.setOpenExternalLinks(True)
             self.algInstructionsLayout.addWidget(self.algInstructionsText, 0, 0)
         else:
-            self.algInstructionsText = QtGui.QTextEdit()
+            self.algInstructionsText = QTextEdit()
             self.algInstructionsText.setTextInteractionFlags(QtCore.Qt.TextEditorInteraction)
             self.algInstructionsLayout.addWidget(self.algInstructionsText, 1, 0)
             # Tool bar to hold font-editing tools
-            self.algInstructionsEditBar = QtGui.QToolBar()
+            self.algInstructionsEditBar = QToolBar()
             self.algInstructionsEditBar.setIconSize(QtCore.QSize(16, 16))
             iconDir = os.path.join(os.path.dirname(__file__), "images")
             # Bold
-            self.actionTextBold = QtGui.QAction(
-                    QtGui.QIcon.fromTheme("format-text-bold",
-                                          QtGui.QIcon(os.path.join(iconDir, "boldA.png"))),
+            self.actionTextBold = QAction(
+                    QIcon.fromTheme("format-text-bold",
+                                    QIcon(os.path.join(iconDir, "boldA.png"))),
                     "&Bold", self)
             self.actionTextBold.setShortcut("Ctrl+B")
-            QtCore.QObject.connect(self.actionTextBold, QtCore.SIGNAL("triggered()"),
-                                   self.textBold)
+            self.actionTextBold.triggered.connect(self.textBold)
             self.algInstructionsEditBar.addAction(self.actionTextBold)
             # Italic
-            self.actionTextItalic = QtGui.QAction(
-                    QtGui.QIcon.fromTheme("format-text-italic",
-                                          QtGui.QIcon(os.path.join(iconDir, "italicA.png"))),
+            self.actionTextItalic = QAction(
+                    QIcon.fromTheme("format-text-italic",
+                                    QIcon(os.path.join(iconDir, "italicA.png"))),
                     "&Italic", self)
             self.actionTextItalic.setShortcut("Ctrl+I")
-            QtCore.QObject.connect(self.actionTextItalic, QtCore.SIGNAL("triggered()"),
-                                   self.textItalic)
+            self.actionTextItalic.triggered.connect(self.textItalic)
             self.algInstructionsEditBar.addAction(self.actionTextItalic)
             # Underline
-            self.actionTextUnderline = QtGui.QAction(
-                    QtGui.QIcon.fromTheme("format-text-underline",
-                                          QtGui.QIcon(os.path.join(iconDir, "underlineA.png"))),
+            self.actionTextUnderline = QAction(
+                    QIcon.fromTheme("format-text-underline",
+                                    QIcon(os.path.join(iconDir, "underlineA.png"))),
                     "&Underline", self)
             self.actionTextUnderline.setShortcut("Ctrl+U")
-            QtCore.QObject.connect(self.actionTextUnderline, QtCore.SIGNAL("triggered()"),
-                                   self.textUnderline)
+            self.actionTextUnderline.triggered.connect(self.textUnderline)
             self.algInstructionsEditBar.addAction(self.actionTextUnderline)
             # Toggle preview
-            self.actionTogglePreview = QtGui.QAction(
-                    QtGui.QIcon.fromTheme("document-print-preview",
-                                          QtGui.QIcon(os.path.join(iconDir, "eye.png"))),
+            self.actionTogglePreview = QAction(
+                    QIcon.fromTheme("document-print-preview",
+                                    QIcon(os.path.join(iconDir, "eye.png"))),
                     "&Preview", self)
             # self.actionTogglePreview.setShortcut("Ctrl-P")
             self.actionTogglePreview.triggered.connect(self.textTogglePreview)
@@ -115,58 +123,65 @@ class StepDialog(QtGui.QDialog):
             self.algInstructionsLayout.addWidget(self.algInstructionsEditBar, 0, 0)
 
         self.algInstructionsWidget.setLayout(self.algInstructionsLayout)
-        self.algInstructionsDoc = QtGui.QTextDocument()
+        self.algInstructionsDoc = QTextDocument()
         self.algInstructionsDoc.setDefaultStyleSheet(self.style)
         self.algInstructionsText.setDocument(self.algInstructionsDoc)
         self.algInstructionsText.setAcceptRichText(False)
         self.setDefaultInstructionsText()
 
-        self.normalModeDialog = alg.getCustomParametersDialog()
-        if not self.normalModeDialog:
-            self.normalModeDialog = AlgorithmDialog(alg)
-        # Do not show the "Run as batch process" button in workflows
+        self.normalModeDialog = self.createAlgorithmDialog(self.alg,
+                                                           defaultParameters,
+                                                           NORMAL_MODE)
         try:
-            self.normalModeDialog.tabWidget.setCornerWidget(None)
-        except:
+            self.normalModeDialog.tabWidget().setCornerWidget(None)
+        except AttributeError:
             pass
-        self.batchModeDialog = BatchAlgorithmDialog(alg)
+        self.batchModeDialog = self.createAlgorithmDialog(self.alg,
+                                                          defaultParameters,
+                                                          BATCH_MODE)
         self.batchModeDialog.setHidden(True)
         # forwardButton does the job of cancel/close button
         try:
-            if self.alg.name == "Field calculator":
-                self.normalModeDialog.mButtonBox.removeButton(
-                        self.normalModeDialog.mButtonBox.button(QtGui.QDialogButtonBox.Cancel))
+            if self.alg.name() == "Field calculator":
+                self.normalModeDialog.mButtonBox().button(QDialogButtonBox.Cancel).hide()
             else:
-                self.normalModeDialog.buttonBox.removeButton(
-                        self.normalModeDialog.buttonBox.button(QtGui.QDialogButtonBox.Close))
-            # forwardButton does this job
-            self.batchModeDialog.buttonBox.removeButton(
-                    self.batchModeDialog.buttonBox.button(QtGui.QDialogButtonBox.Close))
-        except:
+                self.normalModeDialog.buttonBox().button(QDialogButtonBox.Close).hide()
+            self.batchModeDialog.buttonBox().button(QDialogButtonBox.Close).hide()
+        except AttributeError:
             # Not all dialogs might have buttonBox
+            pass
+        try:
+            self.batchModeDialog.btnRunSingle.hide()
+            self.normalModeDialog.runAsBatchButton.hide()
+        except AttributeError:
+            # Not all dialogs might have those buttons
             pass
         if canEdit:
             try:
-                self.normalModeDialog.progressBar.hide()
-                self.batchModeDialog.progressBar.hide()
+                # TODO: hide progress bar
+                #self.normalModeDialog.progressBar.hide()
+                #self.batchModeDialog.progressBar.hide()
+                self.normalModeDialog.cancelButton().hide()
+                self.batchModeDialog.cancelButton().hide()
                 if self.alg.name == "Field calculator":
-                    self.normalModeDialog.mButtonBox.hide()
+                    self.normalModeDialog.mButtonBox().hide()
                 else:
-                    self.normalModeDialog.buttonBox.hide()
-                self.batchModeDialog.buttonBox.hide()
-            except:
+                    self.normalModeDialog.buttonBox().hide()
+                self.batchModeDialog.buttonBox().hide()
+            except AttributeError:
                 # Not all dialogs might have buttonBox
                 pass
-        self.normalModeDialog.connect(self.normalModeDialog, QtCore.SIGNAL("finished(int)"),
-                                      self.forward)
-        self.batchModeDialog.connect(self.batchModeDialog, QtCore.SIGNAL("finished(int)"),
-                                     self.forward)
+
+        self.normalModeDialog.accepted.connect(self.forward)
+        self.batchModeDialog.accepted.connect(self.forward)
+        self.normalModeDialog.rejected.connect(self.forward)
+        self.batchModeDialog.rejected.connect(self.forward)
 
         self.resize(1120, 790)
         self.algInstructionsText.setMinimumWidth(350)
         self.tabLayout.addWidget(self.algInstructionsWidget, 0, 0)
-        if self.alg.provider.getName() == "workflowtools" and\
-           self.alg.name == "Workflow instructions":
+        if self.alg.provider().name() == "workflowtools" and\
+           self.alg.name() == "workflowinstructions":
             cols = 0
         else:
             cols = 1
@@ -174,31 +189,60 @@ class StepDialog(QtGui.QDialog):
             self.tabLayout.addWidget(self.normalModeDialog, 0, 1)
             self.tabLayout.addWidget(self.batchModeDialog, 0, 1)
 
-        self.algMode = QtGui.QComboBox()
+        self.algMode = QComboBox()
         self.algMode.addItems([NORMAL_MODE, BATCH_MODE])
         if canEdit:
-            self.algMode.connect(self.algMode, QtCore.SIGNAL("currentIndexChanged(QString)"),
-                                 self.mainDialog.changeAlgMode)
+            self.algMode.currentTextChanged.connect(self.mainDialog.changeAlgMode)
             self.tabLayout.addWidget(self.algMode, 1, cols)
         else:
-            self.buttonBox = QtGui.QDialogButtonBox()
+            self.buttonBox = QDialogButtonBox()
             self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-            self.backwardButton = QtGui.QPushButton()
+            self.backwardButton = QPushButton()
             self.backwardButton.setText("< Previous step")
-            self.buttonBox.addButton(self.backwardButton, QtGui.QDialogButtonBox.ActionRole)
-            QtCore.QObject.connect(self.backwardButton, QtCore.SIGNAL("clicked()"), self.backward)
-            self.forwardButton = QtGui.QPushButton()
+            self.buttonBox.addButton(self.backwardButton, QDialogButtonBox.ActionRole)
+            self.backwardButton.clicked.connect(self.backward)
+            self.forwardButton = QPushButton()
             self.forwardButton.setText("Skip step >")
-            self.buttonBox.addButton(self.forwardButton, QtGui.QDialogButtonBox.ActionRole)
-            QtCore.QObject.connect(self.forwardButton, QtCore.SIGNAL("clicked()"), self.forward)
-            self.closeButton = QtGui.QPushButton()
+            self.buttonBox.addButton(self.forwardButton, QDialogButtonBox.ActionRole)
+            self.forwardButton.clicked.connect(self.forward)
+            self.closeButton = QPushButton()
             self.closeButton.setText("Finish Workflow")
-            self.buttonBox.addButton(self.closeButton, QtGui.QDialogButtonBox.ActionRole)
-            QtCore.QObject.connect(self.closeButton, QtCore.SIGNAL("clicked()"), self.close)
+            self.buttonBox.addButton(self.closeButton, QDialogButtonBox.ActionRole)
+            self.closeButton.clicked.connect(self.close)
             self.tabLayout.addWidget(self.buttonBox, 1, cols)
         self.setLayout(self.tabLayout)
 
-        self.executed = self.normalModeDialog.executed
+        self.executed = self.normalModeDialog.wasExecuted
+
+    # Based on processing.tools.general.createAlgorithmDialog but with parent of the dialog widgets
+    # set to None. Otherwise some buttons cannot be removed.
+    def createAlgorithmDialog(self, algOrName, parameters={}, mode=NORMAL_MODE):
+        if isinstance(algOrName, QgsProcessingAlgorithm):
+            alg = algOrName.create()
+        else:
+            alg = QgsApplication.processingRegistry().createAlgorithmById(algOrName)
+
+        if alg is None:
+            return None
+
+        for paramName in parameters.keys():
+            param = alg.parameterDefinition(paramName)
+            if param and (isinstance(param, QgsProcessingParameterBoolean) or
+                          isinstance(param, QgsProcessingParameterNumber) or
+                          isinstance(param, QgsProcessingParameterString) or
+                          isinstance(param, QgsProcessingParameterEnum) or
+                          isinstance(param, QgsProcessingParameterExtent)):
+                param.setDefaultValue(parameters[paramName])
+
+        dlg = None
+        if mode == NORMAL_MODE:
+            dlg = alg.createCustomParametersWidget(None)
+            if not dlg:
+                dlg = AlgorithmDialog(alg, parent=None)
+        elif mode == BATCH_MODE:
+            dlg = BatchAlgorithmDialog(alg)
+
+        return dlg
 
     def textBold(self):
         cursor = self.algInstructionsText.textCursor()
@@ -245,8 +289,8 @@ class StepDialog(QtGui.QDialog):
         return self.algMode.currentText()
 
     def setMode(self, mode):
-        if not (self.alg.provider.getName() == "workflowtools" and
-                self.alg.name == "Workflow instructions"):
+        if not (self.alg.provider().name() == "workflowtools" and
+                self.alg.name() == "workflowinstructions"):
             if mode == NORMAL_MODE and not self.normalModeDialog.isVisible():
                 self.batchModeDialog.setHidden(True)
                 self.normalModeDialog.setVisible(True)
@@ -282,7 +326,7 @@ class StepDialog(QtGui.QDialog):
             self.algInstructionsDoc.setDefaultStyleSheet("")
             self.algInstructionsText.setFontPointSize(12)
             self.algInstructionsText.setPlainText(self._raw_instructions)
-        self.algInstructionsText.document().setMetaInformation(QtGui.QTextDocument.DocumentUrl,
+        self.algInstructionsText.document().setMetaInformation(QTextDocument.DocumentUrl,
                                                                "file:"+self.workflowBaseDir+'/')
 
     def setDefaultInstructionsText(self):
@@ -299,20 +343,20 @@ class StepDialog(QtGui.QDialog):
     # Disconnect all the signals from nomalModeDialog and batchModeDialog when
     # StepDialog is being closed
     def closeEvent(self, evt):
-        self.normalModeDialog.disconnect(self.normalModeDialog, QtCore.SIGNAL("finished(int)"),
-                                         self.forward)
-        self.batchModeDialog.disconnect(self.batchModeDialog, QtCore.SIGNAL("finished(int)"),
-                                        self.forward)
+        self.normalModeDialog.accepted.disconnect(self.forward)
+        self.batchModeDialog.accepted.disconnect(self.forward)
+        self.normalModeDialog.rejected.disconnect(self.forward)
+        self.batchModeDialog.rejected.disconnect(self.forward)
+
         # batchModeDialog could be already closed if the algorithm was executed
         # in batch mode
         try:
-            self.batchModeDialog.closeEvent(evt)
+            self.batchModeDialog.finish()
         except TypeError:
             pass
         # normalModeDialog could be already closed if the algorithm was executed
         # in normal mode
         try:
-            self.normalModeDialog.closeEvent(evt)
+            self.normalModeDialog.finish()
         except TypeError:
             pass
-        QtGui.QDialog.closeEvent(self, evt)
