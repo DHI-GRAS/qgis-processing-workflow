@@ -3,6 +3,8 @@ Processing-Workflow
 
 Plugin for QGIS Processing Toolbox for creating processing workflows and workflow collections. The workflows provide step-by-step instructions and guidance for less experienced users thus facilitating capacity building in Earth observation data analysis and GIS tasks.
 
+**Note for QGIS 3**: The workflow file format remains the same between QGIS 2 and QGIS 3. However, the names of the algorithms and parameters could have changed. If existing workflows do not load then it is recommended to check Processing log messages for the incorrect algorithm name and edit the workflow file directly in text editor.
+
 After installing and activating the plugin, it also needs to be activated in Processing options which are accessible from QGIS main menu (Processing > Options...). The path to the directory where the workflow files are stored (by default in the processing folder in user's QGIS directory) can also be set. In addition, any existing workflow collections (see below for explanation) can also be activated:
 
 ![](https://github.com/TIGER-NET/screenshots/blob/master/Processing-Workflow/activate.png)
