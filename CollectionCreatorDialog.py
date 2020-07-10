@@ -40,18 +40,19 @@ class CollectionCreatorDialog(WIDGET, BASE):
                                                self.tr("Select image"),
                                                self.basedir,
                                                self.tr("Image Files(*.png *.jpg *.bmp)"))[0]
-        self.lineEdit_icon.setText(filename)
-        self.checkIcon()
-        self.iconSelected = 1
-        self.activateButton()
+        if filename:
+            self.lineEdit_icon.setText(filename)
+            self.checkIcon()
+            self.iconSelected = 1
+            self.activateButton()
 
     def selectCss(self):
         filename = QFileDialog.getOpenFileName(self,
                                                self.tr("Select CSS file"),
                                                self.basedir,
                                                self.tr("CSS Files(*.css *.CSS)"))[0]
-        self.lineEdit_css.setText(filename)
-        self.activateButton()
+        if filename:
+            self.lineEdit_css.setText(filename)
 
     def closeWindow(self):
         self.close()
@@ -101,6 +102,8 @@ class CollectionCreatorDialog(WIDGET, BASE):
         confOptions["description"] = self.lineEdit_desc.text()
         confOptions["name"] = self.lineEdit_name.text()
         confOptions["icon"] = self.copyFile(self.lineEdit_icon.text())
+        if not self.lineEdit_css.text():
+            self.lineEdit_css.setText(os.path.join(os.path.dirname(__file__), "style.css"))
         confOptions["css"] = self.copyFile(self.lineEdit_css.text())
         confOptions["aboutHTML"] = self.textEdit_about.toPlainText()
         with io.open(self.confFile, 'w', encoding="utf-8") as fp:
