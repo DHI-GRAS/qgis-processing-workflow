@@ -23,7 +23,7 @@ qgisMinimumVersion=3.10
 # Optional items:
 
 changelog=2.0.0
-    - Update to QGIS 3.10
+    - Make compatible with QGIS 3.10
     1.3.2
     - Improve handling of UTF characters
     - Fix collection activation bug when QGIS is used with language other than English
@@ -58,7 +58,7 @@ homepage=https://github.com/DHI-GRAS/qgis-processing-workflow/blob/master/README
 tracker=https://github.com/DHI-GRAS/processing_workflow/issues
 repository=https://github.com/DHI-GRAS/processing_workflow
 icon=images/icon.png
-experimental=False
+experimental=True
 
 # deprecated flag (applies to the whole plugin, not just a single version
 deprecated=False
