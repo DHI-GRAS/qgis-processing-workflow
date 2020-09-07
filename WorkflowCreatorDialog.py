@@ -195,6 +195,13 @@ class WorkflowCreatorDialog(WIDGET, BASE):
         self.centralWidget().layout().insertWidget(0, self.bar)
         self.setDockOptions(self.dockOptions() | QMainWindow.GroupedDragging)
 
+        if hasattr(self.searchBox, 'setPlaceholderText'):
+            self.searchBox.setPlaceholderText(self.tr('Search...'))
+        if hasattr(self.textName, 'setPlaceholderText'):
+            self.textName.setPlaceholderText(self.tr('Enter workflow name here'))
+        if hasattr(self.textGroup, 'setPlaceholderText'):
+            self.textGroup.setPlaceholderText(self.tr('Enter group name here'))
+
         if iface is not None:
             self.mToolbar.setIconSize(iface.iconSize())
             self.setStyleSheet(iface.mainWindow().styleSheet())
@@ -227,6 +234,7 @@ class WorkflowCreatorDialog(WIDGET, BASE):
         self.mActionRemoveStep.triggered.connect(self.removeStep)
         self.mActionRun.triggered.connect(self.runWorkflow)
         self.algorithmTree.doubleClicked.connect(self.addAlgorithm)
+        self.searchBox.textChanged.connect(self.algorithmTree.setFilterString)
 
     def closeEvent(self, evt):
         settings = QgsSettings()
