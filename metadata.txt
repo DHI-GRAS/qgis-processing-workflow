@@ -17,12 +17,14 @@ about=
 The plugin contains Python markdown package. See https://github.com/Python-Markdown/markdown for license and details.
 
 
-version=2.0.1
+version=2.0.2
 qgisMinimumVersion=3.10
 
 # Optional items:
 
-changelog=2.0.1
+changelog=2.0.2
+    - Fix grouping of algorithms when accessing from taskbar collections
+    2.0.1
     - Add algorithm search functionality and hint text in workflow creator dialog
     2.0.0
     - Make compatible with QGIS 3.10
