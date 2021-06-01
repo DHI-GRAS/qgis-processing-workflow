@@ -202,12 +202,12 @@ class WorkflowListDialog(QDialog):
         # add algorithms
         for alg in algs:
             if text == "" or text.lower() in alg.name.lower():
-                if alg.group in groups:
-                    groupItem = groups[alg.group]
+                if alg.group() in groups:
+                    groupItem = groups[alg.group()]
                 else:
                     groupItem = QTreeWidgetItem()
                     groupItem.setText(0, alg.group())
-                    groups[alg.group] = groupItem
+                    groups[alg.group()] = groupItem
                 algItem = TreeAlgorithmItem(alg)
                 groupItem.addChild(algItem)
 
